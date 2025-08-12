@@ -1,0 +1,1 @@
+web: gunicorn pinoy_ride.pinoy_ride.wsgi

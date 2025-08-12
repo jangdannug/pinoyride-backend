@@ -1,0 +1,8 @@
+
+from .user_repository import UserRepository
+from .rider_repository import RiderRepository
+from .customer_repository import CustomerRepository
+from .rider_vehicle_details_repository import RiderVehicleDetailsRepository
+from .promo_repository import PromoRepository
+from .price_repository import PriceRepository
+from .otp_repository import OtpRepository

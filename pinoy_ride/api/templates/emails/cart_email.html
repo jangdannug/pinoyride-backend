@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Suy Sing Confirm Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        h2 { color: #2c3e50; }
+        .details { background-color: #f4f4f4; padding: 10px; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Hi Ka-Suy Sing,</h2>
+        <p>Thank you for submitting your Suki Day Deals Form for <strong>{{ customer_email_code }}</strong>. Below is a summary of your proposed orders. Your Account Officer will get in touch with you to confirm your orders.</p>
+
+        <!-- {% if carts %}
+            <div class="details">
+                <p><strong>Authorized Representative:</strong> {{ rep.first_name }} {{ rep.last_name }}</p>
+                <p><strong>Email:</strong> {{ rep.email }}</p>
+            </div>
+        {% endif %} -->
+
+        <div class="details">
+            <table border="1" cellspacing="0" cellpadding="8">
+                <tr>
+                    <th>Qty</th>
+                    <th>Item Code</th>
+                    <th>Item Description</th>
+                    <th>Promo</th>
+                </tr>
+                {% for cart_product in cart_products%}
+                <tr>
+                    <td>{{ cart_product.order_qty }}</td>
+                    <td>{{ cart_product.product_info.item_code }}</td>
+                    <td>{{ cart_product.product_info.description }}</td>
+                    <td>
+                        {{ cart_product.product_info.discount }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+
+        <p>Salamat, Ka-Suy Sing!</p>
+    </div>
+</body>
+</html>

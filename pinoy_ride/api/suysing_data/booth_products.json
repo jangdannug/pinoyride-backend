@@ -1,0 +1,2270 @@
+[
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "COB01S",
+    "name": "COBRA ENERGY DRINK PET 24/350ML-P",
+    "description": "COBRA ENERGY DRINK PET 24/350ML-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "COB02S",
+    "name": "COBRA ENERGY DRINK SMART 24/350ML-P",
+    "description": "COBRA ENERGY DRINK SMART 24/350ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "TAN127S",
+    "name": "TANDUAY ICE ALCOMIX (ORIGINAL) 24/330ML-P",
+    "description": "TANDUAY ICE ALCOMIX (ORIGINAL) 24/330ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "TAN31S",
+    "name": "TANDUAY ICE RED MIRAGE (ENERGY) 24/330ML-P",
+    "description": "TANDUAY ICE RED MIRAGE (ENERGY) 24/330ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "TAN37S",
+    "name": "TANDUAY ICE BLUE ILLUSION (FRESH) 24/330ML-P",
+    "description": "TANDUAY ICE BLUE ILLUSION (FRESH) 24/330ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "VIT25S",
+    "name": "VITAMILK SOYMILK DOUBLE CHOCO 24/300ML-P",
+    "description": "VITAMILK SOYMILK DOUBLE CHOCO 24/300ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ABSOL01",
+    "booth_name": "ABSOLUTE SALES CORPORATION",
+    "item_code": "VIT45S",
+    "name": "VITAMILK SOYMILK CHOCO SHAKE 24/300ML-P",
+    "description": "VITAMILK SOYMILK CHOCO SHAKE 24/300ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "PRI02S",
+    "name": "PRIDE POWDER WASHING MACHINE (LIGHT BLUE) 12/1KG-P",
+    "description": "PRIDE POWDER WASHING MACHINE (LIGHT BLUE) 12/1KG-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "PRI03S",
+    "name": "PRIDE POWDER WASHING MACHINE (LIGHT BLUE) 6/2KG-P",
+    "description": "PRIDE POWDER WASHING MACHINE (LIGHT BLUE) 6/2KG-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "PRI73S",
+    "name": "PRIDE BAR BLUE 36/370G-P",
+    "description": "PRIDE BAR BLUE 36/370G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "PRI79S",
+    "name": "PRIDE POWDER WITH FABRIC CONDITIONER SAKURA (PINK) 24/500G-P",
+    "description": "PRIDE POWDER WITH FABRIC CONDITIONER SAKURA (PINK) 24/500G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "PRI83S",
+    "name": "PRIDE POWDER WITH FABRIC CONDITIONER SAKURA (PINK) 12/1KG-P",
+    "description": "PRIDE POWDER WITH FABRIC CONDITIONER SAKURA (PINK) 12/1KG-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "SMA15S",
+    "name": "SMART DISHWASHING PASTE LEMON 48/200G-P",
+    "description": "SMART DISHWASHING PASTE LEMON 48/200G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ACSCH01",
+    "booth_name": "ACS MANUFACTURING CORPORATION",
+    "item_code": "SMA30S",
+    "name": "SMART DISHWASHING PASTE LEMON 36/400G-P",
+    "description": "SMART DISHWASHING PASTE LEMON 36/400G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI05S",
+    "name": "AJINOMOTO GINISA MIX 54/16/8G-P",
+    "description": "AJINOMOTO GINISA MIX 54/16/8G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI09S",
+    "name": "AJINOMOTO VETSIN BLUE 48/250G-P",
+    "description": "AJINOMOTO VETSIN BLUE 48/250G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI10S",
+    "name": "AJINOMOTO VETSIN GOLD 30/6/50G-P",
+    "description": "AJINOMOTO VETSIN GOLD 30/6/50G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI11S",
+    "name": "AJINOMOTO VETSIN BLUE 66/18/11G-P",
+    "description": "AJINOMOTO VETSIN BLUE 66/18/11G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI12S",
+    "name": "AJINOMOTO VETSIN YELLOW 54/8/24G-P",
+    "description": "AJINOMOTO VETSIN YELLOW 54/8/24G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI18S",
+    "name": "AJINOMOTO VETSIN RED 12/1KG-P",
+    "description": "AJINOMOTO VETSIN RED 12/1KG-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI24S",
+    "name": "AJINOMOTO VETSIN RED 8/12/100G-P",
+    "description": "AJINOMOTO VETSIN RED 8/12/100G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI25S",
+    "name": "AJINOMOTO SARSAYA OYSTER SAUCE 24/6/30G-P",
+    "description": "AJINOMOTO SARSAYA OYSTER SAUCE 24/6/30G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI27S",
+    "name": "AJI CRISPY FRY ORIGINAL 13/14/62G-P",
+    "description": "AJI CRISPY FRY ORIGINAL 13/14/62G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI28S",
+    "name": "AJI CRISPY FRY SPICY 13/14/62G-P",
+    "description": "AJI CRISPY FRY SPICY 13/14/62G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI32S",
+    "name": "AJINOMOTO GINISA MIX 36/250G-P",
+    "description": "AJINOMOTO GINISA MIX 36/250G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "AJINO01",
+    "booth_name": "AJINOMOTO PHILIPPINES CORP.",
+    "item_code": "AJI51S",
+    "name": "AJI CRISPY FRY ORIGINAL 21/8/30G-P",
+    "description": "AJI CRISPY FRY ORIGINAL 21/8/30G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ALASK01",
+    "booth_name": "ALASKA MILK CORPORATION",
+    "item_code": "AL003S",
+    "name": "ALASKA POWDERED MILK PLAIN 30/300G-P",
+    "description": "ALASKA POWDERED MILK PLAIN 30/300G-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ALASK01",
+    "booth_name": "ALASKA MILK CORPORATION",
+    "item_code": "ALA02S",
+    "name": "ALASKA EVAPORATED MILK PLAIN 48/360ML-P",
+    "description": "ALASKA EVAPORATED MILK PLAIN 48/360ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ALASK01",
+    "booth_name": "ALASKA MILK CORPORATION",
+    "item_code": "ALA03S",
+    "name": "ALASKA CONDENSED MILK PLAIN 48/377G-P",
+    "description": "ALASKA CONDENSED MILK PLAIN 48/377G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ALASK01",
+    "booth_name": "ALASKA MILK CORPORATION",
+    "item_code": "ALA34S",
+    "name": "ALASKA EVAPORADA 48/360ML-P",
+    "description": "ALASKA EVAPORADA 48/360ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "EXT17S",
+    "name": "EXTRA JOSS MAXX ENERGY DRINK MIXED FRUIT 12/237ML-P",
+    "description": "EXTRA JOSS MAXX ENERGY DRINK MIXED FRUIT 12/237ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT12S",
+    "name": "RITE N' LITE ORANGE IN CAN 24/250ML-P",
+    "description": "RITE N' LITE ORANGE IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT13S",
+    "name": "RITE N' LITE ROOTBEER IN CAN 24/250ML-P",
+    "description": "RITE N' LITE ROOTBEER IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT15S",
+    "name": "RITE N' LITE LEMON IN CAN 24/250ML-P",
+    "description": "RITE N' LITE LEMON IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT16S",
+    "name": "RITE N' LITE LYCHEE & ROSE IN CAN 24/250ML-P",
+    "description": "RITE N' LITE LYCHEE & ROSE IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT17S",
+    "name": "RITE N' LITE CUCUMBER IN CAN 24/250ML-P",
+    "description": "RITE N' LITE CUCUMBER IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ARCRE01",
+    "booth_name": "ARC REFRESHMENTS CORPORATION",
+    "item_code": "RIT18S",
+    "name": "RITE N' LITE LEMON LIME IN CAN 24/250ML-P",
+    "description": "RITE N' LITE LEMON LIME IN CAN 24/250ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "55515S",
+    "name": "555 TUNA FLAKES CALDERETA EOE 50/155G-P",
+    "description": "555 TUNA FLAKES CALDERETA EOE 50/155G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "CEN41S",
+    "name": "CENTURY TUNA FLAKES IN OIL EOE 50/155G-P",
+    "description": "CENTURY TUNA FLAKES IN OIL EOE 50/155G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "CEN43S",
+    "name": "CENTURY TUNA FLAKES HOT & SPICY EOE 50/155G-P",
+    "description": "CENTURY TUNA FLAKES HOT & SPICY EOE 50/155G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "ARG42S",
+    "name": "ARGENTINA CORNED BEEF EOE 48/150G-P",
+    "description": "ARGENTINA CORNED BEEF EOE 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "ARG45S",
+    "name": "ARGENTINA MEAT LOAF 48/150G-P",
+    "description": "ARGENTINA MEAT LOAF 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "55501S",
+    "name": "555 SARDINES IN TOMATO SAUCE EOE 100/155G-P",
+    "description": "555 SARDINES IN TOMATO SAUCE EOE 100/155G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "55502S",
+    "name": "555 SARDINES IN TOMATO SAUCE WITH CHILI EOE 100/155G-P",
+    "description": "555 SARDINES IN TOMATO SAUCE WITH CHILI EOE 100/155G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "CENTU03",
+    "booth_name": "CENTURY PACIFIC FOOD, INC.",
+    "item_code": "ANG32S",
+    "name": "ANGEL EVAPORADA LIQUID CREAMER 48/410ML-P",
+    "description": "ANGEL EVAPORADA LIQUID CREAMER 48/410ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "COK05S",
+    "name": "COKE REGULAR PET BOTTLE 12/1.5L-P",
+    "description": "COKE REGULAR PET BOTTLE 12/1.5L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "COK18S",
+    "name": "COKE ZERO IN CAN (SLIM) 24/320ML-P",
+    "description": "COKE ZERO IN CAN (SLIM) 24/320ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "COK22S",
+    "name": "COKE ZERO PET BOTTLE 12/1.5L-P",
+    "description": "COKE ZERO PET BOTTLE 12/1.5L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "NUT13S",
+    "name": "NUTRIBOOST MILK CHOCOLATE 24/110ML-P",
+    "description": "NUTRIBOOST MILK CHOCOLATE 24/110ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "NUT14S",
+    "name": "NUTRIBOOST MILK STRAWBERRY 24/110ML-P",
+    "description": "NUTRIBOOST MILK STRAWBERRY 24/110ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "NUT15S",
+    "name": "NUTRIBOOST MILK CHOCOLATE 24/200ML-P",
+    "description": "NUTRIBOOST MILK CHOCOLATE 24/200ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "NUT16S",
+    "name": "NUTRIBOOST MILK STRAWBERRY 24/200ML-P",
+    "description": "NUTRIBOOST MILK STRAWBERRY 24/200ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "ROY21S",
+    "name": "ROYAL TRU-ORANGE REGULAR PET BOTTLE 12/1.5L-P",
+    "description": "ROYAL TRU-ORANGE REGULAR PET BOTTLE 12/1.5L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COCAC01",
+    "booth_name": "COCACOLA E.PCFC ABOITZ PH INC.",
+    "item_code": "SPR30S",
+    "name": "SPRITE REGULAR PET BOTTLE 12/1.5L-P",
+    "description": "SPRITE REGULAR PET BOTTLE 12/1.5L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLGA01",
+    "booth_name": "COLGATE-PALMOLIVE PHIL. INC",
+    "item_code": "COL18S",
+    "name": "COLGATE TOOTHPASTE GREAT REGULAR FLAVOR 12/12/20G-P",
+    "description": "COLGATE TOOTHPASTE GREAT REGULAR FLAVOR 12/12/20G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLGA01",
+    "booth_name": "COLGATE-PALMOLIVE PHIL. INC",
+    "item_code": "COL34AS",
+    "name": "COLGATE TOOTHBRUSH CLASSIC HANGMAT 24/5+1-P",
+    "description": "COLGATE TOOTHBRUSH CLASSIC HANGMAT 24/5+1-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLGA01",
+    "booth_name": "COLGATE-PALMOLIVE PHIL. INC",
+    "item_code": "COL408S",
+    "name": "COLGATE TOOTHPASTE COOLING CRYSTALS SPICY 12/12/20G-P",
+    "description": "COLGATE TOOTHPASTE COOLING CRYSTALS SPICY 12/12/20G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLGA01",
+    "booth_name": "COLGATE-PALMOLIVE PHIL. INC",
+    "item_code": "COL528S",
+    "name": "COLGATE TOOTHPASTE COOLING CRYSTALS COOL MENTHOL 12/12/20G-P",
+    "description": "COLGATE TOOTHPASTE COOLING CRYSTALS COOL MENTHOL 12/12/20G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLUM03",
+    "booth_name": "COLUMBIA INT'L FOOD PROD. INC.",
+    "item_code": "COL113S",
+    "name": "COLUMBIA'S POTCHI STRAWBERRY 40/50'S-P",
+    "description": "COLUMBIA'S POTCHI STRAWBERRY 40/50'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COLUM03",
+    "booth_name": "COLUMBIA INT'L FOOD PROD. INC.",
+    "item_code": "COL56S",
+    "name": "COLUMBIA'S FRUTOS SOFT CHEWY 40/50'S-P",
+    "description": "COLUMBIA'S FRUTOS SOFT CHEWY 40/50'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COSME01",
+    "booth_name": "COSMETIQUE ASIA CORPORATION",
+    "item_code": "SIL01S",
+    "name": "SILKA SOAP PAPAYA (GREEN) 8/12/65G-P",
+    "description": "SILKA SOAP PAPAYA (GREEN) 8/12/65G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "COSME01",
+    "booth_name": "COSMETIQUE ASIA CORPORATION",
+    "item_code": "SIL68S",
+    "name": "SILKA SOAP PAPAYA (ORANGE) 8/12/65G-P",
+    "description": "SILKA SOAP PAPAYA (ORANGE) 8/12/65G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL108S",
+    "name": "DEL MONTE TOMATO SAUCE ORIGINAL 48/250G-P",
+    "description": "DEL MONTE TOMATO SAUCE ORIGINAL 48/250G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL114S",
+    "name": "DEL MONTE TOMATO PASTE 48/150G-P",
+    "description": "DEL MONTE TOMATO PASTE 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL168S",
+    "name": "DEL MONTE TOMATO SAUCE FILIPINO 12/900G-P",
+    "description": "DEL MONTE TOMATO SAUCE FILIPINO 12/900G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL169S",
+    "name": "DEL MONTE TOMATO SAUCE ORIGINAL 12/900G-P",
+    "description": "DEL MONTE TOMATO SAUCE ORIGINAL 12/900G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL216S",
+    "name": "DEL MONTE JUICE PINEAPPLE W/ ACE 12/1.36L-P",
+    "description": "DEL MONTE JUICE PINEAPPLE W/ ACE 12/1.36L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL220S",
+    "name": "DEL MONTE JUICE PINEAPPLE W/ ACE 6/2.9L-P",
+    "description": "DEL MONTE JUICE PINEAPPLE W/ ACE 6/2.9L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL304S",
+    "name": "DEL MONTE TOMATO PASTE 36/70G-P",
+    "description": "DEL MONTE TOMATO PASTE 36/70G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL323S",
+    "name": "DEL MONTE TOMATO SAUCE ORIGINAL 48/115G-P",
+    "description": "DEL MONTE TOMATO SAUCE ORIGINAL 48/115G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL59AS",
+    "name": "DEL MONTE PINEAPPLE TIDBITS 16/3/115G-P",
+    "description": "DEL MONTE PINEAPPLE TIDBITS 16/3/115G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL59S",
+    "name": "DEL MONTE PINEAPPLE TIDBITS 48/115G-P",
+    "description": "DEL MONTE PINEAPPLE TIDBITS 48/115G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL68DS",
+    "name": "DEL MONTE TOMATO SAUCE ORIGINAL 12/4/200G-P",
+    "description": "DEL MONTE TOMATO SAUCE ORIGINAL 12/4/200G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL68S",
+    "name": "DEL MONTE TOMATO SAUCE ORIGINAL 48/200G-P",
+    "description": "DEL MONTE TOMATO SAUCE ORIGINAL 48/200G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL84AS",
+    "name": "DEL MONTE JUICE PINEAPPLE W/ FIBER 4/6/220ML-P",
+    "description": "DEL MONTE JUICE PINEAPPLE W/ FIBER 4/6/220ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "DELMO01",
+    "booth_name": "DEL MONTE PHILIPPINES, INC.",
+    "item_code": "DEL84S",
+    "name": "DEL MONTE JUICE PINEAPPLE W/ FIBER 24/220ML-P",
+    "description": "DEL MONTE JUICE PINEAPPLE W/ FIBER 24/220ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "CAL62S",
+    "name": "CAL CHEESE WAFER 60/48G-P",
+    "description": "CAL CHEESE WAFER 60/48G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "ENE05S",
+    "name": "ENERGEN CEREAL DRINK CHOCO HANGER 24/10/40G-P",
+    "description": "ENERGEN CEREAL DRINK CHOCO HANGER 24/10/40G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "ENE06S",
+    "name": "ENERGEN CEREAL DRINK VANILLA HANGER 24/10/40G-P",
+    "description": "ENERGEN CEREAL DRINK VANILLA HANGER 24/10/40G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "ENE18S",
+    "name": "ENERGEN CHAMPION TWIN 15/8/60G-P",
+    "description": "ENERGEN CHAMPION TWIN 15/8/60G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "KOP07S",
+    "name": "KOPIKO COFFEE BLANCA TWIN 12/10/58G(52G)-P",
+    "description": "KOPIKO COFFEE BLANCA TWIN 12/10/58G(52G)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "KOP25S",
+    "name": "KOPIKO COFFEE BLACK TWIN 12/10/56G(52G)-P",
+    "description": "KOPIKO COFFEE BLACK TWIN 12/10/56G(52G)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "KOP26S",
+    "name": "KOPIKO COFFEE BROWN TWIN 12/10/53G-P",
+    "description": "KOPIKO COFFEE BROWN TWIN 12/10/53G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "ECOSS04",
+    "booth_name": "ECOSSENTIAL FOODS CORP.",
+    "item_code": "KOP33S",
+    "name": "KOPIKO RTD ICED COFFEE LUCKY DAY 24/180ML-P",
+    "description": "KOPIKO RTD ICED COFFEE LUCKY DAY 24/180ML-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FEDER01",
+    "booth_name": "FEDERATED DISTRIBUTORS, INC.",
+    "item_code": "POC01S",
+    "name": "POCARI SWEAT PET BOTTLE 24/350ML-P",
+    "description": "POCARI SWEAT PET BOTTLE 24/350ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FEDER01",
+    "booth_name": "FEDERATED DISTRIBUTORS, INC.",
+    "item_code": "POC02AS",
+    "name": "POCARI SWEAT PET BOTTLE 6/4/500ML-P",
+    "description": "POCARI SWEAT PET BOTTLE 6/4/500ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FEDER01",
+    "booth_name": "FEDERATED DISTRIBUTORS, INC.",
+    "item_code": "POC07S",
+    "name": "POCARI SWEAT PET BOTTLE (EASY GRIP) 15/900ML-P",
+    "description": "POCARI SWEAT PET BOTTLE (EASY GRIP) 15/900ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FEDER04",
+    "booth_name": "FEDERATED DISTRIBUTORS, INC.",
+    "item_code": "SAL01BS",
+    "name": "SALONPAS PATCH 10/20'S (32)-P",
+    "description": "SALONPAS PATCH 10/20'S (32)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FEDER04",
+    "booth_name": "FEDERATED DISTRIBUTORS, INC.",
+    "item_code": "SAL05BS",
+    "name": "SALONPAS PATCH 20/10'S (25)-P",
+    "description": "SALONPAS PATCH 20/10'S (25)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL02S",
+    "name": "SILVER SWAN SOY SAUCE 24/350ML-P",
+    "description": "SILVER SWAN SOY SAUCE 24/350ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL04S",
+    "name": "SILVER SWAN SOY SAUCE 12/1L-P",
+    "description": "SILVER SWAN SOY SAUCE 12/1L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL06S",
+    "name": "SILVER SWAN SOY SAUCE PLASTIC 4/3785ML-P",
+    "description": "SILVER SWAN SOY SAUCE PLASTIC 4/3785ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL24S",
+    "name": "SILVER SWAN SUKANG PUTI 12/1000ML-P",
+    "description": "SILVER SWAN SUKANG PUTI 12/1000ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL74S",
+    "name": "SILVER SWAN SOY SAUCE PACK 60/200ML-P",
+    "description": "SILVER SWAN SOY SAUCE PACK 60/200ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL75S",
+    "name": "SILVER SWAN SUKANG PUTI 60/200ML-P",
+    "description": "SILVER SWAN SUKANG PUTI 60/200ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL97S",
+    "name": "SILVER SWAN SOY SAUCE JR. POUCH 72/100ML-P",
+    "description": "SILVER SWAN SOY SAUCE JR. POUCH 72/100ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FIRST05",
+    "booth_name": "FIRST PGMC ENTERPRISES INC.",
+    "item_code": "SIL98S",
+    "name": "SILVER SWAN SUKANG PUTI JR. POUCH 72/100ML-P",
+    "description": "SILVER SWAN SUKANG PUTI JR. POUCH 72/100ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FLYAC01",
+    "booth_name": "FLY ACE CORPORATION",
+    "item_code": "JOL09AS",
+    "name": "JOLLY CANOLA OIL 6/2/1L-P",
+    "description": "JOLLY CANOLA OIL 6/2/1L-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FLYAC01",
+    "booth_name": "FLY ACE CORPORATION",
+    "item_code": "JOL22S",
+    "name": "JOLLY WHOLE CORN KERNEL 24/425G-P",
+    "description": "JOLLY WHOLE CORN KERNEL 24/425G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FLYAC01",
+    "booth_name": "FLY ACE CORPORATION",
+    "item_code": "JOL24S",
+    "name": "JOLLY MUSHROOM WHOLE 24/400G-P",
+    "description": "JOLLY MUSHROOM WHOLE 24/400G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FLYAC01",
+    "booth_name": "FLY ACE CORPORATION",
+    "item_code": "JOL25S",
+    "name": "JOLLY MUSHROOM PIECES & STEMS 24/400G-P",
+    "description": "JOLLY MUSHROOM PIECES & STEMS 24/400G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "CDO04S",
+    "name": "CDO KARNE NORTE 48/175G-P",
+    "description": "CDO KARNE NORTE 48/175G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "CDO06S",
+    "name": "CDO KARNE NORTE EO 48/150G-P",
+    "description": "CDO KARNE NORTE EO 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "CDO17S",
+    "name": "CDO KARNE NORTE 48/260G-P",
+    "description": "CDO KARNE NORTE 48/260G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN102S",
+    "name": "SAN MARINO CORNED TUNA 48/150G-P",
+    "description": "SAN MARINO CORNED TUNA 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN103S",
+    "name": "SAN MARINO CORNED TUNA 48/180G-P",
+    "description": "SAN MARINO CORNED TUNA 48/180G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN104S",
+    "name": "SAN MARINO CORNED TUNA CHILI 48/150G-P",
+    "description": "SAN MARINO CORNED TUNA CHILI 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN105S",
+    "name": "SAN MARINO CORNED TUNA CHILI 48/180G-P",
+    "description": "SAN MARINO CORNED TUNA CHILI 48/180G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN18S",
+    "name": "SAN MARINO CORNED TUNA 48/85G-P",
+    "description": "SAN MARINO CORNED TUNA 48/85G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "FOODS01",
+    "booth_name": "FOODSPHERE, INC.",
+    "item_code": "SAN19S",
+    "name": "SAN MARINO CORNED TUNA CHILI 48/85G-P",
+    "description": "SAN MARINO CORNED TUNA CHILI 48/85G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "GOLDL02",
+    "booth_name": "GOLD LABEL RESOURCES INC.",
+    "item_code": "DOR01S",
+    "name": "DOREEN CONDENSADA 48/390G-P",
+    "description": "DOREEN CONDENSADA 48/390G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "LESLI01",
+    "booth_name": "LESLIE CORPORATION",
+    "item_code": "CLO53S",
+    "name": "CLOVER CHIPS CHEESE 105/24G-P",
+    "description": "CLOVER CHIPS CHEESE 105/24G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "LIWAY01",
+    "booth_name": "LIWAYWAY MARKETING CORPORATION",
+    "item_code": "OIS03S",
+    "name": "OISHI PRAWN CRACKERS SPICY 100/24G-P",
+    "description": "OISHI PRAWN CRACKERS SPICY 100/24G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "LTHFO01",
+    "booth_name": "LTHFOOD INDUSTRIES INC.",
+    "item_code": "JER01S",
+    "name": "JERSEY SWEETENED CONDENSED CREAMER 48/390G-P",
+    "description": "JERSEY SWEETENED CONDENSED CREAMER 48/390G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "LTHFO01",
+    "booth_name": "LTHFOOD INDUSTRIES INC.",
+    "item_code": "JER05S",
+    "name": "JERSEY EVAPORADA MILK 48/390G (370ML)-P",
+    "description": "JERSEY EVAPORADA MILK 48/390G (370ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MAGIS01",
+    "booth_name": "MAGIS DISTRIBUTION INC.",
+    "item_code": "KOJ03S",
+    "name": "KOJIESAN SOAP SKIN LIGHTENING 48/3/65G-P",
+    "description": "KOJIESAN SOAP SKIN LIGHTENING 48/3/65G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM01BS",
+    "name": "JIMM'S COFFEE 3PLUS1 WITH GINSENG 12/20G(36)-P",
+    "description": "JIMM'S COFFEE 3PLUS1 WITH GINSENG 12/20G(36)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM02BS",
+    "name": "JIMM'S COFFEE 5IN1 SUGAR FREE 20/21G (30)-P",
+    "description": "JIMM'S COFFEE 5IN1 SUGAR FREE 20/21G (30)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM07BS",
+    "name": "JIMM'S COFFEE 5IN1 REGULAR 12/21G (30)-P",
+    "description": "JIMM'S COFFEE 5IN1 REGULAR 12/21G (30)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM08BS",
+    "name": "JIMM'S COFFEE 7IN1 REGULAR 12/21G (30)-P",
+    "description": "JIMM'S COFFEE 7IN1 REGULAR 12/21G (30)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM12S",
+    "name": "JIMM'S COFFEE 3PLUS1 W/SPIRULINA TWIN PACK 12/10/40G-P",
+    "description": "JIMM'S COFFEE 3PLUS1 W/SPIRULINA TWIN PACK 12/10/40G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MEGAP01",
+    "booth_name": "MEGA PRIME FOODS INCORPORATED",
+    "item_code": "JIM13S",
+    "name": "JIMM'S COFFEE 3PLUS1 W/GINSENG TWIN PACK 12/10/40G-P",
+    "description": "JIMM'S COFFEE 3PLUS1 W/GINSENG TWIN PACK 12/10/40G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "BIN02S",
+    "name": "BINGO COOKIE DOUBLE CHOCOLATE 30/10/28G-P",
+    "description": "BINGO COOKIE DOUBLE CHOCOLATE 30/10/28G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "DUT53S",
+    "name": "DUTCH MILL YOGHURT DRINK STRAWBERRY 48/180ML-P",
+    "description": "DUTCH MILL YOGHURT DRINK STRAWBERRY 48/180ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "LUC02S",
+    "name": "LUCKY ME! INSTANT NOODLES CHICKEN 72/55G-P",
+    "description": "LUCKY ME! INSTANT NOODLES CHICKEN 72/55G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "LUC11S",
+    "name": "LUCKY ME! INSTANT PANCIT CANTON KALAMANSI 72/80G-P",
+    "description": "LUCKY ME! INSTANT PANCIT CANTON KALAMANSI 72/80G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "LUC12S",
+    "name": "LUCKY ME! INSTANT PANCIT CANTON HOT CHILI 72/75G-P",
+    "description": "LUCKY ME! INSTANT PANCIT CANTON HOT CHILI 72/75G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "LUC84S",
+    "name": "LUCKY ME! INSTANT PANCIT CANTON HOT CHILI 72/60G-P",
+    "description": "LUCKY ME! INSTANT PANCIT CANTON HOT CHILI 72/60G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "LUC86S",
+    "name": "LUCKY ME! INSTANT PANCIT CANTON KALAMANSI 72/60G-P",
+    "description": "LUCKY ME! INSTANT PANCIT CANTON KALAMANSI 72/60G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "NIS26S",
+    "name": "NISSIN EGGNOG COOKIES 10/10/18G-P",
+    "description": "NISSIN EGGNOG COOKIES 10/10/18G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "NIS29S",
+    "name": "NISSIN WAFER CHOCOLATE 20/20/12G-P",
+    "description": "NISSIN WAFER CHOCOLATE 20/20/12G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "NIS57S",
+    "name": "NISSIN BISCUIT BUTTER COCONUT SLUG 60/90G-P",
+    "description": "NISSIN BISCUIT BUTTER COCONUT SLUG 60/90G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "SKY27S",
+    "name": "SKY FLAKES REGULAR 15/24/25G-P",
+    "description": "SKY FLAKES REGULAR 15/24/25G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE01",
+    "booth_name": "MONDE NISSIN CORPORATION",
+    "item_code": "MAM13S",
+    "name": "MAMA SITA'S OYSTER SAUCE SACHET 96/30G-P",
+    "description": "MAMA SITA'S OYSTER SAUCE SACHET 96/30G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "CHE80S",
+    "name": "CHEEZ WHIZ PLAIN 72/24G-P",
+    "description": "CHEEZ WHIZ PLAIN 72/24G-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "TAN04S",
+    "name": "TANG POWDERED JUICE SWEET ORANGE 144/19G-P",
+    "description": "TANG POWDERED JUICE SWEET ORANGE 144/19G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "TAN05S",
+    "name": "TANG POWDERED JUICE ORANGE 12/12/19G-P",
+    "description": "TANG POWDERED JUICE ORANGE 12/12/19G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "TAN06S",
+    "name": "TANG POWDERED JUICE PINEAPPLE 12/12/19G-P",
+    "description": "TANG POWDERED JUICE PINEAPPLE 12/12/19G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "TAN16S",
+    "name": "TANG POWDERED JUICE DALANDAN 144/19G-P",
+    "description": "TANG POWDERED JUICE DALANDAN 144/19G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDE03",
+    "booth_name": "MONDELEZ PHILIPPINES, INC.",
+    "item_code": "TAN45S",
+    "name": "TANG POWDER JUICE CALAMANSI LITRO 144/19G-P",
+    "description": "TANG POWDER JUICE CALAMANSI LITRO 144/19G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "MONDI01",
+    "booth_name": "MONDIAL88 TRADING CORPORATION",
+    "item_code": "IND01S",
+    "name": "INDOMIE INSTANT NOODLES MI GORENG ORIGINAL 40/85G-P",
+    "description": "INDOMIE INSTANT NOODLES MI GORENG ORIGINAL 40/85G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NABAT01",
+    "booth_name": "NABATI FOOD PHILIPPINES, INC.",
+    "item_code": "RIC16S",
+    "name": "RICHEESE CHEESE WAFER 60/48G-P",
+    "description": "RICHEESE CHEESE WAFER 60/48G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NABAT01",
+    "booth_name": "NABATI FOOD PHILIPPINES, INC.",
+    "item_code": "RIC22S",
+    "name": "RICHOCO CHOCOLATE WAFER 60/48G-P",
+    "description": "RICHOCO CHOCOLATE WAFER 60/48G-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA17S",
+    "name": "BEAR BRAND MILK WITH IRON 14/680G-P",
+    "description": "BEAR BRAND MILK WITH IRON 14/680G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA18S",
+    "name": "BEAR BRAND MILK WITH IRON 14/840G-P",
+    "description": "BEAR BRAND MILK WITH IRON 14/840G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA52S",
+    "name": "BEAR BRAND MILK WITH IRON 36/300G-P",
+    "description": "BEAR BRAND MILK WITH IRON 36/300G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA64S",
+    "name": "BEAR BRAND MILK CHOCO 24/8/29G-P",
+    "description": "BEAR BRAND MILK CHOCO 24/8/29G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA65S",
+    "name": "BEAR BRAND MILK ADULT PLUS 24/8/33G-P",
+    "description": "BEAR BRAND MILK ADULT PLUS 24/8/33G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "BEA83S",
+    "name": "BEAR BRAND STERILIZED MILK SINGLE 32/200ML-P",
+    "description": "BEAR BRAND STERILIZED MILK SINGLE 32/200ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "COF11S",
+    "name": "COFFEEMATE COFFEE CREAMER 60/150G-P",
+    "description": "COFFEEMATE COFFEE CREAMER 60/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "KOK08S",
+    "name": "KOKO KRUNCH CEREAL 24/12/15G-P",
+    "description": "KOKO KRUNCH CEREAL 24/12/15G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "MAG41S",
+    "name": "MAGGI MAGIC SARAP SEASONING 100/55G-P",
+    "description": "MAGGI MAGIC SARAP SEASONING 100/55G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "MIL23S",
+    "name": "MILO CHOCO DRINK TWIN 32/8/48G-P",
+    "description": "MILO CHOCO DRINK TWIN 32/8/48G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "MIL73S",
+    "name": "MILO CHOCO DRINK 40/300G-P",
+    "description": "MILO CHOCO DRINK 40/300G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NESTL01",
+    "booth_name": "NESTLE PHILIPPINES, INC.",
+    "item_code": "NES109S",
+    "name": "NESTLE MILK CHUCKIE 24/250ML-P",
+    "description": "NESTLE MILK CHUCKIE 24/250ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "MAF02S",
+    "name": "MAFRAN BANANA CATSUP 4/1GAL (3.9KG)-P",
+    "description": "MAFRAN BANANA CATSUP 4/1GAL (3.9KG)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "PAP01S",
+    "name": "PAPA BANANA CATSUP 24/320G-P",
+    "description": "PAPA BANANA CATSUP 24/320G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "UFC02S",
+    "name": "UFC BANANA CATSUP 24/320G-P",
+    "description": "UFC BANANA CATSUP 24/320G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "UFC61S",
+    "name": "UFC BANANA CATSUP BUDGET PACK 48/100G-P",
+    "description": "UFC BANANA CATSUP BUDGET PACK 48/100G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT02S",
+    "name": "DATU PUTI VINEGAR PET BOTTLE 12/1L-P",
+    "description": "DATU PUTI VINEGAR PET BOTTLE 12/1L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT14S",
+    "name": "DATU PUTI SOY SAUCE 24/350ML-P",
+    "description": "DATU PUTI SOY SAUCE 24/350ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT15S",
+    "name": "DATU PUTI SOY SAUCE 12/1L-P",
+    "description": "DATU PUTI SOY SAUCE 12/1L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT22S",
+    "name": "DATU PUTI OYSTERRIFIC OYSTER SAUCE 144/30G-P",
+    "description": "DATU PUTI OYSTERRIFIC OYSTER SAUCE 144/30G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT56S",
+    "name": "DATU PUTI SOY SAUCE STAND UP POUCH 72/100ML-P",
+    "description": "DATU PUTI SOY SAUCE STAND UP POUCH 72/100ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT57S",
+    "name": "DATU PUTI VINEGAR STAND UP POUCH 72/100ML-P",
+    "description": "DATU PUTI VINEGAR STAND UP POUCH 72/100ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT65S",
+    "name": "DATU PUTI PATIS 60/150ML-P",
+    "description": "DATU PUTI PATIS 60/150ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT68S",
+    "name": "DATU PUTI SOY SAUCE TABA PACK 60/200ML-P",
+    "description": "DATU PUTI SOY SAUCE TABA PACK 60/200ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "DAT69S",
+    "name": "DATU PUTI VINEGAR TABA PACK 60/200ML-P",
+    "description": "DATU PUTI VINEGAR TABA PACK 60/200ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "MAN01S",
+    "name": "MANG TOMAS ALL-AROUND SARSA 24/325G-P",
+    "description": "MANG TOMAS ALL-AROUND SARSA 24/325G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "NUTRI07",
+    "booth_name": "NUTRI-ASIA, INC.",
+    "item_code": "MAN16S",
+    "name": "MANG TOMAS ALL-AROUND SARSA 48/100G-P",
+    "description": "MANG TOMAS ALL-AROUND SARSA 48/100G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PERFE01",
+    "booth_name": "PERFETTI VAN MELLE PHILS.,INC.",
+    "item_code": "MEN26S",
+    "name": "MENTOS CANDY MINT BAG 40/50'S-P",
+    "description": "MENTOS CANDY MINT BAG 40/50'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PERFE01",
+    "booth_name": "PERFETTI VAN MELLE PHILS.,INC.",
+    "item_code": "MEN55S",
+    "name": "MENTOS CANDY MINT BAG 12/420'S-P",
+    "description": "MENTOS CANDY MINT BAG 12/420'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PERFE01",
+    "booth_name": "PERFETTI VAN MELLE PHILS.,INC.",
+    "item_code": "MEN95S",
+    "name": "MENTOS MINI ASSORTED FRUIT ROLL 24/20'S-P",
+    "description": "MENTOS MINI ASSORTED FRUIT ROLL 24/20'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PERFE01",
+    "booth_name": "PERFETTI VAN MELLE PHILS.,INC.",
+    "item_code": "MEN96S",
+    "name": "MENTOS MINI RAINBOW ROLL 24/20'S-P",
+    "description": "MENTOS MINI RAINBOW ROLL 24/20'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PHILI11",
+    "booth_name": "PHIL.SPRING WATER RESOURCES IN",
+    "item_code": "NAT09S",
+    "name": "NATURE'S SPRING PURIFIED WATER 20/1L-P",
+    "description": "NATURE'S SPRING PURIFIED WATER 20/1L-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PHILI11",
+    "booth_name": "PHIL.SPRING WATER RESOURCES IN",
+    "item_code": "NAT14S",
+    "name": "NATURE'S SPRING PURIFIED WATER 35/500ML-P",
+    "description": "NATURE'S SPRING PURIFIED WATER 35/500ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PHILI11",
+    "booth_name": "PHIL.SPRING WATER RESOURCES IN",
+    "item_code": "NAT20S",
+    "name": "NATURE'S SPRING DISTILLED WATER 2/10L-P",
+    "description": "NATURE'S SPRING DISTILLED WATER 2/10L-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "CHE08BS",
+    "name": "CHESTERFIELD ORIGINAL (R) FLIP TOP BOX 10/20'S (50)-P",
+    "description": "CHESTERFIELD ORIGINAL (R) FLIP TOP BOX 10/20'S (50)-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "CHE31BS",
+    "name": "CHESTERFIELD REMIX COOL FLIP TOP BOX 10/20'S (50)-P",
+    "description": "CHESTERFIELD REMIX COOL FLIP TOP BOX 10/20'S (50)-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "CHE98BS",
+    "name": "CHESTERFIELD MENTHOL FLIP TOP 10/20'S (50)-P",
+    "description": "CHESTERFIELD MENTHOL FLIP TOP 10/20'S (50)-P",
+    "discount": "0.12",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "FOR07BS",
+    "name": "FORTUNE INTERNATIONAL MENTHOL FLIP-TOP BOX 10/20'S (50)-P",
+    "description": "FORTUNE INTERNATIONAL MENTHOL FLIP-TOP BOX 10/20'S (50)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "FOR07S",
+    "name": "FORTUNE INTERNATIONAL MENTHOL FLIP-TOP BOX 50/10/20'S-P",
+    "description": "FORTUNE INTERNATIONAL MENTHOL FLIP-TOP BOX 50/10/20'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR09BS",
+    "name": "MARLBORO RED FLIP-TOP BOX 10/20'S (50)-P",
+    "description": "MARLBORO RED FLIP-TOP BOX 10/20'S (50)-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR09S",
+    "name": "MARLBORO RED FLIP-TOP BOX 50/10/20'S-P",
+    "description": "MARLBORO RED FLIP-TOP BOX 50/10/20'S-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR13BS",
+    "name": "MARLBORO GOLD FLIP-TOP BOX 10/20'S (50)-P",
+    "description": "MARLBORO GOLD FLIP-TOP BOX 10/20'S (50)-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR13S",
+    "name": "MARLBORO GOLD FLIP-TOP BOX 50/10/20'S-P",
+    "description": "MARLBORO GOLD FLIP-TOP BOX 50/10/20'S-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR59BS",
+    "name": "MARLBORO MENTHOL BLACK FLIP-TOP BOX 10/20'S (50)-P",
+    "description": "MARLBORO MENTHOL BLACK FLIP-TOP BOX 10/20'S (50)-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PMFTC01",
+    "booth_name": "PMFTC, INC.",
+    "item_code": "MAR61BS",
+    "name": "MARLBORO MENTHOL ICE BLAST 10/20'S (50)-P",
+    "description": "MARLBORO MENTHOL ICE BLAST 10/20'S (50)-P",
+    "discount": "0.08",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "ARI20S",
+    "name": "ARIEL POWDER SUNRISE FRESH JUMBO (GREEN) 216/66G-P",
+    "description": "ARIEL POWDER SUNRISE FRESH JUMBO (GREEN) 216/66G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "ARI22S",
+    "name": "ARIEL POWDER W/ FRESHNESS OF DOWNY FLORAL PASSION (RED) 216/64G-P",
+    "description": "ARIEL POWDER W/ FRESHNESS OF DOWNY FLORAL PASSION (RED) 216/64G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "ARI40S",
+    "name": "ARIEL LIQUID DETERGENT POWER GEL SUNRISE FRESH 18/6/58G-P",
+    "description": "ARIEL LIQUID DETERGENT POWER GEL SUNRISE FRESH 18/6/58G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW02S",
+    "name": "DOWNY FABRIC CONDITIONER GARDEN BLOOM (PINK) 360/24ML-P",
+    "description": "DOWNY FABRIC CONDITIONER GARDEN BLOOM (PINK) 360/24ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW03S",
+    "name": "DOWNY FABRIC CONDITIONER GARDEN BLOOM (PINK) 144/40ML (38ML)-P",
+    "description": "DOWNY FABRIC CONDITIONER GARDEN BLOOM (PINK) 144/40ML (38ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW12S",
+    "name": "DOWNY FABRIC CONDITIONER GARDEN BLOOM TRI-PID (PINK) 180/69ML (75ML)-P",
+    "description": "DOWNY FABRIC CONDITIONER GARDEN BLOOM TRI-PID (PINK) 180/69ML (75ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW17S",
+    "name": "DOWNY FABRIC CONDITIONER SUNRISE FRESH TRI-PID (BLUE) 180/69ML (75ML)-P",
+    "description": "DOWNY FABRIC CONDITIONER SUNRISE FRESH TRI-PID (BLUE) 180/69ML (75ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW74S",
+    "name": "DOWNY FABRIC CONDITIONER SUNRISE FRESH (BLUE) 144/40ML(38ML)-P",
+    "description": "DOWNY FABRIC CONDITIONER SUNRISE FRESH (BLUE) 144/40ML(38ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "DOW83S",
+    "name": "DOWNY FABRIC CONDITIONER SUNRISE FRESH (BLUE) 360/24ML (26ML)-P",
+    "description": "DOWNY FABRIC CONDITIONER SUNRISE FRESH (BLUE) 360/24ML (26ML)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "JOY01S",
+    "name": "JOY DISHWASHING LIQUID KALAMANSI 216/18.5ML-P",
+    "description": "JOY DISHWASHING LIQUID KALAMANSI 216/18.5ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "JOY37S",
+    "name": "JOY DISHWASHING LIQUID KALAMANSI 144/40ML-P",
+    "description": "JOY DISHWASHING LIQUID KALAMANSI 144/40ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "SA002S",
+    "name": "SAFEGUARD SOAP PURE WHITE 162/55G-P",
+    "description": "SAFEGUARD SOAP PURE WHITE 162/55G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "SAF13S",
+    "name": "SAFEGUARD SOAP ARCTIC FRESH (BLUE) 162/60G(55G)-P",
+    "description": "SAFEGUARD SOAP ARCTIC FRESH (BLUE) 162/60G(55G)-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "TID23S",
+    "name": "TIDE POWDER PERFECT CLEAN WITH FRESHNESS OF DOWNY GARDEN BLOOM 216/67G-P",
+    "description": "TIDE POWDER PERFECT CLEAN WITH FRESHNESS OF DOWNY GARDEN BLOOM 216/67G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "PROCT06",
+    "booth_name": "PROCTER & GAMBLE PHILS. INC.",
+    "item_code": "TID24S",
+    "name": "TIDE POWDER PERFECT CLEAN WITH FRESHNESS OF DOWNY PERFUME FANTASY 216/67G-P",
+    "description": "TIDE POWDER PERFECT CLEAN WITH FRESHNESS OF DOWNY PERFUME FANTASY 216/67G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "REGEN01",
+    "booth_name": "REGENT FOODS CORPORATION",
+    "item_code": "REG89S",
+    "name": "REGENT SNACK TEMPURA 25/100G-P",
+    "description": "REGENT SNACK TEMPURA 25/100G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "REGEN01",
+    "booth_name": "REGENT FOODS CORPORATION",
+    "item_code": "SNA22S",
+    "name": "SNACKU VEGETABLE SNACK 25/60G-P",
+    "description": "SNACKU VEGETABLE SNACK 25/60G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "REPUB03",
+    "booth_name": "J.B.C FOOD CORPORATION",
+    "item_code": "DIN01S",
+    "name": "DINGDONG MIXED NUTS (ORANGE) 60/100G-P",
+    "description": "DINGDONG MIXED NUTS (ORANGE) 60/100G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "REPUB03",
+    "booth_name": "REPUBLIC BISCUIT CORPORATION",
+    "item_code": "REB100S",
+    "name": "REBISCO HANSEL CRACKERS PLAIN 30/10/32G-P",
+    "description": "REBISCO HANSEL CRACKERS PLAIN 30/10/32G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "REPUB03",
+    "booth_name": "SUNCREST FOODS INCORPORATED",
+    "item_code": "FUD50S",
+    "name": "FUDGEE BARR MACAPUNO 10/10/41G-P",
+    "description": "FUDGEE BARR MACAPUNO 10/10/41G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "ROY01AS",
+    "name": "ROYAL CHEESY CELEBRATION PACK 10'S-P",
+    "description": "ROYAL CHEESY CELEBRATION PACK 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "ROY02AS",
+    "name": "ROYAL PINOY CELEBRATION PACK 10'S-P",
+    "description": "ROYAL PINOY CELEBRATION PACK 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "ROY03AS",
+    "name": "ROYAL SWEET CELEBRATION PACK 10'S-P",
+    "description": "ROYAL SWEET CELEBRATION PACK 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "SEL63CS",
+    "name": "SELECTA MILK FORTIFIED FILLED 6/2/1L-P",
+    "description": "SELECTA MILK FORTIFIED FILLED 6/2/1L-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "WHI04AS",
+    "name": "WHITE KING FIESTA 3-CHEESE SPAGHETTIPID 10'S-P",
+    "description": "WHITE KING FIESTA 3-CHEESE SPAGHETTIPID 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "WHI51AS",
+    "name": "WHITE KING FIESTA FILIPINO SPAGHETTIPID 10'S-P",
+    "description": "WHITE KING FIESTA FILIPINO SPAGHETTIPID 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "WHI52AS",
+    "name": "WHITE KING FIESTA SWEET SPAGHETTIPID SMALL 12'S-P",
+    "description": "WHITE KING FIESTA SWEET SPAGHETTIPID SMALL 12'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "WHI53AS",
+    "name": "WHITE KING FIESTA SWEET SPAGHETTIPID 10'S-P",
+    "description": "WHITE KING FIESTA SWEET SPAGHETTIPID 10'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RFMCO01",
+    "booth_name": "RFM CORPORATION",
+    "item_code": "WHI62AS",
+    "name": "WHITE KING FIESTA CARBONARA SULIT PACK 12'S-P",
+    "description": "WHITE KING FIESTA CARBONARA SULIT PACK 12'S-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "RHEIN01",
+    "booth_name": "RHEINLAND DISTRIBUTIONS, INC.",
+    "item_code": "SCO43S",
+    "name": "SCOTCH BRITE SCRUB SPONGE MINI 8/12/1'S-P",
+    "description": "SCOTCH BRITE SCRUB SPONGE MINI 8/12/1'S-P",
+    "discount": "0.25",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH01S",
+    "name": "MR. HAT GULAMAN POWDER RED 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER RED 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH02S",
+    "name": "MR. HAT GULAMAN POWDER GREEN 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER GREEN 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH05S",
+    "name": "MR. HAT GULAMAN POWDER WHITE 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER WHITE 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH07S",
+    "name": "MR. HAT GULAMAN POWDER BUCO PANDAN 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER BUCO PANDAN 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH11S",
+    "name": "MR. HAT GULAMAN POWDER COFFEE 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER COFFEE 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SEANL01",
+    "booth_name": "SEANLUC INC.",
+    "item_code": "MRH15S",
+    "name": "MR. HAT GULAMAN POWDER BLACK 10/10/25G-P",
+    "description": "MR. HAT GULAMAN POWDER BLACK 10/10/25G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SKINT01",
+    "booth_name": "SKINTEC ADVANCE INC.",
+    "item_code": "KER01S",
+    "name": "KERATINPLUS TREATMENT WITH ARGAN OIL AND JOJOBA OIL (BLACK) 24/12/20G-P",
+    "description": "KERATINPLUS TREATMENT WITH ARGAN OIL AND JOJOBA OIL (BLACK) 24/12/20G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SKINT01",
+    "booth_name": "SKINTEC ADVANCE INC.",
+    "item_code": "KER02S",
+    "name": "KERATINPLUS TREATMENT WITH SUNFLOWER AND ROSEMARY OIL (GOLD) 24/12/20G-P",
+    "description": "KERATINPLUS TREATMENT WITH SUNFLOWER AND ROSEMARY OIL (GOLD) 24/12/20G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "SKINT01",
+    "booth_name": "SKINTEC ADVANCE INC.",
+    "item_code": "KER03S",
+    "name": "KERATINPLUS TREATMENT WITH BIOTIN AND LAVENDER OIL (RED) 24/12/20G-P",
+    "description": "KERATINPLUS TREATMENT WITH BIOTIN AND LAVENDER OIL (RED) 24/12/20G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "DAI10S",
+    "name": "MAGNOLIA DAILY QUEZO 48/185G (160G)-P",
+    "description": "MAGNOLIA DAILY QUEZO 48/185G (160G)-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "MAG147S",
+    "name": "MAGNOLIA CHEEZEE 48/185G (160G)-P",
+    "description": "MAGNOLIA CHEEZEE 48/185G (160G)-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA01DS",
+    "name": "STAR MARGARINE REGULAR 32/3/100G-P",
+    "description": "STAR MARGARINE REGULAR 32/3/100G-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA20S",
+    "name": "STAR MARGARINE REGULAR 72/250G-P",
+    "description": "STAR MARGARINE REGULAR 72/250G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA45S",
+    "name": "STAR MARGARINE SWEET BLEND 96/100G-P",
+    "description": "STAR MARGARINE SWEET BLEND 96/100G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA46S",
+    "name": "STAR MARGARINE SWEET BLEND 48/250G-P",
+    "description": "STAR MARGARINE SWEET BLEND 48/250G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA64AS",
+    "name": "STAR MARGARINE REGULAR TWIN PACK 120/30G-P",
+    "description": "STAR MARGARINE REGULAR TWIN PACK 120/30G-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA66AS",
+    "name": "STAR MARGARINE SWEET BLEND 120/30G-P",
+    "description": "STAR MARGARINE SWEET BLEND 120/30G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "SAN MIGUEL SUPER COFFEEMIX CO.",
+    "item_code": "SAN61CS",
+    "name": "SAN MIG COFFEE ORIGINAL SUGAR FREE 15/2/10/7G-P",
+    "description": "SAN MIG COFFEE ORIGINAL SUGAR FREE 15/2/10/7G-P",
+    "discount": "0.15",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "SAN MIGUEL SUPER COFFEEMIX CO.",
+    "item_code": "SAN94S",
+    "name": "SAN MIG COFFEE ORIGINAL STRIP 24/10/20G-P",
+    "description": "SAN MIG COFFEE ORIGINAL STRIP 24/10/20G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "PUR101S",
+    "name": "PUREFOODS SIZZLING SISIG 48/150G-P",
+    "description": "PUREFOODS SIZZLING SISIG 48/150G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "PUR25DS",
+    "name": "PUREFOODS LUNCHEON MEAT CHINESE 12/2/350G-P",
+    "description": "PUREFOODS LUNCHEON MEAT CHINESE 12/2/350G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "PUR33S",
+    "name": "PUREFOODS LUNCHEON MEAT BLUE 24/340G-P",
+    "description": "PUREFOODS LUNCHEON MEAT BLUE 24/340G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "PUR43S",
+    "name": "PUREFOODS LUNCHEON MEAT BLUE 48/230G-P",
+    "description": "PUREFOODS LUNCHEON MEAT BLUE 48/230G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA31S",
+    "name": "STAR CORNED BEEF 48/150G-P",
+    "description": "STAR CORNED BEEF 48/150G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA37S",
+    "name": "STAR CORNED BEEF 48/175G-P",
+    "description": "STAR CORNED BEEF 48/175G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "THEPU01",
+    "booth_name": "THE PUREFOODS-HORMEL CO. INC.",
+    "item_code": "STA38S",
+    "name": "STAR CORNED BEEF 48/260G-P",
+    "description": "STAR CORNED BEEF 48/260G-P",
+    "discount": "0.2",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "GRE62S",
+    "name": "GREAT TASTE COFFEE WHITE TWIN 24/10/50G-P",
+    "description": "GREAT TASTE COFFEE WHITE TWIN 24/10/50G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "GRE63S",
+    "name": "GREAT TASTE COFFEE CHOCO TWIN 24/10/50G-P",
+    "description": "GREAT TASTE COFFEE CHOCO TWIN 24/10/50G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "MAX03S",
+    "name": "MAXX CANDY CHERRY 40/50'S-P",
+    "description": "MAXX CANDY CHERRY 40/50'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "MAX08S",
+    "name": "MAXX CANDY HONEY LEMON 40/50'S-P",
+    "description": "MAXX CANDY HONEY LEMON 40/50'S-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "PIA02S",
+    "name": "PIATTOS CHEESE 80/40G-P",
+    "description": "PIATTOS CHEESE 80/40G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "PIA05S",
+    "name": "PIATTOS SOUR CREAM & ONION 80/40G-P",
+    "description": "PIATTOS SOUR CREAM & ONION 80/40G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "QUA80S",
+    "name": "QUAKE OVERLOAD MOCHA BUTTER 10/10/30G-P",
+    "description": "QUAKE OVERLOAD MOCHA BUTTER 10/10/30G-P",
+    "discount": "0.1",
+    "qty": "100"
+  },
+  {
+    "booth_code": "UNIVE01",
+    "booth_name": "UNIVERSAL ROBINA CORPORATION",
+    "item_code": "C2C27S",
+    "name": "C2 GREEN TEA APPLE SOLO 24/230ML-P",
+    "description": "C2 GREEN TEA APPLE SOLO 24/230ML-P",
+    "discount": "0.1",
+    "qty": "100"
+  }
+]

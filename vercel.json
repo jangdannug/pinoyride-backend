@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "pinoy_ride/pinoy_ride/wsgi.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "pinoy_ride/pinoy_ride/wsgi.py" }
+  ]
+}

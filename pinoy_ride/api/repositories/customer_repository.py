@@ -1,0 +1,178 @@
+from django.contrib.auth.hashers import make_password
+from django.utils import timezone
+from django.core.paginator import Paginator
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
+from api.models.customer_model import Customer
+from api.serializers import (
+    PartialRiderSerializer
+)
+from django.db import transaction
+
+class CustomerRepository:
+    
+    @staticmethod
+    @transaction.atomic
+    def create(customer):
+        new_customer = Customer.objects.create(
+            customer_type=customer.get("customer_type", ""),
+            fname=customer.get("fname", ""),
+            mname=customer.get("mname", ""),
+            lname=customer.get("lname", ""),
+            mobile=customer.get("mobile", ""),
+            email=customer.get("email", ""),
+        )
+
+        new_customer.save()
+        return new_customer
+
+
+
+    # @staticmethod
+    # def get_by_id(rider_id):
+    #     """Get rider by id"""
+    #     try:
+    #         return Rider.objects.get(id=rider_id)
+    #     except Rider.DoesNotExist:
+    #         return None
+
+    # # exclude application_status = 1
+    # @staticmethod
+    # def get_applicant_by_id(rider_id):
+    #     """Get rider applicant by id"""
+    #     try:
+    #         return Rider.objects.exclude(application_status='1').get(id=rider_id)
+    #     except Rider.DoesNotExist:
+    #         return None
+
+
+
+
+    # @staticmethod
+    # def admin_rider_applicants(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
+    #     """Retrieve paginated rider applicants with optional search query."""
+
+    #     # exclude application_status = 1
+    #     riders = (
+    #         Rider.objects
+    #         .exclude(application_status='1')
+    #         .annotate()
+    #         .order_by(sort_by)
+    #     )
+
+    #     # if filters:
+    #     #     if "name_filter" in filters and filters["name_filter"]:
+    #     #         promos = promos.filter(
+    #     #             name=filters["name_filter"]
+    #     #         )
+
+    #     if search_query:
+    #         search_terms = search_query.split()
+    #         query_filter = Q()
+
+    #         for term in search_terms:
+    #             query_filter |= (
+    #                 Q(first_name__icontains=term)
+    #                 | Q(middle_name__icontains=term)
+    #                 | Q(last_name__icontains=term)
+    #             )
+
+    #         riders = riders.filter(query_filter).distinct()
+
+    #     paginator = Paginator(riders, page_size)
+    #     page = paginator.get_page(page_number)
+
+    #     serialized_riders = PartialRiderSerializer(
+    #         page.object_list, many=True
+    #     ).data
+
+    #     return {
+    #         "riders": serialized_riders,
+    #         "total_pages": paginator.num_pages,
+    #         "current_page": page_number,
+    #         "has_next": page.has_next(),
+    #         "has_previous": page.has_previous(),
+    #         "next_page": page.next_page_number() if page.has_next() else None,
+    #         "previous_page": (
+    #             page.previous_page_number() if page.has_previous() else None
+    #         ),
+    #     }
+
+    
+    # @staticmethod
+    # @transaction.atomic
+    # def update_rider_applicant_status(rider_instance, applicant_status, auth_user_id):
+        
+    #     if applicant_status == '1':
+    #         rider_status = '1'
+    #     else:
+    #         rider_status = '0'
+
+    #     rider_instance.application_status = applicant_status
+    #     rider_instance.status = rider_status
+    #     rider_instance.updated_by= auth_user_id
+    #     rider_instance.save()
+        
+    #     return rider_instance
+
+
+    # @staticmethod
+    # def admin_riders_list(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
+    #     """Retrieve paginated rider list with optional search query."""
+
+    #     # application_status = 1
+    #     riders = (
+    #         Rider.objects
+    #         .filter(application_status='1', status='1')
+    #         .annotate()
+    #         .order_by(sort_by)
+    #     )
+
+    #     # if filters:
+    #     #     if "name_filter" in filters and filters["name_filter"]:
+    #     #         promos = promos.filter(
+    #     #             name=filters["name_filter"]
+    #     #         )
+
+    #     if search_query:
+    #         search_terms = search_query.split()
+    #         query_filter = Q()
+
+    #         for term in search_terms:
+    #             query_filter |= (
+    #                 Q(first_name__icontains=term)
+    #                 | Q(middle_name__icontains=term)
+    #                 | Q(last_name__icontains=term)
+    #             )
+
+    #         riders = riders.filter(query_filter).distinct()
+
+    #     paginator = Paginator(riders, page_size)
+    #     page = paginator.get_page(page_number)
+
+    #     serialized_riders = PartialRiderSerializer(
+    #         page.object_list, many=True
+    #     ).data
+
+    #     return {
+    #         "riders": serialized_riders,
+    #         "total_pages": paginator.num_pages,
+    #         "current_page": page_number,
+    #         "has_next": page.has_next(),
+    #         "has_previous": page.has_previous(),
+    #         "next_page": page.next_page_number() if page.has_next() else None,
+    #         "previous_page": (
+    #             page.previous_page_number() if page.has_previous() else None
+    #         ),
+    #     }
+
+
+    # @staticmethod
+    # @transaction.atomic
+    # def update_rider_status(rider_instance, rider_status, auth_user_id):
+        
+    #     rider_instance.status = rider_status
+    #     rider_instance.updated_by = auth_user_id
+    #     rider_instance.save()
+        
+    #     return rider_instance

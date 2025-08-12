@@ -1,0 +1,9 @@
+env
+.env
+__pycache__
+# api/migrations
+# migrations
+media
+venv
+.vercel
+logs

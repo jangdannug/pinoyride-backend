@@ -1,0 +1,17 @@
+import os
+
+from django.conf import settings
+
+from celery import Celery
+
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pinoy_ride.settings')
+
+app = Celery('pinoy_ride')
+
+
+app.config_from_object('pinoy_ride.settings', namespace='CELERY')
+
+
+app.autodiscover_tasks()
+
