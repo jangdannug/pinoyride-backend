@@ -19,6 +19,8 @@ class Customer(SoftDeleteModel):
     email = models.CharField(max_length=255,null=True)
     is_verified = models.IntegerField(default=0)
     login_type = models.CharField(max_length=255, null=True)
+    current_location = models.TextField(null=True)
+    updated_by = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     customer_hash_code = models.CharField(max_length=255,null=True)
     session_id = models.CharField(max_length=255,null=True)
@@ -31,7 +33,9 @@ class Customer(SoftDeleteModel):
             models.Index(fields=['code']),
             models.Index(fields=['is_verified']),
             models.Index(fields=['login_type']),
+            models.Index(fields=['current_location']),
             models.Index(fields=['status']),
+            models.Index(fields=['updated_by']),
             models.Index(fields=['session_id']),
             models.Index(fields=['customer_hash_code']),
         ]

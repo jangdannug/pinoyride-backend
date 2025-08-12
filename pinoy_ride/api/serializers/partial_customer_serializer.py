@@ -13,5 +13,6 @@ class PartialCustomerSerializer(serializers.ModelSerializer):
             "lname",
             "mobile",
             "email",
+            "current_location",
             "status",
         ]

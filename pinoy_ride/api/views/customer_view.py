@@ -36,7 +36,8 @@ class CustomerViewSet(viewsets.ViewSet):
                 "mobile" : request.data.get("mobile", ""),
                 "email" : request.data.get("email", ""),
                 "login_type" : "mobile_number",
-                "customer_type" : "1"
+                "customer_type" : "1",
+                "status" : 1
             }
 
             customer_serializer = CustomerSerializer(data=customer_details)

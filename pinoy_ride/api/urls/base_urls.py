@@ -9,6 +9,7 @@ urlpatterns = [
 
     path('admin/', include('api.urls.auth_urls')),
     path('admin/rider/', include('api.urls.admin_rider_urls')),
+    path('admin/customer/', include('api.urls.admin_customer_urls')),
     path('admin/promo/', include('api.urls.admin_promo_urls')),
     path('admin/price/', include('api.urls.admin_price_urls')),
 ]
