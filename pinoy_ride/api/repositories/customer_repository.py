@@ -27,6 +27,14 @@ class CustomerRepository:
         return new_customer
 
 
+    @staticmethod
+    def check_customer_by_mobile(customer):
+        """Get customer by mobile"""
+        try:
+            return Customer.objects.get(mobile=customer.get("mobile_no", ""))
+        except Customer.DoesNotExist:
+            return None
+
 
     # @staticmethod
     # def get_by_id(rider_id):

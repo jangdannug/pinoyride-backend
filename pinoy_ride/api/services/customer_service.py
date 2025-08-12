@@ -17,3 +17,16 @@ class CustomerService:
         new_customer = self.customer.create(customer=customer_details)
 
         return new_customer
+
+
+
+    ## Check customer by mobile_no
+    def check_mobile_no(self, customer_details):
+        """Check customer"""
+        
+        customer = self.customer.check_customer_by_mobile(customer=customer_details)
+
+        if customer is None:
+            raise NotFoundError("Customer not found")
+
+        return customer

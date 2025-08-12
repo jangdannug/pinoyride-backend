@@ -2,6 +2,7 @@ from .user_serializer import UserSerializer
 from .rider_serializer import RiderSerializer
 from .partial_rider_serializer import PartialRiderSerializer
 from .customer_serializer import CustomerSerializer
+from .partial_customer_serializer import PartialCustomerSerializer
 from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
 from .promo_serializer import PromoSerializer
 from .partial_promo_serializer import PartialPromoSerializer
