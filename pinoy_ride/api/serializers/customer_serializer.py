@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from api.models import Customer
+from .customer_address_serializer import CustomerAddressSerializer
 
 class CustomerSerializer(serializers.ModelSerializer):
 
     code = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     email = serializers.CharField(required=True)
+    customer_address = serializers.SerializerMethodField()
 
     class Meta:
         model = Customer
@@ -18,6 +20,7 @@ class CustomerSerializer(serializers.ModelSerializer):
             "mobile",
             "email",
             "status",
+            "customer_address"
         ]
     
     def validate_email(self, value):
@@ -44,3 +47,11 @@ class CustomerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This mobile no already exists.")
         
         return value
+
+
+    def get_customer_address(self, obj):
+        # get the related table customer_address
+        address = obj.customer_address.filter(type=1).first()
+        if address:
+            return CustomerAddressSerializer(address).data
+        return {}

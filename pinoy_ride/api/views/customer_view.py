@@ -6,7 +6,8 @@ from api.models import Test
 import json
 from api.services import (
     CustomerService,
-    OtpService
+    OtpService,
+    CustomerAddressService
 )
 from api.serializers import CustomerSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -19,6 +20,7 @@ class CustomerViewSet(viewsets.ViewSet):
         super().__init__(*args, **kwargs)
         self.service = CustomerService()
         self.otp_service = OtpService()
+        self.customer_address_service = CustomerAddressService()
         # self.rider_vehicle_service = RiderVehicleDetailsService()
 
 
@@ -27,6 +29,8 @@ class CustomerViewSet(viewsets.ViewSet):
         """Customer sign up"""
         
         try:
+
+            customer_address = json.loads(request.data.get("customer_address", "{}") or "{}")
 
             # Validation
             customer_details = {
@@ -47,6 +51,10 @@ class CustomerViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 
                 customer_details = self.service.save_customer(customer_details=customer_details)
+
+                if customer_address:
+                    customer_address['type'] = '1'
+                    self.customer_address_service.save_customer_address(customer_instance = customer_details, customer_address=customer_address)
 
 
                 serializer = CustomerSerializer(customer_details)
