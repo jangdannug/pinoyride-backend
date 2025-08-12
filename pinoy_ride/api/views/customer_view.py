@@ -35,6 +35,7 @@ class CustomerViewSet(viewsets.ViewSet):
                 "lname" : request.data.get("lname", ""),
                 "mobile" : request.data.get("mobile", ""),
                 "email" : request.data.get("email", ""),
+                "login_type" : "mobile_number",
                 "customer_type" : "1"
             }
 

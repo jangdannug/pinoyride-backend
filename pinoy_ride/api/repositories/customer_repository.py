@@ -21,6 +21,7 @@ class CustomerRepository:
             lname=customer.get("lname", ""),
             mobile=customer.get("mobile", ""),
             email=customer.get("email", ""),
+            login_type=customer.get("login_type", ""),
         )
 
         new_customer.save()
