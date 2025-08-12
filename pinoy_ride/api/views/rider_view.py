@@ -6,7 +6,8 @@ from api.models import Test
 import json
 from api.services import (
     RiderService,
-    RiderVehicleDetailsService
+    RiderVehicleDetailsService,
+    OtpService
 )
 from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -19,6 +20,7 @@ class RiderViewSet(viewsets.ViewSet):
         super().__init__(*args, **kwargs)
         self.service = RiderService()
         self.rider_vehicle_service = RiderVehicleDetailsService()
+        self.otp_service = OtpService()
 
 
     @action(detail=False, methods=['post'], url_path='apply')
@@ -57,6 +59,53 @@ class RiderViewSet(viewsets.ViewSet):
            
             return AppResponse.send_success(data=serializer.data, message="Record saved successfully")
 
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+
+    @action(detail=False, methods=['post'], url_path='login')
+    def login(self, request):
+        """Rider login"""
+        
+        try:
+
+            mobile_no = request.data.get("mobile_no", "")
+            otp_code = request.data.get("otp_code", "")
+
+            if not mobile_no:
+                return AppResponse.send_error(message="Mobile number is required", code=400)
+
+            response_data = []
+            rider = self.service.check_mobile_no(request.data)
+            otp_data = {
+                "user_type" : "rider",
+                "mobile_no" : mobile_no
+            }
+
+            if not otp_code:
+                self.otp_service.generate_otp(user_details = otp_data)
+
+                response_data = {
+                    "is_otp" : "1"
+                 }
+            else:
+                otp_data['code'] = otp_code
+
+                self.otp_service.verify_otp(otp_data = otp_data)
+                serializer = RiderSerializer(rider)
+                response_data = serializer.data
+
+
+            return AppResponse.send_success(data=response_data, message="Login success")
 
         except NotFoundError as e:
             return AppResponse.send_error(message=str(e), code=404)

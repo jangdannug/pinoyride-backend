@@ -17,3 +17,15 @@ class RiderService:
         new_rider = self.rider.create(rider=personal_details)
 
         return new_rider
+
+    
+    ## Check rider by mobile_no
+    def check_mobile_no(self, rider_details):
+        """Check rider"""
+        
+        rider = self.rider.check_rider_by_mobile(rider=rider_details)
+
+        if rider is None:
+            raise NotFoundError("Rider not found")
+
+        return rider
