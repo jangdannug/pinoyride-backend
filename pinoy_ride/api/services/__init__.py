@@ -1,5 +1,6 @@
 from api.services.rider_service import RiderService
 from api.services.rider_vehicle_details_service import RiderVehicleDetailsService
+from api.services.rider_address_service import RiderAddressService
 from api.services.customer_service import CustomerService
 from api.services.customer_address_service import CustomerAddressService
 from api.services.otp_service import OtpService

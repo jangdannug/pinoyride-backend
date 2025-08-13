@@ -4,6 +4,7 @@ from .rider_repository import RiderRepository
 from .customer_repository import CustomerRepository
 from .customer_address_repository import CustomerAddressRepository
 from .rider_vehicle_details_repository import RiderVehicleDetailsRepository
+from .rider_address_repository import RiderAddressRepository
 from .promo_repository import PromoRepository
 from .price_repository import PriceRepository
 from .otp_repository import OtpRepository

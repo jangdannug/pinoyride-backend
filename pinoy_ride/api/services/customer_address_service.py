@@ -9,7 +9,7 @@ class CustomerAddressService:
     def __init__(self):
         self.customer_address = CustomerAddressRepository()
     
-    ## Save customer
+    ## Save customer address
     @transaction.atomic
     def save_customer_address(self, customer_instance, customer_address):
         """Save customer address"""

@@ -1,5 +1,6 @@
 from .user_serializer import UserSerializer
 from .rider_serializer import RiderSerializer
+from .rider_address_serializer import RiderAddressSerializer
 from .partial_rider_serializer import PartialRiderSerializer
 from .customer_serializer import CustomerSerializer
 from .partial_customer_serializer import PartialCustomerSerializer

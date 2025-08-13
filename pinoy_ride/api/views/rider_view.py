@@ -7,7 +7,8 @@ import json
 from api.services import (
     RiderService,
     RiderVehicleDetailsService,
-    OtpService
+    OtpService,
+    RiderAddressService
 )
 from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -21,6 +22,7 @@ class RiderViewSet(viewsets.ViewSet):
         self.service = RiderService()
         self.rider_vehicle_service = RiderVehicleDetailsService()
         self.otp_service = OtpService()
+        self.rider_address_service = RiderAddressService()
 
 
     @action(detail=False, methods=['post'], url_path='apply')
@@ -31,6 +33,7 @@ class RiderViewSet(viewsets.ViewSet):
 
             personal_details = json.loads(request.data.get("personal_details", "{}"))
             vehicle_details = json.loads(request.data.get("vehicle_details", "{}"))
+            rider_address = json.loads(request.data.get("rider_address", "{}") or "{}")
             
             drivers_license_img= request.data.get("drivers_license_img", None)
             personal_details['drivers_license_img'] = drivers_license_img
@@ -54,6 +57,11 @@ class RiderViewSet(viewsets.ViewSet):
                 rider_details = self.service.save_rider(personal_details=personal_details)
 
                 rider_vehicle = self.rider_vehicle_service.save_rider_vehicle(rider_id = rider_details.id , rider_vehicle_details=vehicle_details)
+
+                if rider_address:
+                    rider_address['type'] = '1'
+                    self.rider_address_service.save_rider_address(rider_instance= rider_details, rider_address=rider_address)
+
 
                 serializer = RiderSerializer(rider_details)
            
