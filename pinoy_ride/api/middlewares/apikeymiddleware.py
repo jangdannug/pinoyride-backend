@@ -14,11 +14,12 @@ class ApiKeyAuthenticationMiddleware:
     def __call__(self, request):
         
         if request.path.startswith('/api/') and settings.ENV != 'development':
-            api_key_customer = request.headers.get('X-API-KEY')
- 
-                            
-            # if api_key_customer != settings.CUSTOM_API_KEY:
-            #     return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
+            api_key_app = request.headers.get('X-API-KEY')
+            
+            if request.path.startswith('/api/customers/') or request.path.startswith('/api/riders/'):
+            
+               if api_key_app != settings.CUSTOM_API_KEY:
+                        return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
 
         response = self.get_response(request)
         return response
