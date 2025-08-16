@@ -27,7 +27,7 @@ class TestViewSet(viewsets.ViewSet):
         return AppResponse.send_success(
                 data={
                     "status": "success",
-                    "message": "Service is live!",
+                    "message": "Service is live! ",
                     "env: CUSTOM_API_KEY" : settings.CUSTOM_API_KEY,
                     "env: ENV" : settings.ENV,
                     "env: SECRET_KEY" : settings.SECRET_KEY,
