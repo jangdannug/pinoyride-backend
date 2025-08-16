@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 from api.utils.app_response import AppResponse
 from api.models import Test
+from django.conf import settings
 
 class TestViewSet(viewsets.ViewSet):
     """Test Controller"""
@@ -18,3 +19,20 @@ class TestViewSet(viewsets.ViewSet):
     def default(self, request):
         """Return sample response"""
         return AppResponse.send_success(data=None, message="Django restful template 123")
+
+
+    @action(detail=False, methods=['post'], url_path='env_check')
+    def env_check(self, request):
+        """Return sample response"""
+        return AppResponse.send_success(
+                data={
+                    "status": "success",
+                    "message": "Service is live!",
+                    "env: CUSTOM_API_KEY" : settings.CUSTOM_API_KEY,
+                    "env: ENV" : settings.ENV,
+                    "env: SECRET_KEY" : settings.SECRET_KEY,
+                    "env: API_KEY" : settings.API_KEY
+                    
+                },
+                code=200,
+            )
