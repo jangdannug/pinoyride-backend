@@ -8,6 +8,7 @@ from .partial_rider_serializer import PartialRiderSerializer
 class BookingSerializer(serializers.ModelSerializer):
 
     ref_code = serializers.CharField(read_only=True)
+    booking_type = serializers.CharField(required=True)
     pickup_location = serializers.CharField(required=True)
     pickup_lat = serializers.CharField(required=True)
     pickup_long = serializers.CharField(required=True)
@@ -35,6 +36,7 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "ref_code",
+            "booking_type",
             "pickup_location",
             "pickup_lat",
             "pickup_long",

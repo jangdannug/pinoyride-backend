@@ -15,6 +15,7 @@ class Booking(SoftDeleteModel):
     ref_code = models.CharField(max_length=255, unique=True)
     customer = models.ForeignKey(Customer, related_name='customer_booking', on_delete=models.CASCADE, default=None, null=True, blank=True)
     rider = models.ForeignKey(Rider, related_name='rider_booking', on_delete=models.CASCADE, default=None, null=True, blank=True)
+    booking_type = models.CharField(max_length=255, null=True)
     pickup_location = models.CharField(max_length=255, null=True)
     dropoff_location = models.CharField(max_length=255, null=True)
     pickup_lat = models.CharField(max_length=255, null=True)

@@ -19,6 +19,7 @@ class BookingRepository:
         new_booking = Booking.objects.create(
             customer=customer_instance,
             pickup_location=booking_details.get("pickup_location", ""),
+            booking_type=booking_details.get("booking_type", ""),
             dropoff_location=booking_details.get("dropoff_location", ""),
             pickup_lat=booking_details.get("pickup_lat", ""),
             pickup_long=booking_details.get("pickup_long", ""),

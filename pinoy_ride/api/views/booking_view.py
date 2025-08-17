@@ -52,6 +52,7 @@ class BookingViewSet(viewsets.ViewSet):
 
             # Validation
             booking_details = {
+                "booking_type" : request.data.get("booking_type", ""),
                 "pickup_location" : request.data.get("pickup_location", ""),
                 "pickup_lat" : pickup_lat,
                 "pickup_long" : pickup_long,
