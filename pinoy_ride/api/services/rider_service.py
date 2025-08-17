@@ -29,3 +29,13 @@ class RiderService:
             raise NotFoundError("Rider not found")
 
         return rider
+
+
+     ## Get rider by id
+    def get_rider_by_id(self,rider_id):
+        """Fetch rider"""
+        rider = self.rider.get_by_id(rider_id=rider_id)
+        
+        if rider is None:
+            raise NotFoundError("Rider "+ str(rider_id) + " not found")
+        return rider

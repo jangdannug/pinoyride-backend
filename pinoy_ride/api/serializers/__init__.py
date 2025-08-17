@@ -11,3 +11,5 @@ from .partial_price_serializer import PartialPriceSerializer
 from .price_serializer import PriceSerializer
 from .generate_otp_serializer import GenerateOtpSerializer
 from .verify_otp_serializer import VerifyOtpSerializer
+from .booking_serializer import BookingSerializer
+from .booking_payment_serializer import BookingPaymentSerializer

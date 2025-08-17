@@ -4,8 +4,12 @@ from api.services.rider_address_service import RiderAddressService
 from api.services.customer_service import CustomerService
 from api.services.customer_address_service import CustomerAddressService
 from api.services.otp_service import OtpService
+from api.services.booking_service import BookingService
+from api.services.booking_payment_service import BookingPaymentService
 
 from api.services.admin_promo_service import AdminPromoService
 from api.services.admin_price_service import AdminPriceService
 from api.services.admin_rider_service import AdminRiderService
 from api.services.admin_customer_service import AdminCustomerService
+
+from api.services.api_service import ApiService

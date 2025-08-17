@@ -8,3 +8,5 @@ from .rider_vehicle_details_model import RiderVehicleDetails
 from .promo_model import Promo
 from .price_model import Price
 from .otp_model import Otp
+from .booking_model import Booking
+from .booking_payment_model import BookingPayment

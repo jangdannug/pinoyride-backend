@@ -3,6 +3,7 @@ from .rider_view import RiderViewSet
 from .auth_view import AuthViewSet
 from .customer_view import CustomerViewSet
 from .otp_view import OtpViewSet
+from .booking_view import BookingViewSet
 
 from .admin_promo_view import AdminPromoViewSet
 from .admin_price_view import AdminPriceViewSet

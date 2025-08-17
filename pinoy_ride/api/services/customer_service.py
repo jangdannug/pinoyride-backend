@@ -30,3 +30,13 @@ class CustomerService:
             raise NotFoundError("Customer not found")
 
         return customer
+
+    
+    ## Get customer by id
+    def get_customer_by_id(self,customer_id):
+        """Fetch customer"""
+        customer = self.customer.get_customer_by_id(customer_id=customer_id)
+        
+        if customer is None:
+            raise NotFoundError("Customer "+ str(customer_id) + " not found")
+        return customer

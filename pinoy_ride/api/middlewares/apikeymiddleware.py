@@ -15,8 +15,13 @@ class ApiKeyAuthenticationMiddleware:
         
         if request.path.startswith('/api/') and settings.ENV != 'development':
             api_key_app = request.headers.get('X-API-KEY')
-            
-            if request.path.startswith('/api/customers/') or request.path.startswith('/api/riders/'):
+            api_routes = (
+                '/api/customers/',
+                '/api/riders/',
+                '/api/booking/',
+            )
+
+            if request.path.startswith(api_routes):
             
                if api_key_app != settings.CUSTOM_API_KEY:
                         return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
