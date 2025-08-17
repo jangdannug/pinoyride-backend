@@ -25,6 +25,7 @@ class PartialRiderSerializer(serializers.ModelSerializer):
             "drivers_license_img",
             "application_status",
             "status",
+            "auto_accept",
             "vehicle_details",
             "rider_address"
         ]

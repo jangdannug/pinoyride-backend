@@ -26,6 +26,7 @@ class BookingRepository:
             dropoff_long=booking_details.get("dropoff_long", ""),
             distance_km=booking_details.get("distance_km", ""),
             payment_type=booking_details.get("payment_type", ""),
+            note_to_rider=booking_details.get("note_to_rider", ""),
         )
 
         new_booking.save()

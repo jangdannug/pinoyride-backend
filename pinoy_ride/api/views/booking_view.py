@@ -59,6 +59,7 @@ class BookingViewSet(viewsets.ViewSet):
                 "dropoff_lat" : dropoff_lat,
                 "dropoff_long" : dropoff_long,
                 "payment_type" : request.data.get("payment_type", ""),
+                "note_to_rider" : request.data.get("note_to_rider", ""),
                 "customer_id" : customer_id
             }
 
