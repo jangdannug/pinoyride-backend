@@ -225,3 +225,57 @@ class BookingViewSet(viewsets.ViewSet):
 
             return AppResponse.send_error(message=str(e), code=500)
 
+
+    
+    @action(detail=False, methods=['post'], url_path='update_status_for_rider')
+    def update_status_for_rider(self, request):
+        """Update status for rider"""
+        
+        try:            
+            
+            rider_id = request.data.get("rider_id", "")
+            booking_id = request.data.get("booking_id", "")
+            rider_lat = request.data.get("current_lat", "")
+            rider_long = request.data.get("current_long", "")
+            status = request.data.get("status", "")
+            allowed_status = ["1", "2", "3"]
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if not rider_lat:
+                return AppResponse.send_error(message="Current lat is required", code=400)
+            if not rider_long:
+                return AppResponse.send_error(message="Current long is required", code=400)
+            if status not in allowed_status:
+                return AppResponse.send_error(message="Invalid status "+str(status), code=400)
+
+            with transaction.atomic():
+                booking_details = self.service.get_booking_by_id(booking_id=booking_id)
+                rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
+                
+                ## validate booking record if it is linked to rider_id
+                if status != "1":
+                    self.service.get_booking_by_rider_and_id(rider_id=rider_id, booking_id=booking_id)
+
+                self.service.update_booking_status_for_rider(booking=booking_details, booking_status = status, rider=rider_details)
+
+                # refresh booking_details
+                booking_details.refresh_from_db()
+
+                serializer = BookingSerializer(booking_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Booking details fetched successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+

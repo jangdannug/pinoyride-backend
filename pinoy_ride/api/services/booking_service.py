@@ -32,3 +32,22 @@ class BookingService:
         if booking is None:
             raise NotFoundError("Booking "+ str(booking_id) + " not found")
         return booking
+
+    ## Get booking by rider and id
+    def get_booking_by_rider_and_id(self,rider_id, booking_id):
+        """Fetch booking"""
+        booking = self.booking.get_by_rider_and_id(rider_id=rider_id, booking_id=booking_id)
+        
+        if booking is None:
+            raise NotFoundError("Booking not found")
+        return booking
+
+
+    ## Update booking status for rider
+    @transaction.atomic
+    def update_booking_status_for_rider(self, booking, booking_status, rider):
+        """Update booking status for rider"""
+
+        update_booking = self.booking.update_booking_status_for_rider(booking_instance=booking, booking_status=booking_status, rider_instance=rider)
+    
+        return update_booking

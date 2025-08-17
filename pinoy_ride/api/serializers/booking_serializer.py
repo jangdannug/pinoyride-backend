@@ -2,6 +2,7 @@ from rest_framework import serializers
 from api.models import Booking, Customer
 from .partial_customer_serializer import PartialCustomerSerializer
 from .booking_payment_serializer import BookingPaymentSerializer
+from .partial_rider_serializer import PartialRiderSerializer
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -16,7 +17,9 @@ class BookingSerializer(serializers.ModelSerializer):
     distance_km = serializers.CharField(read_only=True)
     payment_type = serializers.CharField(read_only=True)
     customer = PartialCustomerSerializer(read_only=True)
+    rider_details = serializers.SerializerMethodField()
     payment_details = serializers.SerializerMethodField()
+    pretty_status = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
     customer_id = serializers.PrimaryKeyRelatedField(
@@ -41,9 +44,11 @@ class BookingSerializer(serializers.ModelSerializer):
             "distance_km",
             "payment_type",
             "status", # 0 = Pending, 1 = Accepted, 2 = Trip Started, 3=Completed, 4=Cancelled
+            "pretty_status",
             "customer_id",
             "customer",
-            "payment_details"
+            "payment_details",
+            "rider_details"
         ]
 
     def get_payment_details(self, obj):
@@ -52,6 +57,25 @@ class BookingSerializer(serializers.ModelSerializer):
         if booking_payment:
             return BookingPaymentSerializer(booking_payment).data
         return {}
+    
+    def get_rider_details(self, obj):
+        # get the related table rider
+        if obj.rider:
+            return PartialRiderSerializer(obj.rider).data
+        return {}
+
+    def get_pretty_status(self, obj):
+        status = 'Pending'
+        if obj.status == 1:
+            status = 'Accepted'
+        elif obj.status == 2:
+            status = "Trip Started"
+        elif obj.status == 3:
+            status = "Completed"
+        elif obj.status == 4:
+            status = "Cancelled"
+
+        return status
     
 
     def validate(self, attrs):

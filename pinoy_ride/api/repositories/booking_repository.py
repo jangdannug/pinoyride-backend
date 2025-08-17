@@ -66,3 +66,23 @@ class BookingRepository:
             return Booking.objects.get(id=booking_id)
         except Booking.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_by_rider_and_id(rider_id, booking_id):
+        """Get booking by rider id and id"""
+        try:
+            return Booking.objects.get(id=booking_id, rider_id=rider_id)
+        except Booking.DoesNotExist:
+            return None
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_booking_status_for_rider(booking_instance, booking_status, rider_instance):
+        
+        booking_instance.status = booking_status
+        booking_instance.updated_by = rider_instance.id
+        booking_instance.rider_id = rider_instance
+        booking_instance.save()
+        
+        return booking_instance
