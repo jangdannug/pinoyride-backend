@@ -25,6 +25,7 @@ class Rider(SoftDeleteModel):
     drivers_license_no_expiration_date = models.DateField(max_length=255,null=True)
     drivers_license_img = models.FileField(upload_to=upload_to_driver_license_img, null=True, blank=True)
     application_status = models.IntegerField(default=0)
+    auto_accept = models.IntegerField(default=0)
     is_verified = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     updated_by = models.IntegerField(default=0)
@@ -37,6 +38,7 @@ class Rider(SoftDeleteModel):
             models.Index(fields=['mobile_no']),
             models.Index(fields=['email_address']),
             models.Index(fields=['code']),
+            models.Index(fields=['auto_accept']),
             models.Index(fields=['is_verified']),
             models.Index(fields=['status']),
             models.Index(fields=['application_status']),
