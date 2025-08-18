@@ -281,3 +281,50 @@ class BookingViewSet(viewsets.ViewSet):
 
             return AppResponse.send_error(message=str(e), code=500)
 
+
+    
+    @action(detail=False, methods=['post'], url_path='update_status_for_customer')
+    def update_status_for_customer(self, request):
+        """Update status for customer"""
+        
+        try:            
+            
+            customer_id = request.data.get("customer_id", "")
+            booking_id = request.data.get("booking_id", "")
+            status = request.data.get("status", "")
+            allowed_status = ["4"]
+
+            if not customer_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if status not in allowed_status:
+                return AppResponse.send_error(message="Invalid status "+str(status), code=400)
+
+            with transaction.atomic():
+                booking_details = self.service.get_booking_by_id(booking_id=booking_id)
+                customer_details = self.customer_service.get_customer_by_id(customer_id=customer_id)
+                
+                ## validate booking record if it is linked to customer_id
+                self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+
+                self.service.update_booking_status_for_customer(booking=booking_details, booking_status = status, customer=customer_details)
+
+                # refresh booking_details
+                booking_details.refresh_from_db()
+
+                serializer = BookingSerializer(booking_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Booking details fetched successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+

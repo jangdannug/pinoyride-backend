@@ -42,6 +42,15 @@ class BookingService:
             raise NotFoundError("Booking not found")
         return booking
 
+    ## Get booking by customer and id
+    def get_booking_by_customer_and_id(self,customer_id, booking_id):
+        """Fetch booking"""
+        booking = self.booking.get_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+        
+        if booking is None:
+            raise NotFoundError("Booking not found")
+        return booking
+
 
     ## Update booking status for rider
     @transaction.atomic
@@ -49,5 +58,15 @@ class BookingService:
         """Update booking status for rider"""
 
         update_booking = self.booking.update_booking_status_for_rider(booking_instance=booking, booking_status=booking_status, rider_instance=rider)
+    
+        return update_booking
+
+
+    ## Update booking status for customer
+    @transaction.atomic
+    def update_booking_status_for_customer(self, booking, booking_status, customer):
+        """Update booking status for customer"""
+
+        update_booking = self.booking.update_booking_status_for_customer(booking_instance=booking, booking_status=booking_status, customer_instance=customer)
     
         return update_booking
