@@ -27,6 +27,8 @@ class Booking(SoftDeleteModel):
     note_to_rider = models.TextField(null=True)
     updated_by = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
+    time_created = models.CharField(max_length=255, null=True)
+    date_created = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

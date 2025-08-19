@@ -228,7 +228,54 @@ class BookingViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
-    
+    @action(detail=False, methods=['post'], url_path='get_history')
+    def get_history(self, request):
+        """Get Booking History"""
+        
+        try:            
+            
+            rider_id = request.data.get("rider_id", "")
+            customer_id = request.data.get("customer_id", "")
+            user_type = request.data.get("user_type", "")
+
+            if not user_type:
+                return AppResponse.send_error(message="User type is required", code=400)
+
+            if user_type == 'rider':
+                if not rider_id:
+                    return AppResponse.send_error(message="Rider id is required", code=400)
+            elif user_type == 'customer':
+                if not customer_id:
+                    return AppResponse.send_error(message="Customer id is required", code=400)
+            else:
+                return AppResponse.send_error(message="Invalid user type", code=400)
+            
+            with transaction.atomic():
+
+                if user_type == 'customer':
+                     
+                    self.customer_service.get_customer_by_id(customer_id=customer_id)
+                    booking_details = self.service.get_customer_booking_history(customer_id=customer_id)
+                    return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
+
+                elif user_type == 'rider':
+
+                    self.rider_service.get_rider_by_id(rider_id=rider_id)
+                    booking_details = self.service.get_rider_booking_history(rider_id=rider_id)
+                    return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
     @action(detail=False, methods=['post'], url_path='update_status_for_rider')
     def update_status_for_rider(self, request):
         """Update status for rider"""

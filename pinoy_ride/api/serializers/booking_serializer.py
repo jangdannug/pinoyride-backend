@@ -48,6 +48,8 @@ class BookingSerializer(serializers.ModelSerializer):
             "status", # 0 = Pending, 1 = Accepted, 2 = Trip Started, 3=Completed, 4=Cancelled
             "pretty_status",
             "note_to_rider",
+            "date_created",
+            "time_created",
             "customer_id",
             "customer",
             "payment_details",

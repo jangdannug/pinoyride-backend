@@ -23,6 +23,15 @@ class BookingService:
         """List all pending bookings"""
         return self.booking.pending_list(rider_lat = rider_lat, rider_long=rider_long)
 
+    ## Get rider booking history
+    def get_rider_booking_history(self, rider_id):
+        """List all rider booking history"""
+        return self.booking.get_rider_booking_history(rider_id = rider_id)
+
+    ## Get customer booking history
+    def get_customer_booking_history(self, customer_id):
+        """List all customer booking history"""
+        return self.booking.get_customer_booking_history(customer_id = customer_id)
 
      ## Get booking by id
     def get_booking_by_id(self,booking_id):

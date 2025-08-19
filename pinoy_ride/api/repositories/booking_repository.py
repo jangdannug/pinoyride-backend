@@ -16,6 +16,11 @@ class BookingRepository:
     @staticmethod
     @transaction.atomic
     def create(customer_instance, booking_details):
+        
+        now = timezone.localtime(timezone.now())
+        date_now = now.strftime("%Y-%m-%d")
+        time_now = now.strftime("%I:%M %p")
+
         new_booking = Booking.objects.create(
             customer=customer_instance,
             pickup_location=booking_details.get("pickup_location", ""),
@@ -28,6 +33,8 @@ class BookingRepository:
             distance_km=booking_details.get("distance_km", ""),
             payment_type=booking_details.get("payment_type", ""),
             note_to_rider=booking_details.get("note_to_rider", ""),
+            time_created=time_now,
+            date_created=date_now
         )
 
         new_booking.save()
@@ -59,6 +66,31 @@ class BookingRepository:
             "bookings": serialized_bookings
         }
 
+
+    @staticmethod
+    def get_rider_booking_history(rider_id):
+        """Retrieve rider booking history"""
+
+        bookings = Booking.objects.filter(rider_id=rider_id).order_by('-id')
+
+        serialized_bookings = BookingSerializer(bookings, many=True).data
+
+        return {
+            "bookings": serialized_bookings
+        }
+
+
+    @staticmethod
+    def get_customer_booking_history(customer_id):
+        """Retrieve customer booking history"""
+
+        bookings = Booking.objects.filter(customer_id=customer_id).order_by('-id')
+
+        serialized_bookings = BookingSerializer(bookings, many=True).data
+
+        return {
+            "bookings": serialized_bookings
+        }
 
 
     @staticmethod
