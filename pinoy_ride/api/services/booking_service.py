@@ -60,6 +60,17 @@ class BookingService:
             raise NotFoundError("Booking not found")
         return booking
 
+    ## Accept booking
+    @transaction.atomic
+    def accept_booking(self, booking, rider):
+        """Accept booking"""
+
+        accept_booking = self.booking.accept_booking(booking_instance=booking, rider_instance=rider)
+        if accept_booking is None:
+            raise NotFoundError("Booking already assigned")
+
+        return accept_booking
+
 
     ## Update booking status for rider
     @transaction.atomic
@@ -79,3 +90,15 @@ class BookingService:
         update_booking = self.booking.update_booking_status_for_customer(booking_instance=booking, booking_status=booking_status, customer_instance=customer)
     
         return update_booking
+
+
+    ## Delete Booking
+    @transaction.atomic
+    def delete_booking(self, booking):
+        """Delete booking"""
+
+        delete_booking = self.booking.delete_booking(booking_instance=booking)
+        if delete_booking is None:
+            raise NotFoundError("Booking not found")
+    
+        return delete_booking

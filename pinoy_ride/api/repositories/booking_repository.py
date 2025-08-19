@@ -120,6 +120,26 @@ class BookingRepository:
 
     @staticmethod
     @transaction.atomic
+    def accept_booking(booking_instance, rider_instance):
+        
+        try:
+            # Lock the row so no one else can update until commit
+            booking = Booking.objects.select_for_update().get(
+                id=booking_instance.id,
+                rider_id__isnull=True
+            )
+        except Booking.DoesNotExist:
+            return None  # already assigned
+
+        booking.status = 1
+        booking.updated_by = rider_instance.id
+        booking.rider = rider_instance
+        booking.save()
+        return booking
+
+
+    @staticmethod
+    @transaction.atomic
     def update_booking_status_for_rider(booking_instance, booking_status, rider_instance):
         
         booking_instance.status = booking_status
@@ -140,3 +160,22 @@ class BookingRepository:
         booking_instance.save()
         
         return booking_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def delete_booking(booking_instance):
+
+        try:
+            # Lock the row so no one else can update until commit
+            booking = Booking.objects.select_for_update().get(
+                id=booking_instance.id,
+                status=0
+            )
+        except Booking.DoesNotExist:
+            return None  # already assigned
+
+        booking_instance.delete_booking() ## call delete booking_method
+        return True
+            
+        

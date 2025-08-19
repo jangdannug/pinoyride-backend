@@ -22,6 +22,12 @@ class SoftDeleteModel(models.Model):
         self.deleted_at = now()
         self.save(update_fields=["deleted_at"])
 
+    def delete_booking(self, using=None, keep_parents=False):
+        """Special method for delete booking"""
+        self.deleted_at = now()
+        self.status = 9
+        self.save(update_fields=["deleted_at", "status"])
+
     def restore(self):
         """Restore a soft-deleted record"""
         self.deleted_at = None

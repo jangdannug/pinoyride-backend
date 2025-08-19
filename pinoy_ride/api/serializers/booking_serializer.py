@@ -45,7 +45,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "dropoff_long",
             "distance_km",
             "payment_type",
-            "status", # 0 = Pending, 1 = Accepted, 2 = Trip Started, 3=Completed, 4=Cancelled
+            "status", # 0 = Pending, 1 = Accepted, 2 = Trip Started, 3=Completed, 4=Cancelled, 9 = Deleted
             "pretty_status",
             "note_to_rider",
             "date_created",
