@@ -88,24 +88,26 @@ class CustomerViewSet(viewsets.ViewSet):
 
             response_data = []
             customer = self.service.check_mobile_no(request.data)
-            otp_data = {
-                "user_type" : "customer",
-                "mobile_no" : mobile_no
-            }
+            
+            # otp_data = {
+            #     "user_type" : "customer",
+            #     "mobile_no" : mobile_no
+            # }
 
-            if not otp_code:
-                otp_details = self.otp_service.generate_otp(user_details = otp_data)
+            # if not otp_code:
+            #     otp_details = self.otp_service.generate_otp(user_details = otp_data)
 
-                response_data = {
-                    "is_otp" : "1",
-                    "otp_code" : otp_details['code']
-                 }
-            else:
-                otp_data['code'] = otp_code
+            #     response_data = {
+            #         "is_otp" : "1",
+            #         "otp_code" : otp_details['code']
+            #      }
+            # else:
+            #     otp_data['code'] = otp_code
 
-                self.otp_service.verify_otp(otp_data = otp_data)
-                serializer = CustomerSerializer(customer)
-                response_data = serializer.data
+            #     self.otp_service.verify_otp(otp_data = otp_data)
+
+            serializer = CustomerSerializer(customer)
+            response_data = serializer.data
 
 
             return AppResponse.send_success(data=response_data, message="Login success")
