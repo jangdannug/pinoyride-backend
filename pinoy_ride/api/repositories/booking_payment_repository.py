@@ -28,3 +28,20 @@ class BookingPaymentRepository:
 
         new_booking_pament.save()
         return new_booking_pament
+
+
+    ## Add tip
+    @transaction.atomic
+    def add_tip(self, booking_payment_instance, tip):
+        """Add tip"""
+        tip = float(tip)
+        minimum_fare = booking_payment_instance.minimum_fare
+        pesos_per_km = booking_payment_instance.pesos_per_km
+        booking_fee = booking_payment_instance.booking_fee
+        total_amount = minimum_fare + pesos_per_km + booking_fee + tip
+        
+        booking_payment_instance.tip = tip
+        booking_payment_instance.total_amount = round(total_amount, 2)
+        booking_payment_instance.save()
+        
+        return booking_payment_instance

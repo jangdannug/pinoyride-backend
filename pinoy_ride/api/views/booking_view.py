@@ -158,6 +158,47 @@ class BookingViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(detail=False, methods=['post'], url_path='add_tip')
+    def add_tip(self, request):
+        """Add tip"""
+        
+        try:            
+            customer_id = request.data.get("customer_id", "")
+            booking_id = request.data.get("booking_id", "")
+            tip = request.data.get("tip", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if not tip:
+                return AppResponse.send_error(message="Tip is required", code=400)
+
+
+            with transaction.atomic():
+                
+                self.customer_service.get_customer_by_id(customer_id=customer_id)
+
+                booking_details = self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+                booking_payment_instance = booking_details.booking_payment.first()
+
+                self.booking_payment_service.add_tip(booking_payment_instance=booking_payment_instance, tip=tip)
+                    
+                serializer = BookingSerializer(booking_details)
+
+            return AppResponse.send_success(data=serializer.data, message="Tip added successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
     
 
     @action(detail=False, methods=['post'], url_path='search_location')

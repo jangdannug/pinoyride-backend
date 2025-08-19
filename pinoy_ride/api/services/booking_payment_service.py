@@ -17,3 +17,13 @@ class BookingPaymentService:
         new_booking_payment = self.booking_payment.create(booking_instance = booking_instance, booking_payment=booking_payment)
 
         return new_booking_payment
+
+
+    ## Add tip
+    @transaction.atomic
+    def add_tip(self, booking_payment_instance, tip):
+        """Add tip"""
+
+        update_booking_payment = self.booking_payment.add_tip(booking_payment_instance=booking_payment_instance, tip=tip)
+    
+        return update_booking_payment
