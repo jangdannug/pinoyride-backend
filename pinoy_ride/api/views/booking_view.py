@@ -113,39 +113,54 @@ class BookingViewSet(viewsets.ViewSet):
         try:            
             
             location_search_key = request.data.get("location_search_key", "")
-            if not location_search_key:
-                return AppResponse.send_error(message="Location Search key is required", code=400)
+            # if not location_search_key:
+            #     return AppResponse.send_error(message="Location Search key is required", code=400)
 
-            geolocator = Nominatim(user_agent="booking_app_2025")
+            # geolocator = Nominatim(user_agent="booking_app_2025")
 
-            locations = geolocator.geocode(
-                            location_search_key,
-                            exactly_one=False,
-                            limit=5,
-                            country_codes="ph",
-                            timeout=10
-                        )
+            # locations = geolocator.geocode(
+            #                 location_search_key,
+            #                 exactly_one=False,
+            #                 limit=5,
+            #                 country_codes="ph",
+            #                 timeout=10
+            #             )
+            # results = []
+            # if locations:
+            #     for loc in locations:
+            #         results.append({
+            #             "name": loc.address,
+            #             "lat": loc.latitude,
+            #             "long": loc.longitude
+            #         })
+
+            api_key = 'AIzaSyD8AjX-V2EAk4ddyNPFzUGfqjxIu4ZkIZA'
+            url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+            params = {
+                "input": location_search_key,
+                "components": "country:PH",
+                "key": api_key
+            }
+            res = self.api_service.get_request(url=url, params=params)
+
             results = []
-            if locations:
-                for loc in locations:
+            for prediction in res.get("predictions", []):
+                place_id = prediction["place_id"]
+
+                # Get details for each suggestion
+                details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+                params = {"place_id": place_id, "key": api_key}
+                details_res = res = self.api_service.get_request(url=details_url, params=params)
+
+                if "result" in details_res:
+                    loc = details_res["result"]["geometry"]["location"]
                     results.append({
-                        "name": loc.address,
-                        "lat": loc.latitude,
-                        "long": loc.longitude
+                        "description": prediction["description"],  # user-friendly address
+                        "address": details_res["result"].get("formatted_address"),
+                        "lat": loc["lat"],
+                        "long": loc["lng"],
+                        "place_id": place_id
                     })
-
-            # request_data = {
-            #                     "name": "Apple MacBook Pro 16",
-            #                     "data": {
-            #                         "year": 2019,
-            #                         "price": 1849.99,
-            #                         "CPU model": "Intel Core i9",
-            #                         "Hard disk size": "1 TB"
-            #                     }
-            #                 }
-
-
-            # results = self.api_service.post_request("https://api.restful-api.dev/objects", request_data)
 
             return AppResponse.send_success(data=results, message="Success")
 

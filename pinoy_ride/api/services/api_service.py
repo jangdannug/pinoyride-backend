@@ -11,9 +11,9 @@ class ApiService:
     
 
     @staticmethod
-    def get_request(url):
+    def get_request(url, params):
       try:
-          response = requests.get(url)  # Make a GET request
+          response = requests.get(url, params=params)  # Make a GET request
 
           if response.status_code in (200, 201):
             data = response.json()  # Convert JSON response to a Python dictionary

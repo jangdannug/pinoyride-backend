@@ -51,7 +51,9 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     def get_customer_address(self, obj):
         # get the related table customer_address
-        address = obj.customer_address.filter(type=1).first()
+        address = obj.customer_address
         if address:
-            return CustomerAddressSerializer(address).data
+            return CustomerAddressSerializer(address, many=True).data
         return {}
+
+        

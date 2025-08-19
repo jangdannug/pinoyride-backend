@@ -49,7 +49,7 @@ class BookingRepository:
         rider_current_latlong = (rider_lat, rider_long)
         radius_km = 1.5 #0.5 -> 500 meters #3 -> 3000 meters radius
 
-        bookings = Booking.objects.filter(status=0)  # pending only
+        bookings = Booking.objects.filter(status=0).order_by('-id')  # pending only
 
         nearby_bookings = []
         for booking in bookings:

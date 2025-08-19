@@ -121,3 +121,42 @@ class CustomerViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+
+
+
+    @action(detail=False, methods=['post'], url_path='save_address')
+    def save_address(self, request):
+        """Save customer address"""
+        
+        try:
+            
+            customer_id = request.data.get("customer_id", None)
+            customer_address = json.loads(request.data.get("customer_address", "{}") or "{}")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+
+            if not customer_address:
+                return AppResponse.send_error(message="Customer Address is required", code=400)
+
+        
+            with transaction.atomic():
+                
+                customer_details = self.service.get_customer_by_id(customer_id=customer_id)
+               
+                self.customer_address_service.save_customer_address(customer_instance = customer_details, customer_address=customer_address)
+
+                serializer = CustomerSerializer(customer_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Record saved successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
