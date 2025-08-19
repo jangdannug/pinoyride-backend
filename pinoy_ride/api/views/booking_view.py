@@ -29,6 +29,60 @@ class BookingViewSet(viewsets.ViewSet):
         self.booking_payment_service = BookingPaymentService()
 
 
+    @action(detail=False, methods=['post'], url_path='inquire')
+    def inquire_booking(self, request):
+        """Return booking details"""
+
+        try:
+            customer_id = request.data.get("customer_id", "")
+            if not customer_id:
+                    return AppResponse.send_error(message="Customer id is required", code=400)
+
+            self.customer_service.get_customer_by_id(customer_id=customer_id)
+
+            pickup_lat = request.data.get("pickup_lat", "")
+            pickup_long = request.data.get("pickup_long", "")
+            dropoff_lat = request.data.get("dropoff_lat", "")
+            dropoff_long= request.data.get("dropoff_long", "")
+
+            # origin
+            origin = (pickup_lat, pickup_long)   # (lat, lng)
+            # destination
+            destination = (dropoff_lat, dropoff_long)
+
+            # compute distance in kilometers
+            distance_km = geodesic(origin, destination).kilometers
+            distance_km_round = round(distance_km, 2);
+
+            minimum_fare = 50.00
+            pesos_per_km = 10
+            booking_fee = 10
+            
+            base_amount = distance_km_round * pesos_per_km
+            total_amount= minimum_fare + base_amount + booking_fee
+
+            response = {
+                "distance_km_round" : distance_km_round,
+                "minimum_fare" : minimum_fare,
+                "pesos_per_km" : pesos_per_km,
+                "base_amount" : base_amount,
+                "total_amount" : total_amount
+            }
+
+            return AppResponse.send_success(data=response, message="Success")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+
     @action(detail=False, methods=['post'], url_path='create')
     def create_booking(self, request):
         """Create Booking"""
