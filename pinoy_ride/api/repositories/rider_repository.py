@@ -33,8 +33,10 @@ class RiderRepository:
     @staticmethod
     def check_rider_by_mobile(rider):
         """Get rider by mobile"""
+
+        ## get active rider
         try:
-            return Rider.objects.get(mobile_no=rider.get("mobile_no", ""))
+            return Rider.objects.get(mobile_no=rider.get("mobile_no", ""), application_status=1, status=1)
         except Rider.DoesNotExist:
             return None
 
