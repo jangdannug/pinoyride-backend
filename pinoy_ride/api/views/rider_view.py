@@ -94,23 +94,24 @@ class RiderViewSet(viewsets.ViewSet):
 
             response_data = []
             rider = self.service.check_mobile_no(request.data)
-            otp_data = {
-                "user_type" : "rider",
-                "mobile_no" : mobile_no
-            }
+            # otp_data = {
+            #     "user_type" : "rider",
+            #     "mobile_no" : mobile_no
+            # }
 
-            if not otp_code:
-                self.otp_service.generate_otp(user_details = otp_data)
+            # if not otp_code:
+            #     self.otp_service.generate_otp(user_details = otp_data)
 
-                response_data = {
-                    "is_otp" : "1"
-                 }
-            else:
-                otp_data['code'] = otp_code
+            #     response_data = {
+            #         "is_otp" : "1"
+            #      }
+            # else:
+            #     otp_data['code'] = otp_code
 
-                self.otp_service.verify_otp(otp_data = otp_data)
-                serializer = RiderSerializer(rider)
-                response_data = serializer.data
+            #     self.otp_service.verify_otp(otp_data = otp_data)
+
+            serializer = RiderSerializer(rider)
+            response_data = serializer.data
 
 
             return AppResponse.send_success(data=response_data, message="Login success")
