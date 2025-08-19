@@ -47,6 +47,15 @@ class RiderRepository:
         except Rider.DoesNotExist:
             return None
 
+    
+    @staticmethod
+    def get_available_rider(rider_id):
+        """Get rider by id"""
+        try:
+            return Rider.objects.get(id=rider_id, is_available=1)
+        except Rider.DoesNotExist:
+            return None
+
     # exclude application_status = 1
     @staticmethod
     def get_applicant_by_id(rider_id):
@@ -184,6 +193,16 @@ class RiderRepository:
         
         rider_instance.status = rider_status
         rider_instance.updated_by = auth_user_id
+        rider_instance.save()
+        
+        return rider_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_rider_available_status(rider_instance, status):
+        
+        rider_instance.is_available = status
         rider_instance.save()
         
         return rider_instance

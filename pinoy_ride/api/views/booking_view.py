@@ -292,10 +292,13 @@ class BookingViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 booking_details = self.service.get_booking_by_id(booking_id=booking_id)
-                rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
+                rider_details = self.rider_service.get_available_rider(rider_id=rider_id)
                 
 
                 self.service.accept_booking(booking=booking_details, rider=rider_details)
+
+                ## update rider status to unavailable
+                self.rider_service.update_rider_available_status(rider_instance=rider_details, status=2)
 
                 # refresh booking_details
                 booking_details.refresh_from_db()
@@ -350,6 +353,9 @@ class BookingViewSet(viewsets.ViewSet):
 
                 self.service.update_booking_status_for_rider(booking=booking_details, booking_status = status, rider=rider_details)
 
+                if status == "3": #if status == completed update rider status to available
+                    self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
+
                 # refresh booking_details
                 booking_details.refresh_from_db()
 
@@ -396,6 +402,11 @@ class BookingViewSet(viewsets.ViewSet):
                 self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
 
                 self.service.update_booking_status_for_customer(booking=booking_details, booking_status = status, customer=customer_details)
+
+                if status == "4": #if status == cancelled update rider status to available
+                    if booking_details.rider_id:
+                        rider_details = self.rider_service.get_rider_by_id(rider_id=booking_details.rider_id)
+                        self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
 
                 # refresh booking_details
                 booking_details.refresh_from_db()

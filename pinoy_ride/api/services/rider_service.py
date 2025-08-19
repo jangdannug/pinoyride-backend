@@ -39,3 +39,23 @@ class RiderService:
         if rider is None:
             raise NotFoundError("Rider "+ str(rider_id) + " not found")
         return rider
+
+
+    ## Get available rider
+    def get_available_rider(self,rider_id):
+        """Get available rider"""
+        rider = self.rider.get_available_rider(rider_id=rider_id)
+        
+        if rider is None:
+            raise NotFoundError("Rider "+ str(rider_id) + " not found or not available")
+        return rider
+
+    
+    ## Update rider available status
+    @transaction.atomic
+    def update_rider_available_status(self, rider_instance, status):
+        """Update rider available status"""
+        
+        rider_avail_status = self.rider.update_rider_available_status(rider_instance=rider_instance, status=status)
+
+        return rider_avail_status

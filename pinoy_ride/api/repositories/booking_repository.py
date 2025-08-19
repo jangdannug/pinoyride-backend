@@ -126,6 +126,7 @@ class BookingRepository:
             # Lock the row so no one else can update until commit
             booking = Booking.objects.select_for_update().get(
                 id=booking_instance.id,
+                status=0,
                 rider_id__isnull=True
             )
         except Booking.DoesNotExist:

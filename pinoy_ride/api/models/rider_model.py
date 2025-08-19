@@ -26,6 +26,7 @@ class Rider(SoftDeleteModel):
     drivers_license_img = models.FileField(upload_to=upload_to_driver_license_img, null=True, blank=True)
     application_status = models.IntegerField(default=0)
     auto_accept = models.IntegerField(default=0)
+    is_available = models.IntegerField(default=1)
     is_verified = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     updated_by = models.IntegerField(default=0)
