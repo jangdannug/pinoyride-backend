@@ -53,7 +53,7 @@ class OtpViewSet(viewsets.ViewSet):
 
 
     @action(detail=False, methods=['post'], url_path='verify')
-    def generate_otp(self, request):
+    def verify_otp(self, request):
         """Verify OTP"""
         
         try:

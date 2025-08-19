@@ -94,10 +94,11 @@ class CustomerViewSet(viewsets.ViewSet):
             }
 
             if not otp_code:
-                self.otp_service.generate_otp(user_details = otp_data)
+                otp_details = self.otp_service.generate_otp(user_details = otp_data)
 
                 response_data = {
-                    "is_otp" : "1"
+                    "is_otp" : "1",
+                    "otp_code" : otp_details['code']
                  }
             else:
                 otp_data['code'] = otp_code
