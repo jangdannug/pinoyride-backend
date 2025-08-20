@@ -50,7 +50,16 @@ class RiderService:
             raise NotFoundError("Rider "+ str(rider_id) + " not found or not available")
         return rider
 
-    
+    ## Update rider current coordinates
+    @transaction.atomic
+    def update_rider_coordinates(self, rider_instance, rider_lat, rider_long):
+        """Update rider available status"""
+        
+        rider_coordinates = self.rider.update_rider_coordinates(rider_instance=rider_instance, rider_lat=rider_lat, rider_long=rider_long)
+
+        return rider_coordinates
+
+
     ## Update rider available status
     @transaction.atomic
     def update_rider_available_status(self, rider_instance, status):
@@ -59,3 +68,12 @@ class RiderService:
         rider_avail_status = self.rider.update_rider_available_status(rider_instance=rider_instance, status=status)
 
         return rider_avail_status
+
+    ## Update rider online status
+    @transaction.atomic
+    def update_rider_online_status(self, rider_instance, status):
+        """Update rider online status"""
+        
+        rider_online_status = self.rider.update_rider_online_status(rider_instance=rider_instance, status=status)
+
+        return rider_online_status

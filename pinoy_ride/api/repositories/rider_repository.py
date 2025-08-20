@@ -202,9 +202,29 @@ class RiderRepository:
 
     @staticmethod
     @transaction.atomic
+    def update_rider_coordinates(rider_instance, rider_lat, rider_long):
+        
+        rider_instance.current_lat = rider_lat
+        rider_instance.current_long = rider_long
+        rider_instance.save()
+        
+        return rider_instance
+
+    @staticmethod
+    @transaction.atomic
     def update_rider_available_status(rider_instance, status):
         
         rider_instance.is_available = status
+        rider_instance.save()
+        
+        return rider_instance
+
+    
+    @staticmethod
+    @transaction.atomic
+    def update_rider_online_status(rider_instance, status):
+        
+        rider_instance.is_online = status
         rider_instance.save()
         
         return rider_instance

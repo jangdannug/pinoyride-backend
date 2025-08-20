@@ -25,7 +25,11 @@ class RiderSerializer(serializers.ModelSerializer):
             "drivers_license_no_expiration_date",
             "drivers_license_img",
             "application_status",
+            "current_lat",
+            "current_long",
             "auto_accept",
+            "is_available", # 1 = available, 2 = unavailable
+            "is_online",
             "status",
             "vehicle_details",
             "rider_address"

@@ -290,7 +290,9 @@ class BookingViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 
-                self.rider_service.get_rider_by_id(rider_id=rider_id)
+                rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
+
+                self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
                 booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long)
            
@@ -462,6 +464,7 @@ class BookingViewSet(viewsets.ViewSet):
                     self.service.get_booking_by_rider_and_id(rider_id=rider_id, booking_id=booking_id)
 
                 self.service.update_booking_status_for_rider(booking=booking_details, booking_status = status, rider=rider_details)
+                self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
                 if status == "3": #if status == completed update rider status to available
                     self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
