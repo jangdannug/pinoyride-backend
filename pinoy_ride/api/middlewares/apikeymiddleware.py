@@ -19,6 +19,7 @@ class ApiKeyAuthenticationMiddleware:
                 '/api/customers/',
                 '/api/riders/',
                 '/api/booking/',
+                '/api/otp/',
             )
 
             if request.path.startswith(api_routes):
