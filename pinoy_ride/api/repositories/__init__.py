@@ -4,6 +4,7 @@ from .rider_repository import RiderRepository
 from .customer_repository import CustomerRepository
 from .booking_repository import BookingRepository
 from .booking_payment_repository import BookingPaymentRepository
+from .booking_ratings_repository import BookingRatingsRepository
 from .customer_address_repository import CustomerAddressRepository
 from .rider_vehicle_details_repository import RiderVehicleDetailsRepository
 from .rider_address_repository import RiderAddressRepository

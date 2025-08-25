@@ -26,6 +26,7 @@ class Booking(SoftDeleteModel):
     payment_type = models.CharField(max_length=255, null=True)
     note_to_rider = models.TextField(null=True)
     updated_by = models.IntegerField(default=0)
+    updated_by_user = models.CharField(max_length=255, null=True)
     status = models.IntegerField(default=0)
     time_created = models.CharField(max_length=255, null=True)
     date_created = models.CharField(max_length=255, null=True)

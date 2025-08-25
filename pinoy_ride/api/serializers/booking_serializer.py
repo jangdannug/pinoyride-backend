@@ -3,6 +3,7 @@ from api.models import Booking, Customer
 from .partial_customer_serializer import PartialCustomerSerializer
 from .booking_payment_serializer import BookingPaymentSerializer
 from .partial_rider_serializer import PartialRiderSerializer
+from .booking_ratings_serializer import BookingRatingsSerializer
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -20,6 +21,7 @@ class BookingSerializer(serializers.ModelSerializer):
     customer = PartialCustomerSerializer(read_only=True)
     rider_details = serializers.SerializerMethodField()
     payment_details = serializers.SerializerMethodField()
+    booking_ratings = serializers.SerializerMethodField()
     pretty_status = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
@@ -53,7 +55,8 @@ class BookingSerializer(serializers.ModelSerializer):
             "customer_id",
             "customer",
             "payment_details",
-            "rider_details"
+            "rider_details",
+            "booking_ratings",
         ]
 
     def get_payment_details(self, obj):
@@ -61,6 +64,13 @@ class BookingSerializer(serializers.ModelSerializer):
         booking_payment = obj.booking_payment.first()
         if booking_payment:
             return BookingPaymentSerializer(booking_payment).data
+        return {}
+
+    def get_booking_ratings(self, obj):
+        # get the related table booking_ratings
+        booking_ratings = obj.booking_ratings.first()
+        if booking_ratings:
+            return BookingRatingsSerializer(booking_ratings).data
         return {}
     
     def get_rider_details(self, obj):

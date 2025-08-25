@@ -10,3 +10,4 @@ from .price_model import Price
 from .otp_model import Otp
 from .booking_model import Booking
 from .booking_payment_model import BookingPayment
+from .booking_ratings_model import BookingRatings

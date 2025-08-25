@@ -6,6 +6,7 @@ from api.services.customer_address_service import CustomerAddressService
 from api.services.otp_service import OtpService
 from api.services.booking_service import BookingService
 from api.services.booking_payment_service import BookingPaymentService
+from api.services.booking_ratings_service import BookingRatingsService
 
 from api.services.admin_promo_service import AdminPromoService
 from api.services.admin_price_service import AdminPriceService

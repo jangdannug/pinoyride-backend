@@ -146,6 +146,7 @@ class BookingRepository:
         booking_instance.status = booking_status
         booking_instance.updated_by = rider_instance.id
         booking_instance.rider_id = rider_instance
+        booking_instance.updated_by_user = 'rider'
         booking_instance.save()
         
         return booking_instance
@@ -158,6 +159,7 @@ class BookingRepository:
         booking_instance.status = booking_status
         booking_instance.updated_by = customer_instance.id
         booking_instance.customer = customer_instance
+        booking_instance.updated_by_user = 'customer'
         booking_instance.save()
         
         return booking_instance

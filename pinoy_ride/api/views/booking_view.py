@@ -12,7 +12,8 @@ from api.services import (
     CustomerService,
     RiderService,
     ApiService,
-    BookingPaymentService
+    BookingPaymentService,
+    BookingRatingsService
 )
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
@@ -27,6 +28,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.rider_service = RiderService()
         self.api_service = ApiService()
         self.booking_payment_service = BookingPaymentService()
+        self.booking_ratings_service = BookingRatingsService()
 
 
     @action(detail=False, methods=['post'], url_path='inquire')
@@ -527,6 +529,51 @@ class BookingViewSet(viewsets.ViewSet):
                 serializer = BookingSerializer(booking_details)
            
             return AppResponse.send_success(data=serializer.data, message="Booking updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='rate')
+    def rate(self, request):
+        """Rate Booking"""
+        
+        try:            
+            customer_id = request.data.get("customer_id", "")
+            booking_id = request.data.get("booking_id", "")
+            rate = request.data.get("rate", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if not rate:
+                return AppResponse.send_error(message="Rate is required", code=400)
+
+            with transaction.atomic():
+                booking_details = self.service.get_booking_by_id(booking_id=booking_id)
+
+                ## validate booking record if it is linked to customer_id
+                self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+
+                booking_ratings = {
+                    "rate" : rate,
+                    "compliment" : request.data.get("compliment", ""),
+                }
+
+                self.booking_ratings_service.save_booking_ratings(booking_instance=booking_details, booking_ratings=booking_ratings)
+
+                serializer = BookingSerializer(booking_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Booking rate saved successfully")
 
 
         except NotFoundError as e:
