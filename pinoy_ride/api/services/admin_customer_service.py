@@ -1,11 +1,12 @@
 from django.db import transaction
-from api.repositories import CustomerRepository
+from api.repositories import CustomerRepository, BookingRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 class AdminCustomerService:
     
     def __init__(self):
         self.customer = CustomerRepository()
+        self.booking = BookingRepository()
 
     ## Admin get list of customers
     def admin_customer_list(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
@@ -32,3 +33,8 @@ class AdminCustomerService:
     
         return update_customer
 
+
+     ## Admin get list of customer booking history
+    def admin_list_customer_booking_history(self, customer_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
+        """List all customer booking history with pagination"""
+        return self.booking.admin_customer_booking_history(customer_id, page_number, page_size, search_query, filters, sort_by)

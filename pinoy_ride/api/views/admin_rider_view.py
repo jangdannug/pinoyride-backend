@@ -171,6 +171,50 @@ class AdminRiderViewSet(viewsets.ViewSet):
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    
+    ## Get rider booking history
+    @action(
+        detail=False, methods=["get"], url_path="get-history"
+    )
+    def admin_get_rider_booking_history(self, request):
+        """List rider booking history with pagination and search query"""
+        try:
+            page = int(request.query_params.get("page", 1))
+            perpage = int(request.query_params.get("perpage", 10))
+            query = request.query_params.get("query", None)
+            sort_by = request.query_params.get("sort_by")
+            name_filter = request.query_params.get("name_filter")
+            rider_id = request.query_params.get("rider_id", "")
+
+            filters = {}
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+
+            if name_filter:
+                filters["name_filter"] = name_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-updated_at"
+
+            booking_history = self.admin_service.admin_list_rider_booking_history(
+                rider_id=rider_id, page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by
+            )
+
+
+            return AppResponse.send_success(
+                data=booking_history, message="Rider booking history listed successfully", code=status.HTTP_200_OK
+            )
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
 
 
     ## Update rider status

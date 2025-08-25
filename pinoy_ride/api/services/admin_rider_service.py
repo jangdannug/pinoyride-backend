@@ -1,11 +1,12 @@
 from django.db import transaction
-from api.repositories import RiderRepository
+from api.repositories import RiderRepository, BookingRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 class AdminRiderService:
     
     def __init__(self):
         self.rider = RiderRepository()
+        self.booking = BookingRepository()
 
     ## Admin get list of applicants
     def admin_list_applicants(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
@@ -57,4 +58,10 @@ class AdminRiderService:
         update_rider = self.rider.update_rider_status(rider_instance=rider, rider_status=rider_status, auth_user_id=auth_user_id)
     
         return update_rider
+
+    
+    ## Admin get list of rider booking history
+    def admin_list_rider_booking_history(self, rider_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
+        """List all rider booking history with pagination"""
+        return self.booking.admin_rider_booking_history(rider_id, page_number, page_size, search_query, filters, sort_by)
 
