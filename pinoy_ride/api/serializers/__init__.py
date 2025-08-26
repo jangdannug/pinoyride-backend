@@ -14,3 +14,6 @@ from .verify_otp_serializer import VerifyOtpSerializer
 from .booking_serializer import BookingSerializer
 from .booking_payment_serializer import BookingPaymentSerializer
 from .booking_ratings_serializer import BookingRatingsSerializer
+from .wallet_serializer import WalletSerializer
+from .partial_wallet_serializer import PartialWalletSerializer
+from .wallet_history_serializer import WalletHistorySerializer

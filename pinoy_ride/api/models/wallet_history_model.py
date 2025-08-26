@@ -14,6 +14,9 @@ class WalletHistory(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     wallet = models.ForeignKey(Wallet, related_name='wallet_ref', on_delete=models.CASCADE, default=None, null=True, blank=True)
     type = models.CharField(max_length=255, null=True)
+    description = models.TextField(null=True)
+    creditor_account_number = models.CharField(max_length=255, null=True)
+    debitor_account_number = models.CharField(max_length=255, null=True)
     credit_amount = models.FloatField(default=0)
     debit_amount = models.FloatField(default=0)
     time_created = models.CharField(max_length=255, null=True)
@@ -26,7 +29,8 @@ class WalletHistory(SoftDeleteModel):
     class Meta:
         indexes = [
             models.Index(fields=['wallet_id']),
-            models.Index(fields=['type'])
+            models.Index(fields=['type']),
+            models.Index(fields=['status'])
         ]
         db_table = "wallet_history"
 

@@ -23,3 +23,24 @@ class WalletRepository:
         new_wallet.save()
         
         return new_wallet
+
+
+    @staticmethod
+    def get_rider_wallet(rider_id):
+        """Get rider wallet"""
+        try:
+            return Wallet.objects.get(user_id=rider_id, user_type='rider', type='user-wallet')
+        except Wallet.DoesNotExist:
+            return None
+
+    
+    @staticmethod
+    @transaction.atomic
+    def update_balance(wallet_instance, wallet_details):
+        
+        wallet_instance.credit_amount = wallet_details.get("credit_amount", 0)
+        wallet_instance.debit_amount = wallet_details.get("debit_amount", 0)
+        wallet_instance.avail_balance = wallet_details.get("avail_balance", 0)
+        wallet_instance.save()
+        
+        return wallet_instance

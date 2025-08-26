@@ -11,7 +11,7 @@ from api.services import (
     RiderAddressService,
     WalletService
 )
-from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer
+from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer, WalletSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from django.db import transaction
 
@@ -167,6 +167,48 @@ class RiderViewSet(viewsets.ViewSet):
                 serializer = RiderSerializer(rider_details)
            
             return AppResponse.send_success(data=serializer.data, message="Rider status updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='top_up')
+    def top_up(self, request):
+        """Top up"""
+        
+        try:            
+            
+            rider_id = request.data.get("rider_id", "")
+            amount = request.data.get("amount", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not amount:
+                return AppResponse.send_error(message="Amount is required", code=400)
+
+            with transaction.atomic():
+                rider_details = self.service.get_rider_by_id(rider_id=rider_id)
+
+                wallet_details = self.wallet_service.get_rider_wallet(rider_id=rider_id)
+                
+                top_up_details = {
+                    "type" : "credit",
+                    "credit_amount" : amount,
+                    "description" : "Top-up",
+                }
+                wallet_details = self.wallet_service.top_up(wallet_instance = wallet_details, top_up_details = top_up_details)
+
+                serializer = WalletSerializer(wallet_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Record added successfully")
 
 
         except NotFoundError as e:

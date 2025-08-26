@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from api.models import Rider
+from api.models import Rider, Wallet
 from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
 from .rider_address_serializer import RiderAddressSerializer
+from .partial_wallet_serializer import PartialWalletSerializer
 
 class RiderSerializer(serializers.ModelSerializer):
 

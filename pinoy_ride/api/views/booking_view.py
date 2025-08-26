@@ -54,7 +54,7 @@ class BookingViewSet(viewsets.ViewSet):
 
             # compute distance in kilometers
             distance_km = geodesic(origin, destination).kilometers
-            distance_km_round = round(distance_km, 2);
+            distance_km_round = round(distance_km, 2)
 
             minimum_fare = 50.00
             pesos_per_km = 10
