@@ -11,3 +11,5 @@ from .rider_address_repository import RiderAddressRepository
 from .promo_repository import PromoRepository
 from .price_repository import PriceRepository
 from .otp_repository import OtpRepository
+from .wallet_repository import WalletRepository
+from .wallet_history_repository import WalletHistoryRepository

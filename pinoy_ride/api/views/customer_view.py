@@ -7,7 +7,8 @@ import json
 from api.services import (
     CustomerService,
     OtpService,
-    CustomerAddressService
+    CustomerAddressService,
+    WalletService
 )
 from api.serializers import CustomerSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -22,6 +23,7 @@ class CustomerViewSet(viewsets.ViewSet):
         self.otp_service = OtpService()
         self.customer_address_service = CustomerAddressService()
         # self.rider_vehicle_service = RiderVehicleDetailsService()
+        self.wallet_service = WalletService()
 
 
     @action(detail=False, methods=['post'], url_path='sign_up')
@@ -56,6 +58,13 @@ class CustomerViewSet(viewsets.ViewSet):
                     customer_address['type'] = '1'
                     self.customer_address_service.save_customer_address(customer_instance = customer_details, customer_address=customer_address)
 
+                # create wallet
+                wallet_details = {
+                    "user_id" : customer_details.id,
+                    "user_type" : "customer",
+                    "type" : "user-wallet"
+                }
+                self.wallet_service.save_wallet(wallet_details)
 
                 serializer = CustomerSerializer(customer_details)
            

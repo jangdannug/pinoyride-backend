@@ -8,7 +8,8 @@ from api.services import (
     RiderService,
     RiderVehicleDetailsService,
     OtpService,
-    RiderAddressService
+    RiderAddressService,
+    WalletService
 )
 from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -23,6 +24,7 @@ class RiderViewSet(viewsets.ViewSet):
         self.rider_vehicle_service = RiderVehicleDetailsService()
         self.otp_service = OtpService()
         self.rider_address_service = RiderAddressService()
+        self.wallet_service = WalletService()
 
 
     @action(detail=False, methods=['post'], url_path='apply')
@@ -62,6 +64,13 @@ class RiderViewSet(viewsets.ViewSet):
                     rider_address['type'] = '1'
                     self.rider_address_service.save_rider_address(rider_instance= rider_details, rider_address=rider_address)
 
+                # create wallet
+                wallet_details = {
+                    "user_id" : rider_details.id,
+                    "user_type" : "rider",
+                    "type" : "user-wallet"
+                }
+                self.wallet_service.save_wallet(wallet_details)
 
                 serializer = RiderSerializer(rider_details)
            
