@@ -180,6 +180,79 @@ class RiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(detail=False, methods=['post'], url_path='update_auto_accept')
+    def update_auto_accept(self, request):
+        """Update auto accept status"""
+        
+        try:            
+            
+            rider_id = request.data.get("rider_id", "")
+            status = request.data.get("auto_accept", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not status:
+                return AppResponse.send_error(message="Status is required", code=400)
+
+            with transaction.atomic():
+                rider_details = self.service.get_rider_by_id(rider_id=rider_id)
+                
+                ## update rider auto accept status
+                self.service.update_auto_accept(rider_instance=rider_details, status=status)
+
+                serializer = RiderSerializer(rider_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Rider auto accept status updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='update_current_location')
+    def update_current_location(self, request):
+        """Update current location"""
+        
+        try:            
+            
+            rider_id = request.data.get("rider_id", "")
+            rider_lat = request.data.get("current_lat", "")
+            rider_long = request.data.get("current_long", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not rider_lat:
+                return AppResponse.send_error(message="Current lat is required", code=400)
+            if not rider_long:
+                return AppResponse.send_error(message="Current long is required", code=400)
+
+            with transaction.atomic():
+                rider_details = self.service.get_rider_by_id(rider_id=rider_id)
+                
+                self.service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
+
+                serializer = RiderSerializer(rider_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Rider location updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
     @action(detail=False, methods=['post'], url_path='top_up')
     def top_up(self, request):
         """Top up"""

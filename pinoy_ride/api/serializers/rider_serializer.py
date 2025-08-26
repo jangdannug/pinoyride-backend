@@ -8,7 +8,7 @@ class RiderSerializer(serializers.ModelSerializer):
 
     vehicle_details = RiderVehicleDetailsSerializer(source='rider_vehicle', many=True, read_only=False, required=False)
     code = serializers.CharField(read_only=True)
-    auto_accept = serializers.CharField(read_only=True)
+    auto_accept = serializers.IntegerField(read_only=True)
     drivers_license_img = serializers.FileField(required=True)
     rider_address = serializers.SerializerMethodField()
 

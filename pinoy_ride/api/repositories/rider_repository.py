@@ -228,3 +228,13 @@ class RiderRepository:
         rider_instance.save()
         
         return rider_instance
+
+    
+    @staticmethod
+    @transaction.atomic
+    def update_auto_accept(rider_instance, status):
+        
+        rider_instance.auto_accept = status
+        rider_instance.save()
+        
+        return rider_instance

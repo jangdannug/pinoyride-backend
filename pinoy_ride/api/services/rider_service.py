@@ -77,3 +77,13 @@ class RiderService:
         rider_online_status = self.rider.update_rider_online_status(rider_instance=rider_instance, status=status)
 
         return rider_online_status
+
+
+    ## Update rider auto accept status
+    @transaction.atomic
+    def update_auto_accept(self, rider_instance, status):
+        """Update rider auto accept status"""
+        
+        rider_auto_accept = self.rider.update_auto_accept(rider_instance=rider_instance, status=status)
+
+        return rider_auto_accept
