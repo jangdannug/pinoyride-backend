@@ -10,6 +10,7 @@ from api.serializers import (
 )
 from geopy.distance import geodesic
 from api.utils.app_logger import app_logger
+import math, random
 
 class BookingRepository:
     
@@ -46,10 +47,22 @@ class BookingRepository:
     @staticmethod
     def pending_list(rider_lat, rider_long):
         """Retrieve list of pending bookings"""
+        rider_lat = float(rider_lat)
+        rider_long = float(rider_long)
         rider_current_latlong = (rider_lat, rider_long)
         radius_km = 1.5 #0.5 -> 500 meters #3 -> 3000 meters radius
 
-        bookings = Booking.objects.filter(status=0).order_by('-id')  # pending only
+        lat_delta = radius_km / 111  # in degrees
+        lng_delta = radius_km / (111 * math.cos(math.radians(rider_lat)))
+        lat_range = (rider_lat - lat_delta, rider_lat + lat_delta)
+        lng_range = (rider_long - lng_delta, rider_long + lng_delta)
+
+        # Narrow down candidates from DB
+        bookings = (
+            Booking.objects
+            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range)
+            .order_by("-id")[:50]  # limit to 50 candidates
+        )
 
         nearby_bookings = []
         for booking in bookings:
@@ -65,6 +78,47 @@ class BookingRepository:
         return {
             "bookings": serialized_bookings
         }
+
+
+    @staticmethod
+    def random_pending(rider_lat, rider_long):
+        """Retrieve random pending booking"""
+
+        rider_lat = float(rider_lat)
+        rider_long = float(rider_long)
+        rider_current_latlong = (rider_lat, rider_long)
+
+        radius_km = 1.5  # 1.5 km search radius
+
+        lat_delta = radius_km / 111  # in degrees
+        lng_delta = radius_km / (111 * math.cos(math.radians(rider_lat)))
+        lat_range = (rider_lat - lat_delta, rider_lat + lat_delta)
+        lng_range = (rider_long - lng_delta, rider_long + lng_delta)
+
+        # Narrow down candidates from DB
+        bookings = (
+            Booking.objects
+            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range)
+            .order_by("-id")[:50]  # limit to 50 candidates
+        )
+
+        # Precise filtering using geopy
+        nearby_bookings = []
+        for booking in bookings:
+            booking_pickup_point = (booking.pickup_lat, booking.pickup_long)
+            distance = geodesic(rider_current_latlong, booking_pickup_point).kilometers
+            app_logger(1, str("Distance " + str(booking.id) + " "+str(distance)) +" km" , [])
+            if distance <= radius_km:
+                nearby_bookings.append(booking)
+
+        if not nearby_bookings:
+            serialized_booking =  {}
+        else:
+            # Choose random 1 booking
+            random_booking = random.choice(nearby_bookings)
+            serialized_booking = BookingSerializer(random_booking).data
+
+        return serialized_booking
 
 
     @staticmethod

@@ -419,7 +419,7 @@ class BookingViewSet(viewsets.ViewSet):
 
                 serializer = BookingSerializer(booking_details)
            
-            return AppResponse.send_success(data=serializer.data, message="Booking accepted successfully")
+            return AppResponse.send_success(data=serializer.data, message="Booking accepted")
 
 
         except NotFoundError as e:
@@ -609,6 +609,58 @@ class BookingViewSet(viewsets.ViewSet):
                 self.service.delete_booking(booking=booking_details)
            
             return AppResponse.send_success(data=[], message="Booking deleted successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='auto_book')
+    def auto_book(self, request):
+        """Auto Book"""
+        
+        try:            
+            rider_id = request.data.get("rider_id", "")
+            rider_lat = request.data.get("current_lat", "")
+            rider_long = request.data.get("current_long", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not rider_lat:
+                return AppResponse.send_error(message="Current lat is required", code=400)
+            if not rider_long:
+                return AppResponse.send_error(message="Current long is required", code=400)
+
+            with transaction.atomic():
+                
+                rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
+
+                self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
+
+                # get random pending booking
+                pending_booking = self.service.get_random_pending(rider_lat=rider_lat, rider_long=rider_long)
+
+                response = {}
+                if pending_booking:
+                    booking_details = self.service.get_booking_by_id(booking_id=pending_booking['id'])
+
+                    # accept booking
+                    self.service.accept_booking(booking=booking_details, rider=rider_details)
+
+                    booking_details.refresh_from_db()
+
+                    response = BookingSerializer(booking_details).data
+                else:
+                    return AppResponse.send_error(message="No pending bookings available", code=404)
+
+            return AppResponse.send_success(data=response, message="Booking accepted")
 
 
         except NotFoundError as e:

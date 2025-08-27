@@ -39,6 +39,10 @@ class Booking(SoftDeleteModel):
             models.Index(fields=['ref_code']),
             models.Index(fields=['customer_id']),
             models.Index(fields=['rider_id']),
+            models.Index(fields=['pickup_lat']),
+            models.Index(fields=['pickup_long']),
+            models.Index(fields=['dropoff_lat']),
+            models.Index(fields=['dropoff_long']),
             models.Index(fields=['updated_by']),
             models.Index(fields=['status'])
         ]
