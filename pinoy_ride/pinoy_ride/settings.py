@@ -101,7 +101,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://suysing-portal.escarez.com",
+    "https://pinoy-ride.vercel.app",
     "https://suysing-app.escarez.com",
     "http://192.168.100.40:3000",
     "https://suki-portal.suysing.com",
@@ -115,7 +115,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://suysing-portal.escarez.com",
+    "https://pinoy-ride.vercel.app",
     "https://suysing-app.escarez.com",
     "http://192.168.100.40:3000",
     "https://suki-portal.suysing.com",
@@ -331,7 +331,7 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*', '192.168.100.40:3000']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*', '192.168.100.40:3000',]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
