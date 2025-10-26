@@ -131,6 +131,7 @@ class QrphApiService:
         app_logger(1, "Request to Pay", {
             "url": request_to_pay_url,
             "reference_id": reference_id,
+            "raw_data": data,
             "token": auth_token,
         })
         

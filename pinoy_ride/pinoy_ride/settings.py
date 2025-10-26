@@ -352,19 +352,30 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
-TOP_PH_CONFIG = {
+QRPH_CONFIG = {
     'AUTH_BASE_URL': os.getenv('QRPH_AUTH_BASE_URL', 'https://pre-auth.theorangeplatform.com/'),
     'TOP_PH_BASE_URL': os.getenv('QRPH_TOP_PH_BASE_URL', 'https://pre-web.theorangeplatform.com/'),
-    'EKYC_BASE_URL': os.getenv('EKYC_BASE_URL', 'https://pre-zkyc.theorangeplatform.com/'),
     'LOGIN_CODE_API': os.getenv('QRPH_LOGIN_CODE_API', 'connect/ext/clientidentity/v1/api/extclient/identity/login/code'),
     'REQUEST_TO_PAY_API': os.getenv('QRPH_REQUEST_TO_PAY_API', 'channel/epay/v1/api/client/top/epayment'),
-    'GENERATE_EKYC_URL': os.getenv('GENERATE_EKYC_URL', 'channel/kyc/v1/api/client/application/generate'),
     'USERNAME': os.getenv('QRPH_USERNAME', 'topqrclient1'),
     'PASSWORD': os.getenv('QRPH_PASSWORD', 'Password@2025'),
     'DEVICE_TYPE': os.getenv('QRPH_DEVICE_TYPE', 'client_type_web_921b77e6-e4d0-4bb4-8225-339df8251c07'),
     'CLIENT_SECRET': os.getenv('QRPH_CLIENT_SECRET', 'I0nPnfRfbBFv1O0b9tc0NobCvimKyntUJb+DYxV8wps='),
     'APP_ID': os.getenv('QRPH_APP_ID', '921b77e6-e4d04bb48225339df8251c07'),
     'API_KEY': os.getenv('QRPH_API_KEY', '339df8251c07'),
+}
+
+TOP_PH_EKYC_CONFIG = {
+    'AUTH_BASE_URL': os.getenv('QRPH_AUTH_BASE_URL', 'https://pre-auth.theorangeplatform.com/'),
+    'EKYC_BASE_URL': os.getenv('EKYC_BASE_URL', 'https://pre-zkyc.theorangeplatform.com/'),
+    'LOGIN_CODE_API': os.getenv('QRPH_LOGIN_CODE_API', 'connect/ext/clientidentity/v1/api/extclient/identity/login/code'),
+    'GENERATE_EKYC_URL': os.getenv('GENERATE_EKYC_URL', 'channel/kyc/v1/api/client/application/generate'),
+    'USERNAME': os.getenv('EKYC_USERNAME', 'topqrclient6'),
+    'PASSWORD': os.getenv('EKYC_PASSWORD', 'Password@2025'),
+    'DEVICE_TYPE': os.getenv('EKYC_DEVICE_TYPE', 'device_type_zkyc_a4063e95aa7642a990e52208bed8753b'),
+    'CLIENT_SECRET': os.getenv('EKYC_CLIENT_SECRET', 'SaSyTxi10iCu4HCeRP84Wwxd65H82GLQRhCkILJGlJo='),
+    'APP_ID': os.getenv('EKYC_APP_ID', 'a4063e95-aa76-42a9-90e5-2208bed8753b'),
+    'API_KEY': os.getenv('QRPH_API_KEY', '2208bed8753b'),
 }
 
 

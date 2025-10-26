@@ -25,7 +25,7 @@ class EkycApiService:
 
     def __init__(self):
         self.api_service = ApiService()
-        self.config = settings.TOP_PH_CONFIG
+        self.config = settings.TOP_PH_EKYC_CONFIG
     
     ## authenticate method
     def authenticate(self, force_refresh: bool = False):
@@ -115,7 +115,9 @@ class EkycApiService:
         
         app_logger(1, "Generating eKYC URL", {
             "url": generate_url,
-            "user_id": user_id
+            "user_id": user_id,
+            "raw_data": data,
+            "token": auth_token,
         })
         
         response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
