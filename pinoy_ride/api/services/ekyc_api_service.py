@@ -120,9 +120,9 @@ class EkycApiService:
         
         response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
 
-        ## Throw error if request to pay failed
+        ## Throw error if request to generate eKYC url failed
         if response.get('statusCode') not in [200, 201]:
-            raise ValidationError(f"Request to pay failed: {response.get('message')}")
+            raise ValidationError(f"Request to generate eKYC url failed: {response.get('message')}")
 
         return response
 
