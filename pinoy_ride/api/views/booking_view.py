@@ -11,9 +11,11 @@ from api.services import (
     BookingService,
     CustomerService,
     RiderService,
-    ApiService,
     BookingPaymentService,
     BookingRatingsService
+)
+from api.base import (
+    ApiService
 )
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic

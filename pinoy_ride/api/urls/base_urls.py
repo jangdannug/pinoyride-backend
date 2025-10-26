@@ -7,6 +7,8 @@ urlpatterns = [
     path('customers/', include('api.urls.customer_urls')),
     path('otp/', include('api.urls.otp_urls')),
     path('booking/', include('api.urls.booking_urls')),
+    path('qrph/', include('api.urls.qrph_urls')),
+    path('ekyc/', include('api.urls.ekyc_urls')),
 
     path('admin/', include('api.urls.auth_urls')),
     path('admin/rider/', include('api.urls.admin_rider_urls')),

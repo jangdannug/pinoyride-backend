@@ -4,6 +4,8 @@ from .auth_view import AuthViewSet
 from .customer_view import CustomerViewSet
 from .otp_view import OtpViewSet
 from .booking_view import BookingViewSet
+from .qrph_view import QrphViewSet
+from .ekyc_view import EkycViewSet
 
 from .admin_promo_view import AdminPromoViewSet
 from .admin_price_view import AdminPriceViewSet
