@@ -15,10 +15,14 @@ import hashlib
 from api.utils.app_logger import app_logger
 from typing import Dict, Any, Optional
 import uuid
+from django.core.cache import cache
 
 
 class QrphApiService:
     
+    CACHE_KEY_TOKEN = 'qrph_auth_token'
+    CACHE_KEY_EXPIRY = 'qrph_token_expiry'
+
     def __init__(self):
         self.api_service = ApiService()
         self.auth_base_url = 'https://pre-auth.theorangeplatform.com/'
@@ -33,9 +37,16 @@ class QrphApiService:
         self.api_key  = '339df8251c07'
     
     ## authenticate method
-    def authenticate(self):
+    def authenticate(self, force_refresh: bool = False):
         """Authenticate and get token"""
 
+        # Check cache first
+        if not force_refresh:
+            cached_token = self._get_cached_token()
+            if cached_token:
+                app_logger(1, "Using cached QRPh token", {"token": cached_token, "expiry": cache.get(self.CACHE_KEY_EXPIRY)})
+                return {"message" : "cached token", "result" : cached_token}
+            
         auth_url = f"{self.auth_base_url}{self.login_code_api}"
 
         # Create credentials payload (order matters)
@@ -52,6 +63,17 @@ class QrphApiService:
         }
         
         response = self.api_service.post_request(url=auth_url, payload=payload, headers=headers)
+
+        ## Throw error if authentication failed
+        if response.get('statusCode') not in [200, 201]:
+            raise ValidationError(f"Authentication failed: {response.get('message')}")
+        
+        ## save token and expiry in cache
+        token = response.get('result')
+        now = timezone.localtime(timezone.now())
+        expiry = now + timedelta(minutes=1)  # Token valid for 45 mins
+        self._cache_token(token, expiry)
+        app_logger(1, "QRPh Authentication Successful", {"token": token, "expiry" : expiry})
         
         return response
     
@@ -113,7 +135,11 @@ class QrphApiService:
         })
         
         response = self.api_service.post_request(url=request_to_pay_url, payload=payload, headers=headers)
-        
+
+        ## Throw error if request to pay failed
+        if response.get('statusCode') not in [200, 201]:
+            raise ValidationError(f"Request to pay failed: {response.get('message')}")
+
         return response
     
     def _create_payload(
@@ -146,6 +172,23 @@ class QrphApiService:
             "hash": hash_value
         }
     
+    def _get_cached_token(self) -> Optional[str]:
+        """Get token from cache if valid"""
+        token = cache.get(self.CACHE_KEY_TOKEN)
+        expiry = cache.get(self.CACHE_KEY_EXPIRY)
+        now = timezone.localtime(timezone.now())
+        
+        if token and expiry:
+            if now < expiry:
+                return token
+        
+        return None
+    
+    def _cache_token(self, token: str, expiry: timezone.datetime):
+        """Cache token with expiry"""
+        cache.set(self.CACHE_KEY_TOKEN, token, timeout=3600)  # 1 hour
+        cache.set(self.CACHE_KEY_EXPIRY, expiry, timeout=3600)
+
     def _get_expiration_ms(self, hours: int = 1) -> int:
         """Generate expiration timestamp in milliseconds"""
         now = timezone.localtime(timezone.now())

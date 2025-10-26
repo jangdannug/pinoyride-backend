@@ -111,7 +111,7 @@ class ApiService:
                 err_mesasge
             )
       except requests.RequestException as e:
-          app_logger(1, "API POST Error Response", {
+          app_logger(1, "API POST Error Exception Response", {
               "url": url,
               "err_message": (str(e))
           })
