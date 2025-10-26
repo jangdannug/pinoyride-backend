@@ -375,7 +375,7 @@ TOP_PH_EKYC_CONFIG = {
     'DEVICE_TYPE': os.getenv('EKYC_DEVICE_TYPE', 'device_type_zkyc_a4063e95aa7642a990e52208bed8753b'),
     'CLIENT_SECRET': os.getenv('EKYC_CLIENT_SECRET', 'SaSyTxi10iCu4HCeRP84Wwxd65H82GLQRhCkILJGlJo='),
     'APP_ID': os.getenv('EKYC_APP_ID', 'a4063e95-aa76-42a9-90e5-2208bed8753b'),
-    'API_KEY': os.getenv('QRPH_API_KEY', '2208bed8753b'),
+    'API_KEY': os.getenv('EKYC_API_KEY', '2208bed8753b'),
 }
 
 
