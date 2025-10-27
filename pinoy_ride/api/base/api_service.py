@@ -96,15 +96,18 @@ class ApiService:
         
 
         if response.status_code in (200, 201):  # 201 = Created
+            
             return response.json()
+        
         else:
             
-            try:
-                error_msg = response.json()
-            except ValueError:
-                error_msg = response.text
+            # try:
+            #     error_msg = response.json()
+            # except ValueError:
+            #     error_msg = response.text
                 
-            err_mesasge = f"Failed to post data. Status code: {response.status_code}, Message: {error_msg}"
+            # err_mesasge = f"Failed to post data. Status code: {response.status_code}, Message: {error_msg}"
+            err_mesasge = ApiService.extract_error_message(response)
 
             raise Exception(
                 err_mesasge
@@ -115,3 +118,39 @@ class ApiService:
               "err_message": (str(e))
           })
           raise Exception(str(e))
+      
+
+    @staticmethod
+    def extract_error_message(response):
+        """
+        Extract clean error message from API response
+        Handles various error response formats
+        """
+        try:
+            error_data = response.json()
+            
+            # Common error message field names in order of preference
+            error_fields = [
+                'message',
+                'error',
+                'err_message', 
+                'error_message',
+                'detail',
+                'msg',
+                'responseException'
+            ]
+            
+            # Try to find error message in common fields
+            for field in error_fields:
+                if field in error_data:
+                    # Handle nested responseException (like in TOP.ph API)
+                    if field == 'responseException' and isinstance(error_data[field], dict):
+                        return error_data[field].get('exceptionMessage', str(error_data[field]))
+                    return str(error_data[field])
+            
+            # If no standard field found, return the whole JSON
+            return str(error_data)
+            
+        except ValueError:
+            # If response is not JSON, return text
+            return response.text or f"HTTP {response.status_code} Error"
