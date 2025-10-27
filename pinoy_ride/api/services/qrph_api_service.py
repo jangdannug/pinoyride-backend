@@ -17,8 +17,8 @@ from typing import Dict, Any, Optional
 import uuid
 from django.core.cache import cache
 from django.conf import settings
-
-
+from api.models.qrph_transaction_model import QrPhTransaction
+from api.utils.qrph_security import QRPhSecurityUtil
 class QrphApiService:
     
     CACHE_KEY_TOKEN = 'qrph_auth_token'
@@ -27,6 +27,7 @@ class QrphApiService:
     def __init__(self):
         self.api_service = ApiService()
         self.config = settings.QRPH_CONFIG
+        self.security = QRPhSecurityUtil()
     
     ## authenticate method
     def authenticate(self, force_refresh: bool = False):
@@ -69,6 +70,8 @@ class QrphApiService:
         
         return response
     
+
+
     ## request to pay method
     def request_to_pay(
         self,
@@ -89,6 +92,10 @@ class QrphApiService:
         # Get auth token
         auth_response = self.authenticate()
         auth_token = auth_response.get("result", "")
+
+        # Generate unique partner reference
+        partner_ref = f"PART-{uuid.uuid4().hex[:12].upper()}"
+        # partner_ref =  str(uuid.uuid4())
 
         # Build request data (order matters per API spec)
         data = {}   
@@ -117,7 +124,7 @@ class QrphApiService:
         
         headers = {
             "X-API-KEY": self.config['API_KEY'],
-            "x-idempotent-key": str(uuid.uuid4())
+            "x-idempotent-key": partner_ref
         }
         
         app_logger(1, "Request to Pay", {
@@ -132,9 +139,75 @@ class QrphApiService:
         ## Throw error if request to pay failed
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to pay failed: {response.get('message')}")
+        
+        result = response.get('result', {})
 
-        return response
-    
+        # Save to database
+        transaction = QrPhTransaction.objects.create(
+            reference_id=result.get('referenceId'),
+            partner_reference_id=partner_ref,
+            invoice_id=result.get('invoiceId'),
+            amount=amount,
+            total_amount=total_amount,
+            discount=discount,
+            tax=tax,
+            trxn_fee=trxn_fee,
+            status='requested',
+            payment_url=result.get('url'),
+            client_title=client_title,
+            order_details=order_details,
+            expires_at=timezone.localtime(timezone.now()) + timedelta(minutes=exp_in_mins),
+            request_payload=data,
+            response_payload=response
+        )
+
+        return {
+            "transaction": transaction,
+            "response": result
+        }
+
+
+
+    # process callback method
+    def process_callback(
+        self,
+        callback_data: Dict[str, Any],
+        callback_hash: str
+    ) -> QrPhTransaction:
+        """Process and verify callback"""
+        # Verify hash
+        data_json = json.dumps(callback_data, separators=(',', ':'))
+        is_valid = self.security.verify_hash(data_json, self.config['APP_ID'], callback_hash)
+        
+        if not is_valid:
+            app_logger(2, "Invalid callback hash", callback_data)
+            raise ValidationError("Invalid callback signature")
+        
+        reference_id = callback_data.get('referenceId')
+        status = callback_data.get('status', '').lower()
+        
+        try:
+            transaction = QrPhTransaction.objects.get(reference_id=reference_id)
+            transaction.status = status
+            transaction.callback_data = callback_data
+            transaction.invoice_id = callback_data.get('invoiceId')
+            
+            if status == 'success':
+                transaction.completed_at = timezone.localtime(timezone.now())
+            
+            transaction.save()
+            
+            app_logger(1, "Callback processed", {
+                "reference_id": reference_id,
+                "status": status
+            })
+            
+            return transaction
+            
+        except QrPhTransaction.DoesNotExist:
+            app_logger(3, "Callback for unknown transaction", callback_data)
+            raise ValidationError(f"Transaction not found: {reference_id}")
+
     def _create_payload(
         self,
         data_dict: Dict[str, Any],

@@ -55,9 +55,9 @@ class QrphViewSet(viewsets.ViewSet):
                 if field not in data:
                     raise ValidationError(f"Missing required field: {field}")
                 
-            response = self.qrph_service.request_to_pay(
-                amount=float(data['amount']),
-                total_amount=float(data['total_amount']),
+            result = self.qrph_service.request_to_pay(
+                amount=float(data.get('amount', 0.0)),
+                total_amount=float(data.get('total_amount', 0.0)),
                 reference_id=str(uuid.uuid4()),
                 client_title=data.get('client_title', "Pinoy Ride"),
                 client_logo=data.get('client_logo', "https://pinoyride.com/assets/img/pinoyride-logo.png"),
@@ -65,10 +65,19 @@ class QrphViewSet(viewsets.ViewSet):
                 discount=float(data.get('discount', 0.0)),
                 tax=float(data.get('tax', 0.0)),
                 trxn_fee=float(data.get('trxn_fee', 0.0)),
-                order_details=data.get('order_details', {})
+                order_details=data.get('order_details', [])
             )
-            
-            return AppResponse.send_success(data=response, message="Success")
+
+            return AppResponse.send_success(
+                data={
+                    "paymentUrl": result['response']['url'],
+                    "referenceId": result['response']['referenceId'],
+                    "invoiceId": result['response'].get('invoiceId'),
+                    "partnerReferenceId": result['transaction'].expires_at.isoformat(),
+                    "expiresAt": result['transaction'].expires_at.isoformat()
+                },
+                message="Payment request created successfully"
+            )   
 
 
         except NotFoundError as e:
@@ -95,26 +104,27 @@ class QrphViewSet(viewsets.ViewSet):
             callback_hash = request.data.get('hash', '')
             
             # # Validate callback structure
-            # serializer = QRPhCallbackSerializer(data=callback_data)
-            # serializer.is_valid(raise_exception=True)
+            serializer = QRPhCallbackSerializer(data=callback_data)
+            if not serializer.is_valid():
+                    return AppResponse.send_error(message=serializer.errors, code=400)
             
-            # # Process callback
-            # with transaction.atomic():
-            #     transaction = self.qrph_service.process_callback(
-            #         callback_data=callback_data,
-            #         callback_hash=callback_hash
-            #     )
+            # Process callback
+            with transaction.atomic():
+                transaction_resp = self.qrph_service.process_callback(
+                    callback_data=callback_data,
+                    callback_hash=callback_hash
+                )
         
             
-            # return AppResponse.send_success(
-            #     data={
-            #         "referenceId": transaction.reference_id,
-            #         "status": transaction.status,
-            #         "processed": True
-            #     },
-            #     message="Callback processed successfully"
-            # )
-            return AppResponse.send_success(data=callback_request, message="Success")
+            return AppResponse.send_success(
+                data={
+                    "referenceId": transaction_resp.reference_id,
+                    "status": transaction_resp.status,
+                    "processed": True
+                },
+                message="Callback processed successfully"
+            )
+            # return AppResponse.send_success(data=callback_request, message="Success")
 
 
         except NotFoundError as e:

@@ -13,3 +13,4 @@ from .booking_payment_model import BookingPayment
 from .booking_ratings_model import BookingRatings
 from .wallet_model import Wallet
 from .wallet_history_model import WalletHistory
+from .qrph_transaction_model import QrPhTransaction

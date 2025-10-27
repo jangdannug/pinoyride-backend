@@ -361,7 +361,7 @@ QRPH_CONFIG = {
     'PASSWORD': os.getenv('QRPH_PASSWORD', 'Password@2025'),
     'DEVICE_TYPE': os.getenv('QRPH_DEVICE_TYPE', 'client_type_web_921b77e6-e4d0-4bb4-8225-339df8251c07'),
     'CLIENT_SECRET': os.getenv('QRPH_CLIENT_SECRET', 'I0nPnfRfbBFv1O0b9tc0NobCvimKyntUJb+DYxV8wps='),
-    'APP_ID': os.getenv('QRPH_APP_ID', '921b77e6-e4d04bb48225339df8251c07'),
+    'APP_ID': os.getenv('QRPH_APP_ID', '921b77e6-e4d0-4bb4-8225-339df8251c07'),
     'API_KEY': os.getenv('QRPH_API_KEY', '339df8251c07'),
 }
 
