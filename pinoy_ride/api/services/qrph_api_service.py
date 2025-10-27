@@ -16,6 +16,7 @@ from api.utils.app_logger import app_logger
 from typing import Dict, Any, Optional
 import uuid
 from django.core.cache import cache
+from django.conf import settings
 
 
 class QrphApiService:
@@ -25,16 +26,7 @@ class QrphApiService:
 
     def __init__(self):
         self.api_service = ApiService()
-        self.auth_base_url = 'https://pre-auth.theorangeplatform.com/'
-        self.top_ph_base_url = 'https://pre-web.theorangeplatform.com/'
-        self.login_code_api = 'connect/ext/clientidentity/v1/api/extclient/identity/login/code'
-        self.request_to_pay_api = 'channel/epay/v1/api/client/top/epayment'
-        self.username = 'topqrclient1'
-        self.password = 'Password@2025'
-        self.device_type = 'client_type_web_921b77e6-e4d0-4bb4-8225-339df8251c07'
-        self.client_secret = 'I0nPnfRfbBFv1O0b9tc0NobCvimKyntUJb+DYxV8wps='      
-        self.app_id = '921b77e6-e4d0-4bb4-8225-339df8251c07'
-        self.api_key  = '339df8251c07'
+        self.config = settings.QRPH_CONFIG
     
     ## authenticate method
     def authenticate(self, force_refresh: bool = False):
@@ -47,19 +39,19 @@ class QrphApiService:
                 app_logger(1, "Using cached QRPh token", {"token": cached_token, "expiry": cache.get(self.CACHE_KEY_EXPIRY)})
                 return {"message" : "cached token", "result" : cached_token}
             
-        auth_url = f"{self.auth_base_url}{self.login_code_api}"
+        auth_url = f"{self.config['AUTH_BASE_URL']}{self.config['LOGIN_CODE_API']}"
 
         # Create credentials payload (order matters)
         credentials = {
-            "password": self.password,
-            "userName": self.username
+            "password": self.config['PASSWORD'],
+            "userName": self.config['USERNAME']
         }
 
         exp_ms = self._get_expiration_ms()
         payload = self._create_payload(credentials, token="", exp_ms=exp_ms)
 
         headers = {
-            "X-API-KEY": self.api_key
+            "X-API-KEY": self.config['API_KEY'],
         }
         
         response = self.api_service.post_request(url=auth_url, payload=payload, headers=headers)
@@ -92,7 +84,7 @@ class QrphApiService:
         order_details: Optional[list] = None
     ) -> Dict[str, Any]:
         """Request to Pay"""
-        request_to_pay_url = f"{self.top_ph_base_url}{self.request_to_pay_api}"
+        request_to_pay_url = f"{self.config['TOP_PH_BASE_URL']}{self.config['REQUEST_TO_PAY_API']}"
 
         # Get auth token
         auth_response = self.authenticate()
@@ -124,7 +116,7 @@ class QrphApiService:
         payload = self._create_payload(data, token=auth_token)
         
         headers = {
-            "X-API-KEY": self.api_key,
+            "X-API-KEY": self.config['API_KEY'],
             "x-idempotent-key": str(uuid.uuid4())
         }
         
@@ -160,11 +152,11 @@ class QrphApiService:
         encoded_data = self._encode_base64(data_json)
         
         # Create and encode code
-        code_str = f"{token}.{exp_ms}.{self.device_type}"
+        code_str = f"{token}.{exp_ms}.{self.config['DEVICE_TYPE']}"
         encoded_code = self._encode_base64(code_str)
         
         # Create salt and hash
-        salt = f"{token}.{exp_ms}.{self.client_secret}.{self.device_type}"
+        salt = f"{token}.{exp_ms}.{self.config['CLIENT_SECRET']}.{self.config['DEVICE_TYPE']}"
         hash_value = self._generate_hash(data_json, salt)
         
         return {
