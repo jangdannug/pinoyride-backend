@@ -81,30 +81,19 @@ class EkycViewSet(viewsets.ViewSet):
             callback_request = request.data
             app_logger(1, "EKYC Callback Request", callback_request)            
 
-            callback_data = request.data.get('data', {})
+            encoded_data = request.data.get('data', {})
             callback_hash = request.data.get('hash', '')
             
-            # # Validate callback structure
-            # serializer = QRPhCallbackSerializer(data=callback_data)
-            # serializer.is_valid(raise_exception=True)
+            if not encoded_data or not callback_hash:
+                raise ValidationError("Missing data or hash in callback")
             
-            # # Process callback
-            # with transaction.atomic():
-            #     transaction = self.qrph_service.process_callback(
-            #         callback_data=callback_data,
-            #         callback_hash=callback_hash
-            #     )
-        
+            # Process and verify callback
+            callback_data = self.ekyc_service.process_callback(
+                encoded_data=encoded_data,
+                callback_hash=callback_hash
+            )
             
-            # return AppResponse.send_success(
-            #     data={
-            #         "referenceId": transaction.reference_id,
-            #         "status": transaction.status,
-            #         "processed": True
-            #     },
-            #     message="Callback processed successfully"
-            # )
-            return AppResponse.send_success(data=callback_request, message="Success")
+            return AppResponse.send_success(data=callback_data, message="Success")
 
 
         except NotFoundError as e:

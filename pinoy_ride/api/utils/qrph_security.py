@@ -39,7 +39,7 @@ class QRPhSecurityUtil:
         app_logger(1, "Verifying hash", {
             "data": data,
             "salt": salt,
-            "expected_hash": expected_hash,
+            "received_hash": expected_hash,
             "calculated_hash": calculated
         })
         return calculated == expected_hash

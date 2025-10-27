@@ -17,6 +17,8 @@ from typing import Dict, Any, Optional
 import uuid
 from django.conf import settings
 from django.core.cache import cache
+from api.utils.top_ph_ekyc_security import TopPhEkycSecurityUtil
+from api.models.top_ph_ekyc_model import TopPhEkyc
 
 class EkycApiService:
     
@@ -26,6 +28,7 @@ class EkycApiService:
     def __init__(self):
         self.api_service = ApiService()
         self.config = settings.TOP_PH_EKYC_CONFIG
+        self.security = TopPhEkycSecurityUtil()
     
     ## authenticate method
     def authenticate(self, force_refresh: bool = False):
@@ -128,7 +131,45 @@ class EkycApiService:
 
         return response
 
+    
+    ## Process callback method
+    def process_callback(
+        self,
+        encoded_data: str,
+        callback_hash: str
+    ) -> Dict[str, Any]:
+        """
+        Process callback from TOP.ph eKYC
+        """
+
+        # Decode the data
+        try:
+            decoded_data = base64.b64decode(encoded_data).decode('utf-8')
+            callback_data = json.loads(decoded_data)
+        except Exception as e:
+            raise ValidationError(f"Invalid callback data format: {str(e)}")
         
+        # Verify hash
+        salt = self.config['CLIENT_SECRET']
+        if not self.security.verify_callback_hash(salt, decoded_data, callback_hash):
+            raise ValidationError("Invalid callback hash - data may be tampered")
+        
+        # Save to database
+        callback_record = TopPhEkyc.objects.create(
+            user_id=callback_data.get('userId', "none"),
+            zkyc_id=callback_data.get('zkycId', "none"),
+            status=callback_data.get('status').lower(),
+            trx_date=callback_data.get('trxDate', 'none'),
+            remarks=callback_data.get('remark', 'none'),
+            result_code=callback_data.get('resultCode', 'none'),
+            completed_at=timezone.localtime(timezone.now()),
+            callback_data=callback_data
+        )
+        
+        app_logger(1, "Callback processed successfully", callback_data)
+        
+        return callback_data
+
     def _create_payload(
         self,
         data_dict: Dict[str, Any],
