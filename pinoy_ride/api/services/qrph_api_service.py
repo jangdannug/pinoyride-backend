@@ -94,8 +94,7 @@ class QrphApiService:
         auth_token = auth_response.get("result", "")
 
         # Generate unique partner reference
-        partner_ref = f"PART-{uuid.uuid4().hex[:12].upper()}"
-        # partner_ref =  str(uuid.uuid4())
+        partner_ref =  str(uuid.uuid4())
 
         # Build request data (order matters per API spec)
         data = {}   
