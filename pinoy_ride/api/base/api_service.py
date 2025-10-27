@@ -16,7 +16,7 @@ class ApiService:
       try:
           app_logger(1, "API GET Request", {
             "url": url,
-            "params_keys": list(params.keys()) if isinstance(params, dict) else None,
+            # "params_keys": list(params.keys()) if isinstance(params, dict) else None,
             "params": params
           })
             
@@ -75,9 +75,8 @@ class ApiService:
         # Log request
         app_logger(1, "API POST Request", {
             "url": url,
-            "headers": {k: v[:20] + "..." if len(v) > 20 else v 
-                        for k, v in merged_headers.items()},
-            "payload_keys": list(payload.keys()) if isinstance(payload, dict) else None,
+            "headers": merged_headers,
+            # "payload_keys": list(payload.keys()) if isinstance(payload, dict) else None,
             "payload": payload
         })
             
