@@ -20,8 +20,8 @@ from django.core.cache import cache
 
 class EkycApiService:
     
-    CACHE_KEY_TOKEN = 'qrph_auth_token'
-    CACHE_KEY_EXPIRY = 'qrph_token_expiry'
+    CACHE_KEY_TOKEN = 'ekyc_auth_token'
+    CACHE_KEY_EXPIRY = 'ekyc_token_expiry'
 
     def __init__(self):
         self.api_service = ApiService()
