@@ -59,7 +59,12 @@ class EkycViewSet(viewsets.ViewSet):
                 expired_url=data.get('expired_url', 'https://pinoyride.com/expire.html')
             )
             
-            return AppResponse.send_success(data=response, message="Success")
+            return AppResponse.send_success(data={
+                    "user_id": response.get('result', {}).get('userId', ''),
+                    "zkyc_id": response.get('result', {}).get('zkycId', ''),
+                    "zkyc_url": response.get('result', {}).get('zkycUrl', ''),
+                    "trx_date": response.get('result', {}).get('trxDate', ''),
+                }, message="Success")
 
 
         except NotFoundError as e:
