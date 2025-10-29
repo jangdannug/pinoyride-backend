@@ -21,7 +21,7 @@ class ApiKeyAuthenticationMiddleware:
                 '/api/booking/',
                 '/api/otp/',
                 '/api/qrph/',
-                '/api/otp/',
+                '/api/ekyc/',
             )
 
             if request.path.startswith(api_routes):
