@@ -232,3 +232,10 @@ class EkycApiService:
         combined = data + salt
         hash_obj = hashlib.sha256(combined.encode('utf-8'))
         return base64.b64encode(hash_obj.digest()).decode('utf-8')
+
+    def check_status(self, zkyc_id: str):
+        try:
+            return TopPhEkyc.objects.filter(zkyc_id=zkyc_id).order_by('-id').first()
+        except TopPhEkyc.DoesNotExist:
+            return None
+            

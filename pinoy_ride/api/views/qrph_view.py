@@ -53,7 +53,7 @@ class QrphViewSet(viewsets.ViewSet):
             required_fields = ['amount', 'total_amount']
             for field in required_fields:
                 if field not in data:
-                    raise ValidationError(f"Missing required field: {field}")
+                    return AppResponse.send_error(message=str(f"Missing required field: {field}"), code=400)
                 
             result = self.qrph_service.request_to_pay(
                 amount=float(data.get('amount', 0.0)),
@@ -135,5 +135,42 @@ class QrphViewSet(viewsets.ViewSet):
 
         except Exception as e:
 
-            return AppResponse.send_error(message=str(e), code=500)    
+            return AppResponse.send_error(message=str(e), code=500)   
+
+
+    @action(detail=False, methods=['post'], url_path='check_status')
+    def qrph_check_status(self, request):
+        """QRPH Check Status"""
+        
+        try:            
+            reference_id = request.data.get('reference_id', '')
+            
+            if not reference_id:
+                return AppResponse.send_error(message=str("Reference ID is required"), code=400)
+            
+            status = 'not-found'
+
+            # Check status
+            transaction = self.qrph_service.check_status(reference_id=reference_id)
+            if transaction:
+                status = transaction.status
+        
+            return AppResponse.send_success(
+                data={
+                    "referenceId": reference_id,
+                    "status": status,
+                },
+                message="Success"
+            )
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)   
 

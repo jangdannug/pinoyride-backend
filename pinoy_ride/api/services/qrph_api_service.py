@@ -269,3 +269,10 @@ class QrphApiService:
         combined = data + salt
         hash_obj = hashlib.sha256(combined.encode('utf-8'))
         return base64.b64encode(hash_obj.digest()).decode('utf-8')
+    
+    def check_status(self, reference_id: str):
+        try:
+            return QrPhTransaction.objects.filter(reference_id=reference_id).order_by('-id').first()
+        except QrPhTransaction.DoesNotExist:
+            return None
+            

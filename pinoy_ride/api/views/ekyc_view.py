@@ -110,3 +110,40 @@ class EkycViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)   
+        
+
+    @action(detail=False, methods=['post'], url_path='check_status')
+    def ekyc_check_status(self, request):
+        """EKYC check status"""
+        
+        try:            
+            zkyc_id = request.data.get('zkyc_id', '')
+            
+            if not zkyc_id:
+                return AppResponse.send_error(message=str("ZKYC ID is required"), code=400)
+            
+            status = 'not-found'
+
+            # Check status
+            ekyc_resp = self.ekyc_service.check_status(zkyc_id=zkyc_id)
+            if ekyc_resp:
+                status = ekyc_resp.status
+        
+            return AppResponse.send_success(
+                data={
+                    "zkyc_id": zkyc_id,
+                    "status": status,
+                },
+                message="Success"
+            )
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)   
