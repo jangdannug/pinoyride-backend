@@ -233,7 +233,7 @@ class BookingViewSet(viewsets.ViewSet):
             #             "long": loc.longitude
             #         })
 
-            api_key = 'AIzaSyD8AjX-V2EAk4ddyNPFzUGfqjxIu4ZkIZA'
+            api_key = 'AIzaSyC6I6_4MnzZGrYXp3aUDR3EaY6Vn7-LS_A'
             url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
             params = {
                 "input": location_search_key,

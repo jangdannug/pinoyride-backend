@@ -73,7 +73,7 @@ class QrphViewSet(viewsets.ViewSet):
                     "paymentUrl": result['response']['url'],
                     "referenceId": result['response']['referenceId'],
                     "invoiceId": result['response'].get('invoiceId'),
-                    "partnerReferenceId": result['transaction'].expires_at.isoformat(),
+                    "partnerReferenceId": result['transaction'].get('partner_reference_id'),
                     "expiresAt": result['transaction'].expires_at.isoformat()
                 },
                 message="Payment request created successfully"
