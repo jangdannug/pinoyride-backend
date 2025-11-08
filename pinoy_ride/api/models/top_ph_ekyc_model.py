@@ -26,6 +26,7 @@ class TopPhEkyc(SoftDeleteModel):
     trx_date = models.CharField(max_length=150)
     remarks = models.CharField(max_length=250, null=True)
     result_code = models.CharField(max_length=50, null=True)
+    is_success_kyc = models.IntegerField(default=0)
     callback_data = models.JSONField(blank=True, null=True)
     ekyc_url = models.TextField(blank=True, null=True)
     completed_at = models.DateTimeField(blank=True, null=True)
@@ -41,6 +42,7 @@ class TopPhEkyc(SoftDeleteModel):
             models.Index(fields=['zkyc_id']),
             models.Index(fields=['top_ph_user_id']),
             models.Index(fields=['user_type']),
+            models.Index(fields=['is_success_kyc']),
         ]
         db_table = "top_ph_ekyc"
         

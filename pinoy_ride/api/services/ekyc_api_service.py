@@ -195,6 +195,7 @@ class EkycApiService:
             
             if status == 'success':
                 ekycRecord.completed_at = timezone.localtime(timezone.now())
+                ekycRecord.is_success_kyc=1
             
             ekycRecord.save()
             
