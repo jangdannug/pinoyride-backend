@@ -11,19 +11,22 @@ from storages.backends.s3boto3 import S3Boto3Storage
 
 class TopPhEkyc(SoftDeleteModel):
     STATUS_CHOICES = [
+        ('pending', 'Pending'),
         ('success', 'Success'),
         ('failed', 'Failed'),
         ('expired', 'Expired')
     ]
 
     id = models.AutoField(primary_key=True)
-    user_id = models.CharField(max_length=150, db_index=True)
-    zkyc_id = models.CharField(max_length=150, db_index=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='success')
+    user_id = models.CharField(max_length=150)
+    zkyc_id = models.CharField(max_length=150, unique=True, db_index=True)
+    top_ph_user_id = models.CharField(max_length=150, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     trx_date = models.CharField(max_length=150)
     remarks = models.CharField(max_length=250, null=True)
     result_code = models.CharField(max_length=50, null=True)
     callback_data = models.JSONField(blank=True, null=True)
+    ekyc_url = models.TextField(blank=True, null=True)
     completed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,6 +38,7 @@ class TopPhEkyc(SoftDeleteModel):
             models.Index(fields=['result_code']),
             models.Index(fields=['user_id']),
             models.Index(fields=['zkyc_id']),
+            models.Index(fields=['top_ph_user_id']),
         ]
         db_table = "top_ph_ekyc"
         

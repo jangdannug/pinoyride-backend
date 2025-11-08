@@ -370,6 +370,7 @@ TOP_PH_EKYC_CONFIG = {
     'EKYC_BASE_URL': os.getenv('EKYC_BASE_URL', 'https://pre-zkyc.theorangeplatform.com/'),
     'LOGIN_CODE_API': os.getenv('QRPH_LOGIN_CODE_API', 'connect/ext/clientidentity/v1/api/extclient/identity/login/code'),
     'GENERATE_EKYC_URL': os.getenv('GENERATE_EKYC_URL', 'channel/kyc/v1/api/client/application/generate'),
+    'GET_EKYC_USER_DETAILS': os.getenv('GET_EKYC_USER_DETAILS', 'channel/kyc/v1/api/client/application/details'),
     'USERNAME': os.getenv('EKYC_USERNAME', 'topqrclient6'),
     'PASSWORD': os.getenv('EKYC_PASSWORD', 'Password@2025'),
     'DEVICE_TYPE': os.getenv('EKYC_DEVICE_TYPE', 'device_type_zkyc_a4063e95aa7642a990e52208bed8753b'),

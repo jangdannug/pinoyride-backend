@@ -147,3 +147,36 @@ class EkycViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)   
+
+
+    @action(detail=False, methods=['post'], url_path='get-user-details')
+    def get_user_details(self, request):
+        """Get User Details"""
+        
+        try:            
+            data = request.data
+            app_logger(1, "Get User Details", data)
+
+            # Validate required fields
+            zkyc_id = request.data.get('zkyc_id', '')
+            
+            if not zkyc_id:
+                return AppResponse.send_error(message=str("ZKYC ID is required"), code=400)
+            
+                
+            response = self.ekyc_service.get_topph_user_details(
+                zkyc_id=zkyc_id
+            )
+            
+            return AppResponse.send_success(data=response, message="Success")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
