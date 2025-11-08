@@ -123,19 +123,7 @@ class EkycApiService:
             "token": auth_token,
         })
 
-        # response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
-        ## Simulated response
-        response = {
-            "version": "1.0",
-            "statusCode": 200,
-            "message": "POST Request successful.",
-            "result": {
-                "userId": "639411112111",
-                "zkycId": "4841b809-4893-4ee9-b9f9-051022b502fb",
-                "zkycUrl": "https://pre-zkyc.theorangeplatform.com/BUcjpNB4MkQlBkZl9TXNMkbDFlcGtNU0duQXAvWTF3WHNhZUdMMk5BakVUQUJiZ05OMD0=/hZKX1ElDKubG17VI8QkVgZWFJsVkdsdFpTSTZNVGMyTWpVM056VXpNekk0Tml3aWVtdDVZMGxrSWpvaU5EZzBNV0k0TURrdE5EZzVNeTAwWldVNUxXSTVaamt0TURVeE1ESXlZalV3TW1aaUlpd2lZMnhwWlc1MFNXUWlPaUpoTkRBMk0yVTVOUzFoWVRjMkxUUXlZVGt0T1RCbE5TMHlNakE0WW1Wa09EYzFNMklpTENKNmEzbGpVM1JsY0NJNk1Td2lkWE5sY2tsa0lqb2lOak01TkRFeE1URXlNVEV4SWl3aWRYSnNjeUk2ZXlKbVlXbHNaV1JWY213aU9pSm9kSFJ3Y3pvdkwzQnBibTk1Y21sa1pTNWpiMjB2Wm1GcGJHVmtMbWgwYld3aUxDSmxlSEJwY21Wa1ZYSnNJam9pYUhSMGNITTZMeTl3YVc1dmVYSnBaR1V1WTI5dEwyVjRjR2x5WlM1b2RHMXNJaXdpYzNWalkyVnpjMVZ5YkNJNkltaDBkSEJ6T2k4dmNHbHViM2x5YVdSbExtTnZiUzl6ZFdOalpYTnpMbWgwYld3aUxDSmpiMjVtYVhKdFlYUnBiMjVWY213aU9pSWlMQ0pqWVd4aVlXTnJWWEpzSWpvaWFIUjBjSE02THk5d2NtVXRZWEJ3TG5Sb1pXOXlZVzVuWlhCc1lYUm1iM0p0TG1OdmJTOXdZWGx0WVhSbEwzWXhMM0JoZVcxbGJuUXZjSEp2WTJWemMyOXlMMkYxWWk5bWRXNWtMM1J5WVc1elptVnlJbjBzSW5wdmJHOTZWWEpzSWpvaWFIUjBjSE02THk5elp5MXdjbTlrZFdOMGFXOXVMV05rYmk1NmIyeHZlaTVqYjIwdmNHRm5aUzk2YjJ4dmVpMXlaV0ZzYVdRdFptVXZhVzVrWlhndWFIUnRiQ0o5/GTlU6zRkBKd0dW1EJQXdRNREF0TURBd01DMHdNREF3TFRBd01EQXRNREF3TURBd01EQXdNREF3TG1FME1EWXpaVGsxTFdGaE56WXROREpoT1MwNU1HVTFMVEl5TURoaVpXUTROelV6WWk1b1ZEYzRUbXRHUmpkQmIxUmxha2wxUmxKQmQyZEJhV2wwV0ZwUVRXazFWV1JRUTNWQmVUVlJWVlJGUFM0eE56WXlOVGMyTXpNek16WTFMbVJsZG1salpWOTBlWEJsWDNwcmVXTmZZVFF3TmpObE9UVmhZVGMyTkRKaE9Ua3daVFV5TWpBNFltVmtPRGMxTTJJPQ==/uSFH9cNLtrbmf1xvmNm5BpRDNBYUx0eXQ5M2xLUFQvQ3czell2YUtOd0VlamxIbHF2TT0=",
-                "trxDate": 1762604533
-            }
-        }
+        response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
 
         ## Throw error if request to generate eKYC url failed
         if response.get('statusCode') not in [200, 201]:
