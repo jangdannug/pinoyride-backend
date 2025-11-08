@@ -161,14 +161,14 @@ class EkycViewSet(viewsets.ViewSet):
             app_logger(1, "Get User Details", data)
 
             # Validate required fields
-            zkyc_id = request.data.get('zkyc_id', '')
+            ref_id = request.data.get('ref_id', '')
             
-            if not zkyc_id:
-                return AppResponse.send_error(message=str("ZKYC ID is required"), code=400)
+            if not ref_id:
+                return AppResponse.send_error(message=str("Ref ID is required"), code=400)
             
                 
             response = self.ekyc_service.get_topph_user_details(
-                zkyc_id=zkyc_id
+                ref_id=ref_id
             )
             
             return AppResponse.send_success(data=response, message="Success")
