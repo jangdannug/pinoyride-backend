@@ -21,6 +21,7 @@ from api.utils.top_ph_ekyc_security import TopPhEkycSecurityUtil
 from api.models.top_ph_ekyc_model import TopPhEkyc
 from api.models.top_ph_ekyc_details_model import TopPhEkycDetails
 from api.utils.customer_utils import CustomUtils
+from api.repositories import RiderRepository, CustomerRepository
 
 class EkycApiService:
     
@@ -31,6 +32,8 @@ class EkycApiService:
         self.api_service = ApiService()
         self.config = settings.TOP_PH_EKYC_CONFIG
         self.security = TopPhEkycSecurityUtil()
+        self.rider = RiderRepository()
+        self.customer = CustomerRepository()
     
     ## authenticate method
     def authenticate(self, force_refresh: bool = False):
@@ -75,6 +78,7 @@ class EkycApiService:
     
 
     ## generate ekyc url method
+    @transaction.atomic
     def generate_ekyc_url(
         self,
         user_id: str,
@@ -156,6 +160,7 @@ class EkycApiService:
 
     
     ## Process callback method
+    @transaction.atomic
     def process_callback(
         self,
         encoded_data: str,
@@ -194,9 +199,19 @@ class EkycApiService:
             ekycRecord.callback_data = callback_data
             
             if status == 'success':
+                user_type = ekycRecord.user_type
+                top_ph_user_id = ekycRecord.top_ph_user_id
+
                 ekycRecord.completed_at = timezone.localtime(timezone.now())
                 ekycRecord.is_success_kyc=1
+
+                # Save rider or customer mobile number
+                if user_type == 'rider':
+                    self.save_rider_info(top_ph_user_id)
+                elif user_type == 'customer':
+                    self.save_customer_info(top_ph_user_id)
             
+
             ekycRecord.save()
             
             app_logger(1, "Callback processed", {
@@ -214,6 +229,7 @@ class EkycApiService:
         return callback_data
 
     ## get user details in top ph
+    @transaction.atomic
     def get_topph_user_details(
         self,
         ref_id: str
@@ -252,7 +268,6 @@ class EkycApiService:
         })
         
         response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
-
         ## Throw error if request to get eKYC user details fail
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to get eKYC user details failed: {response.get('message')}")
@@ -317,6 +332,42 @@ class EkycApiService:
 
         return response
 
+    @transaction.atomic
+    def save_rider_info(self, mobile_no):
+
+        personal_details = {
+            "mobile_no" : mobile_no,
+            "application_status": 1,
+            "status" : 1,
+            "is_success_kyc" : 1
+        }
+
+        check_rider_record = self.rider.check_rider_by_mobile(rider=personal_details)
+        if check_rider_record is None:
+            # Insert record
+            self.rider.create(rider=personal_details)
+
+        return
+    
+    @transaction.atomic
+    def save_customer_info(self, mobile_no):
+
+        personal_details = {
+            "mobile" : mobile_no,
+            "mobile_no" : mobile_no,
+            "login_type" : "mobile_number",
+            "customer_type" : "1",
+            "status" : 1,
+            "is_success_kyc" : 1
+        }
+
+        check_customer_record = self.customer.check_customer_by_mobile(customer=personal_details)
+        if check_customer_record is None:
+            # Insert record
+            self.customer.create(customer=personal_details)
+
+        return
+    
     def _create_payload(
         self,
         data_dict: Dict[str, Any],

@@ -22,7 +22,7 @@ class Rider(SoftDeleteModel):
     mobile_no = models.CharField(max_length=255)
     email_address = models.CharField(max_length=255,null=True)
     drivers_license_no = models.CharField(max_length=255,null=True)
-    drivers_license_no_expiration_date = models.DateField(max_length=255,null=True)
+    drivers_license_no_expiration_date = models.DateField(max_length=255,null=True, blank=True)
     drivers_license_img = models.FileField(upload_to=upload_to_driver_license_img, null=True, blank=True)
     application_status = models.IntegerField(default=0)
     current_location = models.TextField(null=True)
@@ -32,6 +32,7 @@ class Rider(SoftDeleteModel):
     is_available = models.IntegerField(default=1)
     is_online = models.IntegerField(default=0)
     is_verified = models.IntegerField(default=0)
+    is_success_kyc = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     updated_by = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,6 +49,7 @@ class Rider(SoftDeleteModel):
             models.Index(fields=['status']),
             models.Index(fields=['application_status']),
             models.Index(fields=['updated_by']),
+            models.Index(fields=['is_success_kyc']),
             models.Index(fields=['deleted_at']),
         ]
         db_table = "riders"

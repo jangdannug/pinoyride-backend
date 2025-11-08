@@ -20,6 +20,7 @@ class TopPhEkyc(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     user_id = models.CharField(max_length=150)
     zkyc_id = models.CharField(max_length=150, unique=True, db_index=True)
+    rider_customer_id = models.IntegerField(default=0)
     user_type = models.CharField(max_length=150, null=True)
     top_ph_user_id = models.CharField(max_length=150, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -43,6 +44,7 @@ class TopPhEkyc(SoftDeleteModel):
             models.Index(fields=['top_ph_user_id']),
             models.Index(fields=['user_type']),
             models.Index(fields=['is_success_kyc']),
+            models.Index(fields=['rider_customer_id']),
         ]
         db_table = "top_ph_ekyc"
         

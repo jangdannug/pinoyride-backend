@@ -53,14 +53,15 @@ class EkycViewSet(viewsets.ViewSet):
                 raise ValidationError("Missing required field: user_id")
             if 'user_type' not in data:
                 raise ValidationError("Missing required field: user_type")
-                
-            response = self.ekyc_service.generate_ekyc_url(
-                user_id=data['user_id'],
-                user_type=data['user_type'],
-                success_url=data.get('success_url', 'https://pinoyride.com/success.html'),
-                failed_url=data.get('failed_url', 'https://pinoyride.com/failed.html'),
-                expired_url=data.get('expired_url', 'https://pinoyride.com/expire.html')
-            )
+            
+            with transaction.atomic():
+                response = self.ekyc_service.generate_ekyc_url(
+                    user_id=data['user_id'],
+                    user_type=data['user_type'],
+                    success_url=data.get('success_url', 'https://pinoyride.com/success.html'),
+                    failed_url=data.get('failed_url', 'https://pinoyride.com/failed.html'),
+                    expired_url=data.get('expired_url', 'https://pinoyride.com/expire.html')
+                )
             
             return AppResponse.send_success(data={
                     "user_id": response.get('result', {}).get('userId', ''),
@@ -96,10 +97,11 @@ class EkycViewSet(viewsets.ViewSet):
                 raise ValidationError("Missing data or hash in callback")
             
             # Process and verify callback
-            callback_data = self.ekyc_service.process_callback(
-                encoded_data=encoded_data,
-                callback_hash=callback_hash
-            )
+            with transaction.atomic():
+                callback_data = self.ekyc_service.process_callback(
+                    encoded_data=encoded_data,
+                    callback_hash=callback_hash
+                )
             
             return AppResponse.send_success(data=callback_data, message="Success")
 
@@ -166,10 +168,10 @@ class EkycViewSet(viewsets.ViewSet):
             if not ref_id:
                 return AppResponse.send_error(message=str("Ref ID is required"), code=400)
             
-                
-            response = self.ekyc_service.get_topph_user_details(
-                ref_id=ref_id
-            )
+            with transaction.atomic():    
+                response = self.ekyc_service.get_topph_user_details(
+                    ref_id=ref_id
+                )
             
             return AppResponse.send_success(data=response, message="Success")
 

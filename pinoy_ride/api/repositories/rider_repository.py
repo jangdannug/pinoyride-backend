@@ -21,7 +21,12 @@ class RiderRepository:
             mobile_no=rider.get("mobile_no", ""),
             email_address=rider.get("email_address", ""),
             drivers_license_no=rider.get("drivers_license_no", ""),
-            drivers_license_no_expiration_date=rider.get("drivers_license_no_expiration_date", "")
+            drivers_license_no_expiration_date=(
+                rider.get("drivers_license_no_expiration_date") or None
+            ),
+            application_status=rider.get("application_status", 0),
+            status=rider.get("status", 0),
+            is_success_kyc=rider.get("is_success_kyc", "")
         )
 
         new_rider.drivers_license_img = rider.get("drivers_license_img", "")

@@ -21,6 +21,7 @@ class Customer(SoftDeleteModel):
     login_type = models.CharField(max_length=255, null=True)
     current_location = models.TextField(null=True)
     updated_by = models.IntegerField(default=0)
+    is_success_kyc = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     customer_hash_code = models.CharField(max_length=255,null=True)
     session_id = models.CharField(max_length=255,null=True)
@@ -37,6 +38,7 @@ class Customer(SoftDeleteModel):
             models.Index(fields=['status']),
             models.Index(fields=['updated_by']),
             models.Index(fields=['session_id']),
+            models.Index(fields=['is_success_kyc']),
             models.Index(fields=['customer_hash_code']),
         ]
         db_table = "customer"
