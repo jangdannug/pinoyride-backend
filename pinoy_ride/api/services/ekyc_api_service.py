@@ -19,6 +19,8 @@ from django.conf import settings
 from django.core.cache import cache
 from api.utils.top_ph_ekyc_security import TopPhEkycSecurityUtil
 from api.models.top_ph_ekyc_model import TopPhEkyc
+from api.models.top_ph_ekyc_details_model import TopPhEkycDetails
+from api.utils.customer_utils import CustomUtils
 
 class EkycApiService:
     
@@ -253,9 +255,67 @@ class EkycApiService:
         
         response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
 
-        # ## Throw error if request to get eKYC user details failed
+        ## Throw error if request to get eKYC user details fail
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to get eKYC user details failed: {response.get('message')}")
+
+        result = response.get('result', {})
+        kycId = result.get('kycId', "")
+        mobileNo = CustomUtils.convert_mobile_no(result.get('phoneNumber', ""))
+
+        try:
+            ## Update record
+            ekycDetailsRecord = TopPhEkycDetails.objects.get(kyc_id=kycId)
+            ekycDetailsRecord.first_name=result.get('firstName', "")
+            ekycDetailsRecord.middle_name=result.get('middleName', "")
+            ekycDetailsRecord.last_name=result.get('lastName', "")
+            ekycDetailsRecord.email_address=result.get('emailAddress', "")
+            ekycDetailsRecord.mobile_no=result.get('phoneNumber', "")
+            ekycDetailsRecord.pretty_mobile_no=mobileNo
+            ekycDetailsRecord.date_of_birth=result.get('dateOfBirth', "")
+            ekycDetailsRecord.place_of_birth=result.get('placeOfBirth', "")
+            ekycDetailsRecord.nationality=result.get('nationality', "")
+            ekycDetailsRecord.gender=result.get('gender', "")
+            ekycDetailsRecord.current_country=result.get('currentCountry', "")
+            ekycDetailsRecord.current_address=result.get('currentAddress', "")
+            ekycDetailsRecord.permanent_country=result.get('permanentCountry', "")
+            ekycDetailsRecord.permanent_address=result.get('permanentAddress', "")
+            ekycDetailsRecord.nature_of_work=result.get('natureOfWork', "")
+            ekycDetailsRecord.source_of_fund=result.get('sourceOfFund', "")
+            ekycDetailsRecord.id_type=result.get('idType', "")
+            ekycDetailsRecord.id_number=result.get('idNumber', "")
+            ekycDetailsRecord.id_front=result.get('idFront', "")
+            ekycDetailsRecord.id_back=result.get('idBack', "")
+            ekycDetailsRecord.selfie=result.get('selfie', "")
+            
+            ekycDetailsRecord.save()
+            
+        except TopPhEkycDetails.DoesNotExist:
+            # Save to database
+            TopPhEkycDetails.objects.create(
+                kyc_id=kycId,
+                first_name=result.get('firstName', ""),
+                middle_name=result.get('middleName', ""),
+                last_name=result.get('lastName', ""),
+                email_address=result.get('emailAddress', ""),
+                mobile_no=result.get('phoneNumber', ""),
+                pretty_mobile_no=mobileNo,
+                date_of_birth=result.get('dateOfBirth', ""),
+                place_of_birth=result.get('placeOfBirth', ""),
+                nationality=result.get('nationality', ""),
+                gender=result.get('gender', ""),
+                current_country=result.get('currentCountry', ""),
+                current_address=result.get('currentAddress', ""),
+                permanent_country=result.get('permanentCountry', ""),
+                permanent_address=result.get('permanentAddress', ""),
+                nature_of_work=result.get('natureOfWork', ""),
+                source_of_fund=result.get('sourceOfFund', ""),
+                id_type=result.get('idType', ""),
+                id_number=result.get('idNumber', ""),
+                id_front=result.get('idFront', ""),
+                id_back=result.get('idBack', ""),
+                selfie=result.get('selfie', "")
+            )
 
         return response
 
