@@ -78,6 +78,7 @@ class EkycApiService:
     def generate_ekyc_url(
         self,
         user_id: str,
+        user_type: str,
         success_url: Optional[str] = None,
         failed_url: Optional[str] = None,
         expired_url: Optional[str] = None
@@ -125,6 +126,10 @@ class EkycApiService:
             "token": auth_token,
         })
 
+        # Check Record
+        if TopPhEkyc.objects.filter(user_id=user_id, user_type=user_type, status="success").exists():
+            raise ValidationError("Record already exists!")
+    
         response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
 
         ## Throw error if request to generate eKYC url failed
@@ -135,6 +140,7 @@ class EkycApiService:
         try:
             TopPhEkyc.objects.create(
                 user_id=user_id,
+                user_type=user_type,
                 zkyc_id=response.get('result', {}).get('zkycId'),
                 top_ph_user_id=response.get('result', {}).get('userId'),
                 ekyc_url=response.get('result', {}).get('zkycUrl'),
@@ -198,18 +204,8 @@ class EkycApiService:
             })
             
         except TopPhEkyc.DoesNotExist:
-            # Save to database
-            TopPhEkyc.objects.create(
-                user_id=callback_data.get('userId', "none"),
-                top_ph_user_id=callback_data.get('userId', "none"),
-                zkyc_id=callback_data.get('zkycId', "none"),
-                status=callback_data.get('status').lower(),
-                trx_date=callback_data.get('trxDate', 'none'),
-                remarks=callback_data.get('remark', 'none'),
-                result_code=callback_data.get('resultCode', 'none'),
-                completed_at=timezone.localtime(timezone.now()),
-                callback_data=callback_data
-            )
+            # raise NotFoundError("zkycId not found")
+            return callback_data
             
        
         app_logger(1, "Callback processed successfully", callback_data)

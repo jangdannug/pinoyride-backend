@@ -51,9 +51,12 @@ class EkycViewSet(viewsets.ViewSet):
             # Validate required fields
             if 'user_id' not in data:
                 raise ValidationError("Missing required field: user_id")
+            if 'user_type' not in data:
+                raise ValidationError("Missing required field: user_type")
                 
             response = self.ekyc_service.generate_ekyc_url(
                 user_id=data['user_id'],
+                user_type=data['user_type'],
                 success_url=data.get('success_url', 'https://pinoyride.com/success.html'),
                 failed_url=data.get('failed_url', 'https://pinoyride.com/failed.html'),
                 expired_url=data.get('expired_url', 'https://pinoyride.com/expire.html')
