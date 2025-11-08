@@ -216,7 +216,7 @@ class EkycApiService:
     ## get user details in top ph
     def get_topph_user_details(
         self,
-        zkyc_id: str
+        ref_id: str
     ) -> Dict[str, Any]:
         """Get user details in top ph"""
 
@@ -230,8 +230,9 @@ class EkycApiService:
             raise ValidationError("Failed to get authentication token")
         
         # Build request data (order matters per API spec)
+        # ref_id = user_id or zkyc_id
         data = {
-            "ref_id": zkyc_id
+            "refId": ref_id
         }
         
         exp_ms = self._get_expiration_ms()
@@ -245,7 +246,7 @@ class EkycApiService:
         
         app_logger(1, "Get Top Ph EKYC User Details", {
             "url": get_user_details_url,
-            "ref_id": zkyc_id,
+            "refId": ref_id,
             "raw_data": data,
             "token": auth_token,
         })
