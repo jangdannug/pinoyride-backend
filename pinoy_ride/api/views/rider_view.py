@@ -115,6 +115,9 @@ class RiderViewSet(viewsets.ViewSet):
                 if check_user_details is None:
                     self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
 
+                # create wallet if not exist
+                self.wallet_service.create_rider_wallet(rider_id=rider.id)
+
             serializer = RiderSerializer(rider)
             response_data = serializer.data
 

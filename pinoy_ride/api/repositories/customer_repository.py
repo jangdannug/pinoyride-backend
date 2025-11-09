@@ -39,6 +39,14 @@ class CustomerRepository:
         except Customer.DoesNotExist:
             return None
 
+    @staticmethod
+    def check_customer_by_mobile_kyc(customer):
+        """Get customer by mobile with is_success_kyc"""
+        try:
+            return Customer.objects.get(mobile=customer.get("mobile_no", ""), is_success_kyc=1)
+        except Customer.DoesNotExist:
+            return None
+
 
     @staticmethod
     def get_customer_by_id(customer_id):

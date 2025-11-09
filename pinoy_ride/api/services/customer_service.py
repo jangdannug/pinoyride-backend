@@ -31,6 +31,16 @@ class CustomerService:
 
         return customer
 
+    ## Check customer by mobile_no
+    def login_mobile_no(self, customer_details):
+        """Check customer"""
+        
+        customer = self.customer.check_customer_by_mobile_kyc(customer=customer_details)
+
+        if customer is None:
+            raise NotFoundError("User not found")
+
+        return customer
     
     ## Get customer by id
     def get_customer_by_id(self,customer_id):

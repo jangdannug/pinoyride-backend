@@ -94,11 +94,12 @@ class EkycApiService:
         # Get auth token
         auth_response = self.authenticate()
         auth_token = auth_response.get("result", "")
-        
+        user_type_code = "C" if user_type == "customer" else "R"
+
         if not auth_token:
             raise ValidationError("Failed to get authentication token")
         
-        request_user_id = f"{user_id}|{int(timezone.now().timestamp())}"
+        request_user_id = f"{user_id}|{user_type_code}{int(timezone.now().timestamp())}"
 
         # Build request data (order matters per API spec)
         data = {

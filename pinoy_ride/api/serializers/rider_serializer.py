@@ -4,6 +4,7 @@ from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
 from .rider_address_serializer import RiderAddressSerializer
 from .partial_wallet_serializer import PartialWalletSerializer
 from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
+from django.db.models import Sum
 
 class RiderSerializer(serializers.ModelSerializer):
 
@@ -13,6 +14,7 @@ class RiderSerializer(serializers.ModelSerializer):
     drivers_license_img = serializers.FileField(required=True)
     rider_address = serializers.SerializerMethodField()
     ekyc_details = serializers.SerializerMethodField()
+    wallet_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Rider
@@ -37,7 +39,8 @@ class RiderSerializer(serializers.ModelSerializer):
             "status",
             "ekyc_details",
             "vehicle_details",
-            "rider_address"
+            "rider_address",
+            "wallet_details"
         ]
     
     def validate_email_address(self, value):
@@ -78,3 +81,24 @@ class RiderSerializer(serializers.ModelSerializer):
         if address:
             return RiderAddressSerializer(address).data
         return {}
+    
+    def get_wallet_details(self, obj):
+        # Safely handle if wallet doesn't exist yet
+        avail_balance = 0
+        wallet_details = {}
+
+        wallet = Wallet.objects.filter(user_id=obj.id, user_type='rider').first()
+        if not wallet:
+            return wallet_details
+        
+        total_credit = wallet.wallet_ref.aggregate(total=Sum('credit_amount'))['total'] or 0
+        total_debit = wallet.wallet_ref.aggregate(total=Sum('debit_amount'))['total'] or 0
+        avail_balance = float(total_credit) - float(total_debit)
+
+        wallet_details['id'] = wallet.id
+        wallet_details['user_type'] = wallet.user_type
+        wallet_details['wallet_type'] = wallet.type
+        wallet_details['avail_balance'] = avail_balance
+
+        return wallet_details
+        

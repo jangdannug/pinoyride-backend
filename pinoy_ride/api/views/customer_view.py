@@ -8,7 +8,8 @@ from api.services import (
     CustomerService,
     OtpService,
     CustomerAddressService,
-    WalletService
+    WalletService,
+    EkycApiService
 )
 from api.serializers import CustomerSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -24,6 +25,7 @@ class CustomerViewSet(viewsets.ViewSet):
         self.customer_address_service = CustomerAddressService()
         # self.rider_vehicle_service = RiderVehicleDetailsService()
         self.wallet_service = WalletService()
+        self.ekyc_service = EkycApiService()
 
 
     @action(detail=False, methods=['post'], url_path='sign_up')
@@ -96,25 +98,20 @@ class CustomerViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message="Mobile number is required", code=400)
 
             response_data = []
-            customer = self.service.check_mobile_no(request.data)
-            
-            # otp_data = {
-            #     "user_type" : "customer",
-            #     "mobile_no" : mobile_no
-            # }
 
-            # if not otp_code:
-            #     otp_details = self.otp_service.generate_otp(user_details = otp_data)
+            with transaction.atomic():
+                customer = self.service.login_mobile_no(request.data)
 
-            #     response_data = {
-            #         "is_otp" : "1",
-            #         "otp_code" : otp_details['code']
-            #      }
-            # else:
-            #     otp_data['code'] = otp_code
+                ekyc_request_user_id = customer.ekyc_request_user_id
 
-            #     self.otp_service.verify_otp(otp_data = otp_data)
+                # Check if record exist on ekyc user details table
+                check_user_details = self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
+                if check_user_details is None:
+                    self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
 
+                # create wallet if not exist
+                self.wallet_service.create_customer_wallet(customer_id=customer.id)
+                
             serializer = CustomerSerializer(customer)
             response_data = serializer.data
 

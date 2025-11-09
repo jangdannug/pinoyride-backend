@@ -33,6 +33,14 @@ class WalletRepository:
         except Wallet.DoesNotExist:
             return None
 
+    @staticmethod
+    def get_customer_wallet(customer_id):
+        """Get customer wallet"""
+        try:
+            return Wallet.objects.get(user_id=customer_id, user_type='customer', type='user-wallet')
+        except Wallet.DoesNotExist:
+            return None
+
     
     @staticmethod
     @transaction.atomic
