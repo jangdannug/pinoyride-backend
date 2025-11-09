@@ -129,7 +129,9 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-API-KEY',
     'x-api-key',
-    'X-Api-Key'
+    'X-Api-Key',
+    'api-key',
+    'Api-Key'
 ]
 
 ROOT_URLCONF = 'pinoy_ride.urls'
@@ -352,6 +354,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
+CALLBACK_API_KEY =  os.getenv('CALLBACK_BEARER_TOKEN', '0sqWRHcV0VUPXQoLj9gHDoCTZ12iHVqRv4E5RK5XzEjxOPp15qDeNgq2e1IF')
 QRPH_CONFIG = {
     'AUTH_BASE_URL': os.getenv('QRPH_AUTH_BASE_URL', 'https://pre-auth.theorangeplatform.com/'),
     'TOP_PH_BASE_URL': os.getenv('QRPH_TOP_PH_BASE_URL', 'https://pre-web.theorangeplatform.com/'),
@@ -363,6 +366,7 @@ QRPH_CONFIG = {
     'CLIENT_SECRET': os.getenv('QRPH_CLIENT_SECRET', 'I0nPnfRfbBFv1O0b9tc0NobCvimKyntUJb+DYxV8wps='),
     'APP_ID': os.getenv('QRPH_APP_ID', '921b77e6-e4d0-4bb4-8225-339df8251c07'),
     'API_KEY': os.getenv('QRPH_API_KEY', '339df8251c07'),
+    
 }
 
 TOP_PH_EKYC_CONFIG = {
