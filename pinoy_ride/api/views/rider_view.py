@@ -9,7 +9,8 @@ from api.services import (
     RiderVehicleDetailsService,
     OtpService,
     RiderAddressService,
-    WalletService
+    WalletService,
+    EkycApiService
 )
 from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer, WalletSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
@@ -25,6 +26,7 @@ class RiderViewSet(viewsets.ViewSet):
         self.otp_service = OtpService()
         self.rider_address_service = RiderAddressService()
         self.wallet_service = WalletService()
+        self.ekyc_service = EkycApiService()
 
 
     @action(detail=False, methods=['post'], url_path='apply')
@@ -102,23 +104,18 @@ class RiderViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message="Mobile number is required", code=400)
 
             response_data = []
-            rider = self.service.check_mobile_no(request.data)
-            # otp_data = {
-            #     "user_type" : "rider",
-            #     "mobile_no" : mobile_no
-            # }
 
-            # if not otp_code:
-            #     self.otp_service.generate_otp(user_details = otp_data)
+            with transaction.atomic():
+                rider = self.service.login_mobile_no(request.data)
 
-            #     response_data = {
-            #         "is_otp" : "1"
-            #      }
-            # else:
-            #     otp_data['code'] = otp_code
+                zkyc_id = rider.zkyc_id
 
-            #     self.otp_service.verify_otp(otp_data = otp_data)
+                # Check if record exist on ekyc user details table
+                check_user_details = self.ekyc_service.check_topph_user_details(zkyc_id=zkyc_id)
+                if check_user_details is None:
+                    self.ekyc_service.get_topph_user_details(ref_id=zkyc_id)
 
+        
             serializer = RiderSerializer(rider)
             response_data = serializer.data
 

@@ -16,6 +16,7 @@ def upload_to_driver_license_img(instance, filename):
 class Rider(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=255, unique=True)
+    ekyc_request_user_id = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255,null=True, blank=True)
     last_name = models.CharField(max_length=255)
@@ -50,6 +51,7 @@ class Rider(SoftDeleteModel):
             models.Index(fields=['application_status']),
             models.Index(fields=['updated_by']),
             models.Index(fields=['is_success_kyc']),
+            models.Index(fields=['ekyc_request_user_id']),
             models.Index(fields=['deleted_at']),
         ]
         db_table = "riders"

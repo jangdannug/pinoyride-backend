@@ -23,6 +23,7 @@ class CustomerRepository:
             email=customer.get("email", ""),
             login_type=customer.get("login_type", ""),
             status=customer.get("status", ""),
+            ekyc_request_user_id=customer.get("ekyc_request_user_id", ""),
             is_success_kyc=customer.get("is_success_kyc", ""),
         )
 

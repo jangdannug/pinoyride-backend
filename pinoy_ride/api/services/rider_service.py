@@ -31,6 +31,18 @@ class RiderService:
         return rider
 
 
+     ## Check rider by mobile_no
+    def login_mobile_no(self, rider_details):
+        """Check rider"""
+        
+        rider = self.rider.check_rider_by_mobile_kyc(rider=rider_details)
+
+        if rider is None:
+            raise NotFoundError("Rider not found")
+
+        return rider
+
+
      ## Get rider by id
     def get_rider_by_id(self,rider_id):
         """Fetch rider"""

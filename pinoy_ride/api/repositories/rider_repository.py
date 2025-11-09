@@ -24,9 +24,10 @@ class RiderRepository:
             drivers_license_no_expiration_date=(
                 rider.get("drivers_license_no_expiration_date") or None
             ),
+            ekyc_request_user_id=rider.get("ekyc_request_user_id", ""),
             application_status=rider.get("application_status", 0),
             status=rider.get("status", 0),
-            is_success_kyc=rider.get("is_success_kyc", "")
+            is_success_kyc=rider.get("is_success_kyc", 0)
         )
 
         new_rider.drivers_license_img = rider.get("drivers_license_img", "")
@@ -42,6 +43,17 @@ class RiderRepository:
         ## get active rider
         try:
             return Rider.objects.get(mobile_no=rider.get("mobile_no", ""), application_status=1, status=1)
+        except Rider.DoesNotExist:
+            return None
+        
+
+    @staticmethod
+    def check_rider_by_mobile_kyc(rider):
+        """Get rider by mobile with success kyc"""
+
+        ## get active rider
+        try:
+            return Rider.objects.get(mobile_no=rider.get("mobile_no", ""),  application_status=1, status=1, is_success_kyc=1)
         except Rider.DoesNotExist:
             return None
 

@@ -98,9 +98,11 @@ class EkycApiService:
         if not auth_token:
             raise ValidationError("Failed to get authentication token")
         
+        request_user_id = f"{user_id}|{int(timezone.now().timestamp())}"
+
         # Build request data (order matters per API spec)
         data = {
-            "userId": user_id
+            "userId": request_user_id
         }
         
         # Add client pages if provided
@@ -143,6 +145,7 @@ class EkycApiService:
         #Save to database
         try:
             TopPhEkyc.objects.create(
+                request_user_id=response.get('result', {}).get('userId'),
                 user_id=user_id,
                 user_type=user_type,
                 zkyc_id=response.get('result', {}).get('zkycId'),
@@ -184,38 +187,42 @@ class EkycApiService:
         
         status = callback_data.get('status', '').lower()
         zkycId = callback_data.get('zkycId', '')
-        if not zkycId:
-            raise ValidationError("zkycId not found")
+        requestUserId = callback_data.get('userId', '')
+
+        if not requestUserId:
+            raise ValidationError("userId not found")
         
         try:
             ## Update record
-            ekycRecord = TopPhEkyc.objects.get(zkyc_id=zkycId)
-            ekycRecord.top_ph_user_id = callback_data.get('userId', "none")
+            ekycRecord = TopPhEkyc.objects.get(request_user_id=requestUserId)
+            ekycRecord.top_ph_user_id = callback_data.get('userId', "")
             ekycRecord.status = status
-            ekycRecord.trx_date = callback_data.get('trxDate', "none")
-            ekycRecord.remarks=callback_data.get('remark', 'none')
-            ekycRecord.result_code=callback_data.get('resultCode', 'none')
+            ekycRecord.trx_date = callback_data.get('trxDate', "")
+            ekycRecord.remarks=callback_data.get('remark', '')
+            ekycRecord.result_code=callback_data.get('resultCode', '')
+            ekycRecord.zkyc_id=callback_data.get('zkycId', '')
 
             ekycRecord.callback_data = callback_data
             
             if status == 'success':
                 user_type = ekycRecord.user_type
-                top_ph_user_id = ekycRecord.top_ph_user_id
+                mobile_no = ekycRecord.user_id
 
                 ekycRecord.completed_at = timezone.localtime(timezone.now())
                 ekycRecord.is_success_kyc=1
 
                 # Save rider or customer mobile number
                 if user_type == 'rider':
-                    self.save_rider_info(top_ph_user_id)
+                    rider_customer_id = self.save_rider_info(mobile_no, requestUserId)
                 elif user_type == 'customer':
-                    self.save_customer_info(top_ph_user_id)
-            
+                    rider_customer_id = self.save_customer_info(mobile_no, requestUserId)
+
+                ekycRecord.rider_customer_id = rider_customer_id
 
             ekycRecord.save()
             
             app_logger(1, "Callback processed", {
-                "zkyc_id": zkycId,
+                "request_user_id": requestUserId,
                 "status": status
             })
             
@@ -333,26 +340,30 @@ class EkycApiService:
         return response
 
     @transaction.atomic
-    def save_rider_info(self, mobile_no):
+    def save_rider_info(self, mobile_no, requestUserId):
 
         personal_details = {
+            "ekyc_request_user_id" : requestUserId,
             "mobile_no" : mobile_no,
             "application_status": 1,
             "status" : 1,
             "is_success_kyc" : 1
         }
-
+        
+        rider_id = 0
         check_rider_record = self.rider.check_rider_by_mobile(rider=personal_details)
         if check_rider_record is None:
             # Insert record
-            self.rider.create(rider=personal_details)
+            rider = self.rider.create(rider=personal_details)
+            rider_id = rider.id
 
-        return
+        return rider_id
     
     @transaction.atomic
-    def save_customer_info(self, mobile_no):
+    def save_customer_info(self, mobile_no, requestUserId):
 
         personal_details = {
+            "ekyc_request_user_id" : requestUserId,
             "mobile" : mobile_no,
             "mobile_no" : mobile_no,
             "login_type" : "mobile_number",
@@ -361,13 +372,30 @@ class EkycApiService:
             "is_success_kyc" : 1
         }
 
+        customer_id = 0
         check_customer_record = self.customer.check_customer_by_mobile(customer=personal_details)
         if check_customer_record is None:
             # Insert record
-            self.customer.create(customer=personal_details)
+            customer = self.customer.create(customer=personal_details)
+            customer_id = customer.id
 
-        return
+        return customer_id
     
+    ## check user details in top ph
+    @transaction.atomic
+    def check_topph_user_details(
+        self,
+        zkyc_id: str
+    ) -> Dict[str, Any]:
+        """Check details in top ph"""
+
+        try:
+            ekycDetailsRecord = TopPhEkycDetails.objects.get(kyc_id=zkyc_id)
+            return ekycDetailsRecord
+        
+        except TopPhEkycDetails.DoesNotExist:
+            return None
+
     def _create_payload(
         self,
         data_dict: Dict[str, Any],
@@ -431,9 +459,9 @@ class EkycApiService:
         hash_obj = hashlib.sha256(combined.encode('utf-8'))
         return base64.b64encode(hash_obj.digest()).decode('utf-8')
 
-    def check_status(self, zkyc_id: str):
+    def check_status(self, request_user_id: str):
         try:
-            return TopPhEkyc.objects.filter(zkyc_id=zkyc_id).order_by('-id').first()
+            return TopPhEkyc.objects.filter(request_user_id=request_user_id).order_by('-id').first()
         except TopPhEkyc.DoesNotExist:
             return None
             

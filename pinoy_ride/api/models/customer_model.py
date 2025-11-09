@@ -11,6 +11,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 class Customer(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=255, unique=True)
+    ekyc_request_user_id = models.CharField(max_length=255, null=True, blank=True)
     customer_type = models.CharField(max_length=6, blank=True)
     fname = models.CharField(max_length=255)
     mname = models.CharField(max_length=255, null=True, blank=True)
@@ -39,6 +40,7 @@ class Customer(SoftDeleteModel):
             models.Index(fields=['updated_by']),
             models.Index(fields=['session_id']),
             models.Index(fields=['is_success_kyc']),
+            models.Index(fields=['ekyc_request_user_id']),
             models.Index(fields=['customer_hash_code']),
         ]
         db_table = "customer"

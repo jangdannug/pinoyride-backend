@@ -64,7 +64,7 @@ class EkycViewSet(viewsets.ViewSet):
                 )
             
             return AppResponse.send_success(data={
-                    "user_id": response.get('result', {}).get('userId', ''),
+                    "request_user_id": response.get('result', {}).get('userId', ''),
                     "zkyc_id": response.get('result', {}).get('zkycId', ''),
                     "zkyc_url": response.get('result', {}).get('zkycUrl', ''),
                     "trx_date": response.get('result', {}).get('trxDate', ''),
@@ -122,21 +122,21 @@ class EkycViewSet(viewsets.ViewSet):
         """EKYC check status"""
         
         try:            
-            zkyc_id = request.data.get('zkyc_id', '')
+            request_user_id = request.data.get('request_user_id', '')
             
-            if not zkyc_id:
-                return AppResponse.send_error(message=str("ZKYC ID is required"), code=400)
+            if not request_user_id:
+                return AppResponse.send_error(message=str("Request User ID is required"), code=400)
             
             status = 'not-found'
 
             # Check status
-            ekyc_resp = self.ekyc_service.check_status(zkyc_id=zkyc_id)
+            ekyc_resp = self.ekyc_service.check_status(request_user_id=request_user_id)
             if ekyc_resp:
                 status = ekyc_resp.status
         
             return AppResponse.send_success(
                 data={
-                    "zkyc_id": zkyc_id,
+                    "request_user_id": request_user_id,
                     "status": status,
                 },
                 message="Success"
