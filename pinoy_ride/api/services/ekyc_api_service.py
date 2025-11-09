@@ -274,36 +274,7 @@ class EkycApiService:
             "token": auth_token,
         })
         
-        # response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
-        #Simulated response
-        response = {
-            "version": "1.0",
-            "statusCode": 200,
-            "message": "GET Request successful.",
-            "result": {
-            "kycId": "cc659b7a-761d-4383-953c-bbca71a36bef",
-            "firstName": "GABRIEL",
-            "middleName": "ORENDAIN",
-            "lastName": "DELA PEÑA",
-            "emailAddress": "gabrieldelapena.official@gmail.com",
-            "phoneNumber": "09273393743",
-            "dateOfBirth": "04/05/2002",
-            "placeOfBirth": "Dagupan City",
-            "nationality": "Filipino",
-            "gender": "",
-            "currentCountry": "Philippines",
-            "currentAddress": "-KAPAYAPAAN, ANONANG, SAN FABIAN PANGASINAN, REGION 1",
-            "permanentCountry": "Philippines",
-            "permanentAddress": "-KAPAYAPAAN, ANONANG, SAN FABIAN PANGASINAN, REGION 1",
-            "natureOfWork": "Aviation",
-            "sourceOfFund": "Employment",
-            "idType": "00630000004",
-            "idNumber": "A02-22-302998",
-            "idFront": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_IdFront.jpg",
-            "idBack": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_IdBack.jpg",
-            "selfie": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_Selfie.jpg"
-            }
-        }
+        response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
         ## Throw error if request to get eKYC user details fail
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to get eKYC user details failed: {response.get('message')}")
