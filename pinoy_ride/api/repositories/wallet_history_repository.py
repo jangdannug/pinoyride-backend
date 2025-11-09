@@ -20,6 +20,7 @@ class WalletHistoryRepository:
 
         mew_wallet_history = WalletHistory.objects.create(
             wallet=wallet_instance,
+            booking_id=wallet_history.get("booking_id", ""),
             type=wallet_history.get("type", ""),
             description=wallet_history.get("description", ""),
             credit_amount=wallet_history.get("credit_amount", 0),

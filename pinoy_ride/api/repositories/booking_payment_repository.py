@@ -23,6 +23,8 @@ class BookingPaymentRepository:
             pesos_per_km=booking_payment.get("pesos_per_km", ""),
             booking_fee=booking_payment.get("booking_fee", ""),
             tip=booking_payment.get("tip", ""),
+            rider_net_amount=booking_payment.get("rider_net_amount", ""),
+            commission=booking_payment.get("commission", ""),
             total_amount=booking_payment.get("total_amount", ""),
         )
 
@@ -45,3 +47,11 @@ class BookingPaymentRepository:
         booking_payment_instance.save()
         
         return booking_payment_instance
+    
+    @staticmethod
+    def get_by_id(booking_id):
+        """Get booking payment by booking id"""
+        try:
+            return BookingPayment.objects.get(booking_id=booking_id)
+        except BookingPayment.DoesNotExist:
+            return None

@@ -18,6 +18,15 @@ class BookingPaymentService:
 
         return new_booking_payment
 
+    ## Save booking payment by booking_id
+    def get_record_by_booking_id(self, booking_id):
+        """Get booking payment by booking_id"""
+        
+        booking_payment = self.booking_payment.get_by_id(booking_id=booking_id)
+        
+        if booking_payment is None:
+            raise NotFoundError("Booking not found")
+        return booking_payment
 
     ## Add tip
     @transaction.atomic

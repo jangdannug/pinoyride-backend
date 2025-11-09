@@ -19,6 +19,8 @@ class BookingPayment(SoftDeleteModel):
     booking_fee = models.FloatField(default=0, blank=True)
     tip = models.FloatField(default=0, blank=True)
     total_amount = models.FloatField(default=0, blank=True)
+    commission = models.FloatField(default=0, blank=True, null=True)
+    rider_net_amount = models.FloatField(default=0, blank=True, null=True)
     status = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

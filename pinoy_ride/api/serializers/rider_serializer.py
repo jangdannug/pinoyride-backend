@@ -94,7 +94,7 @@ class RiderSerializer(serializers.ModelSerializer):
         # get details in wallet history
         total_credit = wallet.wallet_ref.aggregate(total=Sum('credit_amount'))['total'] or 0
         total_debit = wallet.wallet_ref.aggregate(total=Sum('debit_amount'))['total'] or 0
-        avail_balance = float(total_credit) - float(total_debit)
+        avail_balance = round(float(total_credit) - float(total_debit),2)
 
         wallet_details['id'] = wallet.id
         wallet_details['user_type'] = wallet.user_type

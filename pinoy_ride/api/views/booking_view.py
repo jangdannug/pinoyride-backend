@@ -12,7 +12,8 @@ from api.services import (
     CustomerService,
     RiderService,
     BookingPaymentService,
-    BookingRatingsService
+    BookingRatingsService,
+    WalletService
 )
 from api.base import (
     ApiService
@@ -31,6 +32,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.api_service = ApiService()
         self.booking_payment_service = BookingPaymentService()
         self.booking_ratings_service = BookingRatingsService()
+        self.wallet_service = WalletService()
 
 
     @action(detail=False, methods=['post'], url_path='inquire')
@@ -61,15 +63,21 @@ class BookingViewSet(viewsets.ViewSet):
             minimum_fare = 50.00
             pesos_per_km = 10
             booking_fee = 10
+            commission_prcentage = .20 #20%
             
             base_amount = distance_km_round * pesos_per_km
             total_amount= minimum_fare + base_amount + booking_fee
+
+            commision = round(total_amount * commission_prcentage, 2)
+            rider_net_amount = round(total_amount - commision, 2)
 
             response = {
                 "distance_km_round" : distance_km_round,
                 "minimum_fare" : minimum_fare,
                 "pesos_per_km" : pesos_per_km,
                 "base_amount" : base_amount,
+                "commision" : commision,
+                "rider_net_amount" : rider_net_amount,
                 "total_amount" : total_amount
             }
 
@@ -107,6 +115,8 @@ class BookingViewSet(viewsets.ViewSet):
             pickup_long = request.data.get("pickup_long", "")
             dropoff_lat = request.data.get("dropoff_lat", "")
             dropoff_long= request.data.get("dropoff_long", "")
+            payment_type = request.data.get("payment_type", "")
+            payment_total_amount = payment_details.get("total_amount", 0)
 
             # Validation
             booking_details = {
@@ -139,6 +149,10 @@ class BookingViewSet(viewsets.ViewSet):
                 # compute distance in kilometers
                 distance_km = geodesic(pickup, dropoff).kilometers
                 booking_details['distance_km'] = round(distance_km, 2)
+
+                # check customer's wallet
+                if payment_type == 'wallet':
+                    self.wallet_service.check_balance(user_id = customer_id, user_type='customer', amount=payment_total_amount)
 
                 # save booking
                 booking_details = self.service.save_booking(customer_instance = customer_details, booking_details=booking_details)
@@ -467,11 +481,14 @@ class BookingViewSet(viewsets.ViewSet):
                 if status != "1":
                     self.service.get_booking_by_rider_and_id(rider_id=rider_id, booking_id=booking_id)
 
+                if status == "3": #if status == completed update rider status to available and credit amount to wallet
+                    if booking_details.payment_type == 'wallet':
+                        self.wallet_service.update_booking_wallets(booking_details=booking_details)
+
+                    self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
+
                 self.service.update_booking_status_for_rider(booking=booking_details, booking_status = status, rider=rider_details)
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
-
-                if status == "3": #if status == completed update rider status to available
-                    self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
 
                 # refresh booking_details
                 booking_details.refresh_from_db()

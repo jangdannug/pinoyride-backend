@@ -15,7 +15,6 @@ from django.utils import timezone
 from datetime import timedelta
 import base64
 import hashlib
-from api.utils.app_logger import app_logger
 from typing import Dict, Any, Optional
 import uuid
 from django.core.cache import cache

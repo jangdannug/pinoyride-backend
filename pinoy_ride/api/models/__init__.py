@@ -16,3 +16,5 @@ from .wallet_history_model import WalletHistory
 from .qrph_transaction_model import QrPhTransaction
 from .top_ph_ekyc_model import TopPhEkyc
 from .top_ph_ekyc_details_model import TopPhEkycDetails
+from .pinoy_ride_wallet_model import PinoyRideWallet
+from .pinoy_ride_wallet_history_model import PinoyRideWalletHistory
