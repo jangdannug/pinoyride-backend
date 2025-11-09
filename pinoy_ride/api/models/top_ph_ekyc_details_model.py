@@ -12,7 +12,8 @@ from storages.backends.s3boto3 import S3Boto3Storage
 class TopPhEkycDetails(SoftDeleteModel):
 
     id = models.AutoField(primary_key=True)
-    kyc_id = models.CharField(max_length=150, unique=True, db_index=True)
+    generate_request_user_id = models.CharField(max_length=150, unique=True, db_index=True, null=True)
+    kyc_id = models.CharField(max_length=150, db_index=True)
     first_name = models.CharField(max_length=150, null=True)
     middle_name = models.CharField(max_length=150, null=True)
     last_name = models.CharField(max_length=150, null=True)
@@ -45,7 +46,8 @@ class TopPhEkycDetails(SoftDeleteModel):
             models.Index(fields=['status', 'created_at']),
             models.Index(fields=['kyc_id']),
             models.Index(fields=['mobile_no']),
-            models.Index(fields=['pretty_mobile_no'])
+            models.Index(fields=['pretty_mobile_no']),
+            models.Index(fields=['generate_request_user_id']),
         ]
         db_table = "top_ph_ekyc_details"
         

@@ -35,6 +35,28 @@ class RiderRepository:
         new_rider.save()
         return new_rider
 
+    @staticmethod
+    @transaction.atomic
+    def update_rider_details(rider_instance, personal_details):
+        
+        rider_instance.first_name = personal_details.get("first_name", "")
+        rider_instance.middle_name = personal_details.get("middle_name", "")
+        rider_instance.last_name = personal_details.get("last_name", "")
+        
+        rider_instance.save()
+        
+        return rider_instance
+
+    @staticmethod
+    def check_rider_by_request_user_id(request_user_id):
+        """Get rider ekyc request user id"""
+
+        ## get active rider
+        try:
+            return Rider.objects.get(ekyc_request_user_id=request_user_id, application_status=1, status=1)
+        except Rider.DoesNotExist:
+            return None
+        
 
     @staticmethod
     def check_rider_by_mobile(rider):

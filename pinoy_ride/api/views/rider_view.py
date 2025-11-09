@@ -108,14 +108,13 @@ class RiderViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 rider = self.service.login_mobile_no(request.data)
 
-                zkyc_id = rider.zkyc_id
+                ekyc_request_user_id = rider.ekyc_request_user_id
 
                 # Check if record exist on ekyc user details table
-                check_user_details = self.ekyc_service.check_topph_user_details(zkyc_id=zkyc_id)
+                check_user_details = self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
                 if check_user_details is None:
-                    self.ekyc_service.get_topph_user_details(ref_id=zkyc_id)
+                    self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
 
-        
             serializer = RiderSerializer(rider)
             response_data = serializer.data
 

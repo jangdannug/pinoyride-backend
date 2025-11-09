@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from api.models import Rider, Wallet
+from api.models import Rider, Wallet, TopPhEkycDetails
 from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
 from .rider_address_serializer import RiderAddressSerializer
 from .partial_wallet_serializer import PartialWalletSerializer
+from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
 
 class RiderSerializer(serializers.ModelSerializer):
 
@@ -11,11 +12,13 @@ class RiderSerializer(serializers.ModelSerializer):
     auto_accept = serializers.IntegerField(read_only=True)
     drivers_license_img = serializers.FileField(required=True)
     rider_address = serializers.SerializerMethodField()
+    ekyc_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Rider
         fields = [
             "id",
+            "ekyc_request_user_id",
             "code",
             "first_name",
             "middle_name",
@@ -32,6 +35,7 @@ class RiderSerializer(serializers.ModelSerializer):
             "is_available", # 1 = available, 2 = unavailable
             "is_online",
             "status",
+            "ekyc_details",
             "vehicle_details",
             "rider_address"
         ]
@@ -61,6 +65,12 @@ class RiderSerializer(serializers.ModelSerializer):
         
         return value
 
+    def get_ekyc_details(self, obj):
+        try:
+            record = TopPhEkycDetails.objects.get(generate_request_user_id=obj.ekyc_request_user_id)
+            return TopPhEkycDetailsSerializer(record).data
+        except TopPhEkycDetails.DoesNotExist:
+            return None
     
     def get_rider_address(self, obj):
         # get the related table rider_address

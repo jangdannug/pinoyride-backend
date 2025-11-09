@@ -274,7 +274,36 @@ class EkycApiService:
             "token": auth_token,
         })
         
-        response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
+        # response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
+        #Simulated response
+        response = {
+            "version": "1.0",
+            "statusCode": 200,
+            "message": "GET Request successful.",
+            "result": {
+            "kycId": "cc659b7a-761d-4383-953c-bbca71a36bef",
+            "firstName": "GABRIEL",
+            "middleName": "ORENDAIN",
+            "lastName": "DELA PEÑA",
+            "emailAddress": "gabrieldelapena.official@gmail.com",
+            "phoneNumber": "09273393743",
+            "dateOfBirth": "04/05/2002",
+            "placeOfBirth": "Dagupan City",
+            "nationality": "Filipino",
+            "gender": "",
+            "currentCountry": "Philippines",
+            "currentAddress": "-KAPAYAPAAN, ANONANG, SAN FABIAN PANGASINAN, REGION 1",
+            "permanentCountry": "Philippines",
+            "permanentAddress": "-KAPAYAPAAN, ANONANG, SAN FABIAN PANGASINAN, REGION 1",
+            "natureOfWork": "Aviation",
+            "sourceOfFund": "Employment",
+            "idType": "00630000004",
+            "idNumber": "A02-22-302998",
+            "idFront": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_IdFront.jpg",
+            "idBack": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_IdBack.jpg",
+            "selfie": "https://topzkyc.s3.ap-east-1.amazonaws.com/release/TOPQREPayClient7/2025/11/05/36516b5b-2a59-457b-94de-1c8e9517ea01_Selfie.jpg"
+            }
+        }
         ## Throw error if request to get eKYC user details fail
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to get eKYC user details failed: {response.get('message')}")
@@ -285,7 +314,7 @@ class EkycApiService:
 
         try:
             ## Update record
-            ekycDetailsRecord = TopPhEkycDetails.objects.get(kyc_id=kycId)
+            ekycDetailsRecord = TopPhEkycDetails.objects.get(generate_request_user_id=ref_id)
             ekycDetailsRecord.first_name=result.get('firstName', "")
             ekycDetailsRecord.middle_name=result.get('middleName', "")
             ekycDetailsRecord.last_name=result.get('lastName', "")
@@ -310,9 +339,13 @@ class EkycApiService:
             
             ekycDetailsRecord.save()
             
+            # Update user info
+            # self.update_rider_info(request_user_id=ref_id, ekycDetails=ekycDetailsRecord)
+
         except TopPhEkycDetails.DoesNotExist:
             # Save to database
-            TopPhEkycDetails.objects.create(
+            ekycDetailsRecord = TopPhEkycDetails.objects.create(
+                generate_request_user_id=ref_id,
                 kyc_id=kycId,
                 first_name=result.get('firstName', ""),
                 middle_name=result.get('middleName', ""),
@@ -336,6 +369,9 @@ class EkycApiService:
                 id_back=result.get('idBack', ""),
                 selfie=result.get('selfie', "")
             )
+
+            # Update user info
+            # self.update_rider_info(request_user_id=ref_id, ekycDetails=ekycDetailsRecord)
 
         return response
 
@@ -381,16 +417,35 @@ class EkycApiService:
 
         return customer_id
     
+
+    # @transaction.atomic
+    # def update_rider_info(self, request_user_id, ekycDetails):
+
+    #     personal_details = {
+    #         "first_name" : ekycDetails.first_name or "",
+    #         "middle_name" : ekycDetails.middle_name or "",
+    #         "last_name" : ekycDetails.last_name or "",
+    #     }
+        
+    #     rider_record = self.rider.check_rider_by_request_user_id(request_user_id=request_user_id)
+    #     if rider_record:
+    #         # Update record
+    #         rider = self.rider.update_rider_details(rider_instance=rider_record, personal_details=personal_details)
+
+    #     app_logger(1, "Called 1",{})
+    #     return
+
+
     ## check user details in top ph
     @transaction.atomic
     def check_topph_user_details(
         self,
-        zkyc_id: str
+        ekyc_request_user_id: str
     ) -> Dict[str, Any]:
         """Check details in top ph"""
 
         try:
-            ekycDetailsRecord = TopPhEkycDetails.objects.get(kyc_id=zkyc_id)
+            ekycDetailsRecord = TopPhEkycDetails.objects.get(generate_request_user_id=ekyc_request_user_id)
             return ekycDetailsRecord
         
         except TopPhEkycDetails.DoesNotExist:

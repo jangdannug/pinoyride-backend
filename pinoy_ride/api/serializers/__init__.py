@@ -18,3 +18,4 @@ from .wallet_serializer import WalletSerializer
 from .partial_wallet_serializer import PartialWalletSerializer
 from .wallet_history_serializer import WalletHistorySerializer
 from .qrph_callback_serializer import QRPhCallbackSerializer
+from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
