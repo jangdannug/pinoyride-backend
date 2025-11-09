@@ -78,6 +78,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         if not wallet:
             return wallet_details
         
+        # get details in wallet history
         total_credit = wallet.wallet_ref.aggregate(total=Sum('credit_amount'))['total'] or 0
         total_debit = wallet.wallet_ref.aggregate(total=Sum('debit_amount'))['total'] or 0
         avail_balance = float(total_credit) - float(total_debit)

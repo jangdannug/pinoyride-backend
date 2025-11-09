@@ -5,6 +5,9 @@ from api.utils.auth import get_authenticated_user
 from api.base import (
     ApiService
 )
+from api.services import (
+    WalletService
+)
 import requests
 from api.utils.app_logger import app_logger
 import json
@@ -75,6 +78,8 @@ class QrphApiService:
     ## request to pay method
     def request_to_pay(
         self,
+        user_id: str,
+        user_type: str,
         amount: float,
         total_amount: float,
         reference_id: str,
@@ -134,7 +139,6 @@ class QrphApiService:
         })
         
         response = self.api_service.post_request(url=request_to_pay_url, payload=payload, headers=headers)
-
         ## Throw error if request to pay failed
         if response.get('statusCode') not in [200, 201]:
             raise ValidationError(f"Request to pay failed: {response.get('message')}")
@@ -143,6 +147,8 @@ class QrphApiService:
 
         # Save to database
         transaction = QrPhTransaction.objects.create(
+            user_id=user_id,
+            user_type=user_type,
             reference_id=result.get('referenceId'),
             partner_reference_id=partner_ref,
             invoice_id=result.get('invoiceId'),
@@ -168,6 +174,7 @@ class QrphApiService:
 
 
     # process callback method
+    @transaction.atomic
     def process_callback(
         self,
         callback_data: Dict[str, Any],
@@ -193,6 +200,12 @@ class QrphApiService:
             
             if status == 'success':
                 transaction.completed_at = timezone.localtime(timezone.now())
+                user_id = transaction.user_id
+                user_type = transaction.user_type
+                amount = transaction.amount
+
+                # top-up users's wallet 
+                self.top_up_users_wallet(user_type, user_id, amount, reference_id)
             
             transaction.save()
             
@@ -207,6 +220,12 @@ class QrphApiService:
             app_logger(3, "Callback for unknown transaction", callback_data)
             raise ValidationError(f"Transaction not found: {reference_id}")
 
+    # Top up user's wallet
+    @transaction.atomic
+    def top_up_users_wallet(self, user_type, user_id, amount, reference_id):
+        wallet_service = WalletService()
+        return wallet_service.top_up_users_wallet(user_type = user_type, user_id = user_id, amount=amount, reference_id=reference_id)
+    
     def _create_payload(
         self,
         data_dict: Dict[str, Any],

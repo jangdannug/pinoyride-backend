@@ -7,7 +7,9 @@ from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from api.utils.app_logger import app_logger
 from api.serializers import QRPhCallbackSerializer
 from api.services import (
-    QrphApiService
+    QrphApiService,
+    CustomerService,
+    RiderService
 )
 import uuid
 
@@ -17,6 +19,8 @@ class QrphViewSet(viewsets.ViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs),
         self.qrph_service = QrphApiService()
+        self.customer_service = CustomerService()
+        self.rider_service = RiderService()
 
     @action(detail=False, methods=['post'], url_path='authenticate')
     def authenticate(self, request):
@@ -50,12 +54,25 @@ class QrphViewSet(viewsets.ViewSet):
             app_logger(1, "Request to Pay Request", data)
 
             # Validate required fields
-            required_fields = ['amount', 'total_amount']
+            required_fields = ['amount', 'total_amount', 'user_id', 'user_type']
             for field in required_fields:
                 if field not in data:
                     return AppResponse.send_error(message=str(f"Missing required field: {field}"), code=400)
-                
+            
+            user_id = data.get('user_id')
+            user_type = data.get('user_type')
+
+            if user_type == 'customer':
+                self.customer_service.get_customer_by_id(customer_id=user_id)    
+            elif user_type == 'rider':
+                self.rider_service.get_rider_by_id(rider_id=user_id)
+            else:
+                return AppResponse.send_error(message="Invalid user type", code=400)
+            
+
             result = self.qrph_service.request_to_pay(
+                user_id=user_id,
+                user_type=user_type,
                 amount=float(data.get('amount', 0.0)),
                 total_amount=float(data.get('total_amount', 0.0)),
                 reference_id=str(uuid.uuid4()),
@@ -70,10 +87,10 @@ class QrphViewSet(viewsets.ViewSet):
 
             return AppResponse.send_success(
                 data={
-                    "paymentUrl": result['response']['url'],
-                    "referenceId": result['response']['referenceId'],
+                    "paymentUrl": result['response'].get('url'),
+                    "referenceId": result['response'].get('referenceId'),
                     "invoiceId": result['response'].get('invoiceId'),
-                    "partnerReferenceId": result['transaction'].get('partner_reference_id'),
+                    "partnerReferenceId": result['transaction'].partner_reference_id,
                     "expiresAt": result['transaction'].expires_at.isoformat()
                 },
                 message="Payment request created successfully"

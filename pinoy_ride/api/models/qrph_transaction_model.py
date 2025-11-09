@@ -20,6 +20,8 @@ class QrPhTransaction(SoftDeleteModel):
     ]
 
     id = models.AutoField(primary_key=True)
+    user_id = models.CharField(max_length=250, null=True, db_index=True)
+    user_type = models.CharField(max_length=50, null=True, db_index=True)
     reference_id = models.CharField(max_length=50, unique=True, db_index=True)
     partner_reference_id = models.CharField(max_length=50, db_index=True)
     invoice_id = models.CharField(max_length=50, blank=True, null=True)
@@ -53,6 +55,8 @@ class QrPhTransaction(SoftDeleteModel):
             models.Index(fields=['record_status']),
             models.Index(fields=['status', 'created_at']),
             models.Index(fields=['partner_reference_id']),
+            models.Index(fields=['user_id']),
+            models.Index(fields=['user_type']),
         ]
         db_table = "qrph_transactions"
         

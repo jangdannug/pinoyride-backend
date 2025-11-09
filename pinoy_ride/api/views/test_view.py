@@ -15,6 +15,7 @@ class TestViewSet(viewsets.ViewSet):
 
     def __init__(self, *args, **kwargs):
         self.ekyc_config = settings.TOP_PH_EKYC_CONFIG
+        self.qrph_config = settings.QRPH_CONFIG
         self.security = TopPhEkycSecurityUtil()
 
     queryset = Test.objects.all()
@@ -76,6 +77,35 @@ class TestViewSet(viewsets.ViewSet):
 
         callback_raw_data = request.data.get("raw_data", "")
         salt = self.ekyc_config['CLIENT_SECRET']
+
+        ## Create json string
+        data_json = json.dumps(callback_raw_data, separators=(',', ':'))
+        
+        # Encode data
+        encoded_data = base64.b64encode(data_json.encode('utf-8')).decode('utf-8')
+
+        # Generate hash
+        combined = str(data_json) + str(salt)
+        hash_obj = hashlib.sha256(combined.encode('utf-8'))
+        computed_hash = base64.b64encode(hash_obj.digest()).decode('utf-8')
+        
+
+        return AppResponse.send_success(
+                data={
+                    "raw_data" : callback_raw_data,
+                    "computed_hash" : computed_hash,
+                    "encoded_data" : encoded_data
+                },
+                code=200,
+            )
+
+
+    @action(detail=False, methods=['post'], url_path='qrph_callback_payload')
+    def qrph_callback_payload(self, request):
+        """Return sample response"""
+
+        callback_raw_data = request.data.get("raw_data", "")
+        salt = self.qrph_config['APP_ID']
 
         ## Create json string
         data_json = json.dumps(callback_raw_data, separators=(',', ':'))

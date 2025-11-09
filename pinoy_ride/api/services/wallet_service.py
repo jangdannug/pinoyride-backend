@@ -70,6 +70,50 @@ class WalletService:
             
         return wallet
     
+    ## Top-up customer's wallet
+    def top_up_users_wallet(self, user_type, user_id, amount, reference_id):
+        """Top up user's wallet"""
+
+        top_up_details = {
+            "type" : "credit",
+            "credit_amount" : amount,
+            "description" : f"Top-up|Ref-{reference_id}"
+        }
+
+        if user_type == 'customer':
+            wallet_instance = self.wallet.get_customer_wallet(customer_id=user_id)
+        
+            if wallet_instance:
+                new_wallet_history = self.wallet_history.create(wallet_instance=wallet_instance, wallet_history=top_up_details)
+                # Update wallet balance
+                total_debit_credit = self.wallet_history.get_total_debit_credit(wallet_id=wallet_instance.id)
+
+                wallet_details = {
+                    "credit_amount" : total_debit_credit['total_credit'],
+                    "debit_amount" : total_debit_credit['total_debit'],
+                    "avail_balance" : float(total_debit_credit['total_credit']) - float(total_debit_credit['total_debit']),
+                }
+                updated_wallet = self.wallet.update_balance(wallet_instance, wallet_details)
+                
+                return updated_wallet
+
+        else:
+            wallet_instance = self.wallet.get_rider_wallet(rider_id=user_id)
+        
+            if wallet_instance:
+                new_wallet_history = self.wallet_history.create(wallet_instance=wallet_instance, wallet_history=top_up_details)
+                # Update wallet balance
+                total_debit_credit = self.wallet_history.get_total_debit_credit(wallet_id=wallet_instance.id)
+
+                wallet_details = {
+                    "credit_amount" : total_debit_credit['total_credit'],
+                    "debit_amount" : total_debit_credit['total_debit'],
+                    "avail_balance" : float(total_debit_credit['total_credit']) - float(total_debit_credit['total_debit']),
+                }
+                updated_wallet = self.wallet.update_balance(wallet_instance, wallet_details)
+                
+                return updated_wallet
+            
 
     ## Top-up wallet
     def top_up(self,wallet_instance, top_up_details):
