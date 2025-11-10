@@ -9,6 +9,8 @@ from api.utils.top_ph_ekyc_security import TopPhEkycSecurityUtil
 import base64
 import hashlib
 import json
+from datetime import datetime
+from django.utils import timezone
 
 class TestViewSet(viewsets.ViewSet):
     """Test Controller"""
@@ -28,7 +30,10 @@ class TestViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='test')
     def default(self, request):
         """Return sample response"""
-        return AppResponse.send_success(data=None, message="Django restful template 123")
+        
+        utc_dt = datetime.fromisoformat("2025-11-10 09:47:11.996525+00")
+
+        return AppResponse.send_success(data={"time_node": timezone.localtime(utc_dt).strftime("%Y-%m-%d %H:%M:%S")}, message="Django restful template 123")
 
 
     @action(detail=False, methods=['post'], url_path='compute_distance')
