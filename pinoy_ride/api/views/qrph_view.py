@@ -69,20 +69,20 @@ class QrphViewSet(viewsets.ViewSet):
             else:
                 return AppResponse.send_error(message="Invalid user type", code=400)
             
-
-            result = self.qrph_service.request_to_pay(
-                user_id=user_id,
-                user_type=user_type,
-                amount=float(data.get('amount', 0.0)),
-                total_amount=float(data.get('total_amount', 0.0)),
-                reference_id=str(uuid.uuid4()),
-                client_title=data.get('client_title', "Pinoy Ride"),
-                client_logo=data.get('client_logo', "https://pinoyride.com/assets/img/pinoyride-logo.png"),
-                exp_in_mins=data.get('expInMins', 30),
-                discount=float(data.get('discount', 0.0)),
-                tax=float(data.get('tax', 0.0)),
-                trxn_fee=float(data.get('trxn_fee', 0.0)),
-                order_details=data.get('order_details', [])
+            with transaction.atomic():
+                result = self.qrph_service.request_to_pay(
+                    user_id=user_id,
+                    user_type=user_type,
+                    amount=float(data.get('amount', 0.0)),
+                    total_amount=float(data.get('total_amount', 0.0)),
+                    reference_id=str(uuid.uuid4()),
+                    client_title=data.get('client_title', "Pinoy Ride"),
+                    client_logo=data.get('client_logo', "https://pinoyride.com/assets/img/pinoyride-logo.png"),
+                    exp_in_mins=data.get('expInMins', 30),
+                    discount=float(data.get('discount', 0.0)),
+                    tax=float(data.get('tax', 0.0)),
+                    trxn_fee=float(data.get('trxn_fee', 0.0)),
+                    order_details=data.get('order_details', [])
             )
 
             return AppResponse.send_success(
