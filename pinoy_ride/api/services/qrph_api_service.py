@@ -75,6 +75,7 @@ class QrphApiService:
 
 
     ## request to pay method
+    @transaction.atomic
     def request_to_pay(
         self,
         user_id: str,
