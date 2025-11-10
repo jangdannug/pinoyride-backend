@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from api.models import TopPhEkycDetails
+from django.utils import timezone
 
 class TopPhEkycDetailsSerializer(serializers.ModelSerializer):
+
+    create_date = serializers.SerializerMethodField()
 
     class Meta:
         model = TopPhEkycDetails
@@ -30,6 +33,12 @@ class TopPhEkycDetailsSerializer(serializers.ModelSerializer):
             "status",
             "pretty_mobile_no",
             "permanent_address",   
-            "permanent_country",   
+            "permanent_country",
+            "create_date"
         ]
+
+    def get_create_date(self, obj):
+        if obj.created_at:
+            return timezone.localtime(obj.created_at).strftime("%Y-%m-%d %H:%M:%S")
+        return ""
     
