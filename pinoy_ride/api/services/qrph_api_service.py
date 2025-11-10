@@ -201,7 +201,7 @@ class QrphApiService:
                 transaction.completed_at = timezone.localtime(timezone.now())
                 user_id = transaction.user_id
                 user_type = transaction.user_type
-                amount = transaction.amount
+                amount = transaction.total_amount
 
                 # top-up users's wallet 
                 self.top_up_users_wallet(user_type, user_id, amount, reference_id)
