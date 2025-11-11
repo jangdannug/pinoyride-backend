@@ -39,9 +39,9 @@ class RiderRepository:
     @transaction.atomic
     def update_rider_details(rider_instance, personal_details):
         
-        rider_instance.first_name = personal_details.get("first_name", "")
-        rider_instance.middle_name = personal_details.get("middle_name", "")
-        rider_instance.last_name = personal_details.get("last_name", "")
+        rider_instance.drivers_license_no = personal_details.get("drivers_license_no", "")
+        rider_instance.drivers_license_no_expiration_date = personal_details.get("drivers_license_no_expiration_date", "")
+        rider_instance.drivers_license_img = personal_details.get("drivers_license_img", "")
         
         rider_instance.save()
         

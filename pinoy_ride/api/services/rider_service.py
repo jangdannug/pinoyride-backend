@@ -62,6 +62,15 @@ class RiderService:
             raise NotFoundError("Rider "+ str(rider_id) + " not found or not available")
         return rider
 
+    ## Update rider details
+    @transaction.atomic
+    def update_rider_details(self, rider_instance, personal_details):
+        """Update rider details"""
+        
+        rider_details = self.rider.update_rider_details(rider_instance=rider_instance, personal_details=personal_details)
+    
+        return rider_details
+    
     ## Update rider current coordinates
     @transaction.atomic
     def update_rider_coordinates(self, rider_instance, rider_lat, rider_long):

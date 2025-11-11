@@ -250,6 +250,62 @@ class RiderViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+        
+    
+    @action(detail=False, methods=['post'], url_path='documents')
+    def documents_details(self, request):
+        """Update details and documents"""
+        
+        try:
+
+            vehicle_details = json.loads(request.data.get("vehicle_details", "{}"))
+            personal_details = json.loads(request.data.get("personal_details", "{}") or "{}")
+            
+            rider_id= request.data.get("rider_id", "")
+            drivers_license_img= request.data.get("drivers_license_img", "")
+
+            drivers_license_img= request.data.get("drivers_license_img", None)
+            personal_details['drivers_license_img'] =  drivers_license_img
+
+            or_cr_img= request.data.get("or_cr_img", None)
+            motorcyle_img= request.data.get("motorcyle_img", None)
+            vehicle_details['or_cr_img'] = or_cr_img
+            vehicle_details['motorcyle_img'] = motorcyle_img
+
+            # Validation
+            if not rider_id:
+                return AppResponse.send_error(message="Rider ID is required", code=400)
+            if not drivers_license_img:
+                return AppResponse.send_error(message="Driver's license is required", code=400)
+                        
+            rider_vehicle_serializer = RiderVehicleDetailsSerializer(data=vehicle_details)
+            if not rider_vehicle_serializer.is_valid():
+                return AppResponse.send_error(message=rider_vehicle_serializer.errors, code=400)
+
+            with transaction.atomic():
+                
+                rider_details = self.service.get_rider_by_id(rider_id=rider_id)
+
+                self.service.update_rider_details(rider_instance=rider_details, personal_details=personal_details)
+
+                self.rider_vehicle_service.update_rider_vehicle(rider_id = rider_details.id , rider_vehicle_details=vehicle_details)
+
+                serializer = RiderSerializer(rider_details)
+
+                rider_details.refresh_from_db()
+
+            return AppResponse.send_success(data=serializer.data, message="Record updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
 
 
     @action(detail=False, methods=['post'], url_path='top_up')
