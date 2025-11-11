@@ -99,7 +99,7 @@ class EkycApiService:
         if not auth_token:
             raise ValidationError("Failed to get authentication token")
         
-        request_user_id = f"{user_id}|{user_type_code}{int(timezone.now().timestamp())}"
+        request_user_id = f"{user_id}-{user_type_code}{int(timezone.now().timestamp())}"
 
         # Build request data (order matters per API spec)
         data = {
