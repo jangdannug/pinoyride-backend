@@ -205,7 +205,7 @@ class WalletService:
             # insert to pinoy ride wallet history
             self.pinoy_ride_wallet_history.create(wallet_instance=pr_wallet_instance, wallet_history=pr_credit_details)
             # Update wallet balance
-            pr_total_debit_credit = self.pinoy_ride_wallet_history.get_total_debit_credit(wallet_id=rider_wallet_instance.id)
+            pr_total_debit_credit = self.pinoy_ride_wallet_history.get_total_debit_credit(wallet_id=pr_wallet_instance.id)
 
             pr_wallet_details = {
                 "credit_amount" : pr_total_debit_credit['total_credit'],
