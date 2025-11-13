@@ -121,9 +121,12 @@ class QrphViewSet(viewsets.ViewSet):
             callback_hash = request.data.get('hash', '')
             
             # # Validate callback structure
-            serializer = QRPhCallbackSerializer(data=callback_data)
-            if not serializer.is_valid():
-                    return AppResponse.send_error(message=serializer.errors, code=400)
+            # serializer = QRPhCallbackSerializer(data=callback_data)
+            # if not serializer.is_valid():
+            #         return AppResponse.send_error(message=serializer.errors, code=400)
+            
+            if not callback_data or not callback_hash:
+                raise ValidationError("Missing data or hash in callback")
             
             # Process callback
             with transaction.atomic():
