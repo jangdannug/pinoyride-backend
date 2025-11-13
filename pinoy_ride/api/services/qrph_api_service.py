@@ -208,6 +208,8 @@ class QrphApiService:
             transaction.status = status
             transaction.callback_data = callback_data
             transaction.invoice_id = callback_data.get('invoiceId')
+            transaction.topph_partner_reference_id=callback_data.get('partner_ReferenceId')
+            transaction.trx_date=callback_data.get('trxDate')
             
             if status == 'success':
                 transaction.completed_at = timezone.localtime(timezone.now())
