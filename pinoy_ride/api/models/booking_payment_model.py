@@ -17,6 +17,8 @@ class BookingPayment(SoftDeleteModel):
     minimum_fare = models.FloatField(default=0, blank=True)
     pesos_per_km = models.FloatField(default=0, blank=True)
     booking_fee = models.FloatField(default=0, blank=True)
+    base_amount = models.FloatField(default=0, blank=True, null=True)
+    distance_km_round = models.FloatField(default=0, blank=True, null=True)
     tip = models.FloatField(default=0, blank=True)
     total_amount = models.FloatField(default=0, blank=True)
     commission = models.FloatField(default=0, blank=True, null=True)
