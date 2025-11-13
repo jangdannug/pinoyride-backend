@@ -76,7 +76,7 @@ class BookingViewSet(viewsets.ViewSet):
                 "minimum_fare" : minimum_fare,
                 "pesos_per_km" : pesos_per_km,
                 "base_amount" : base_amount,
-                "commision" : commision,
+                "commission" : commision,
                 "rider_net_amount" : rider_net_amount,
                 "total_amount" : total_amount
             }
