@@ -127,6 +127,39 @@ class CustomerViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+    
+
+    @action(detail=False, methods=['post'], url_path='get_customer_details')
+    def get_customer_details(self, request):
+        """Customer details"""
+        
+        try:
+
+            customer_id = request.data.get("customer_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+
+            response_data = []
+
+            with transaction.atomic():
+                customer = self.service.get_customer_by_id(customer_id=customer_id)
+
+            serializer = CustomerSerializer(customer)
+            response_data = serializer.data
+
+
+            return AppResponse.send_success(data=response_data, message="Customer details")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
 
 
 

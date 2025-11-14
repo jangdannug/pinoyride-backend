@@ -135,6 +135,40 @@ class RiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(detail=False, methods=['post'], url_path='get_rider_details')
+    def get_rider_details(self, request):
+        """Rider details"""
+        
+        try:
+
+            rider_id = request.data.get("rider_id", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider Id is required", code=400)
+
+            response_data = []
+
+            with transaction.atomic():
+                customer = self.service.get_rider_by_id(rider_id=rider_id)
+
+            serializer = RiderSerializer(customer)
+            response_data = serializer.data
+
+
+            return AppResponse.send_success(data=response_data, message="Rider details")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+
     @action(detail=False, methods=['post'], url_path='update_online_status')
     def update_online_status(self, request):
         """Update online status"""
