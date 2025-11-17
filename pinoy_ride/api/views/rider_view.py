@@ -382,3 +382,46 @@ class RiderViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+        
+
+    
+    @action(
+        detail=False, methods=["post"], url_path="get_wallet_history"
+    )
+    def get_wallet_history(self, request):
+        """List rider wallet history with pagination and search query"""
+        try:
+            page = int(request.data.get("page", 1))
+            perpage = int(request.data.get("perpage", 10))
+            query = request.data.get("query", None)
+            sort_by = request.data.get("sort_by")
+            name_filter = request.data.get("name_filter")
+            rider_id = request.data.get("rider_id", "")
+
+            filters = {}
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+
+            if name_filter:
+                filters["name_filter"] = name_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-updated_at"
+
+            wallet_history = self.wallet_service.get_wallet_history(
+                user_id=rider_id, user_type='rider',  page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by
+            )
+
+            return AppResponse.send_success(
+                data=wallet_history, message="Rider's wallet history listed successfully"
+            )
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)

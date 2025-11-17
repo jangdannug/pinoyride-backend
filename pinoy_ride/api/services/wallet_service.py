@@ -232,3 +232,17 @@ class WalletService:
         updated_wallet = self.wallet.update_balance(wallet_instance, wallet_details)
         
         return updated_wallet
+    
+
+    ## Get wallet history
+    def get_wallet_history(self, user_id, user_type, page_number, page_size, search_query, filters, sort_by):
+        """Get user's wallet history"""
+        
+        if user_type == 'customer':
+            wallet_instance = self.get_customer_wallet(customer_id=user_id)
+        else:
+            wallet_instance = self.get_rider_wallet(rider_id=user_id)
+         
+        booking_history = self.wallet_history.get_wallet_history(wallet_instance, page_number, page_size, search_query, filters, sort_by)
+    
+        return booking_history
