@@ -79,9 +79,11 @@ class CustomerRepository:
 
             for term in search_terms:
                 query_filter |= (
-                    Q(first_name__icontains=term)
-                    | Q(middle_name__icontains=term)
-                    | Q(last_name__icontains=term)
+                    Q(code__icontains=term)
+                    | Q(fname__icontains=term)
+                    | Q(mname__icontains=term)
+                    | Q(lname__icontains=term)
+                    | Q(mobile__icontains=term)
                 )
 
             customers = customers.filter(query_filter).distinct()

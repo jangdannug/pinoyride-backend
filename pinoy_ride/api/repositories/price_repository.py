@@ -86,6 +86,9 @@ class PriceRepository:
             for term in search_terms:
                 query_filter |= (
                     Q(km__icontains=term)
+                    | Q(id__icontains=term)
+                    | Q(price__icontains=term)
+                    | Q(time_travel__icontains=term)
                 )
 
             prices = prices.filter(query_filter).distinct()

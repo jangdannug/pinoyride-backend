@@ -16,6 +16,7 @@ class Promo(SoftDeleteModel):
     start_date = models.DateField(max_length=255,null=True)
     end_date = models.DateField(max_length=255,null=True)
     location = models.CharField(max_length=255)
+    no_of_users = models.IntegerField(default=0)
     added_by = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

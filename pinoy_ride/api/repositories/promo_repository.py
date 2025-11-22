@@ -29,6 +29,7 @@ class PromoRepository:
             start_date=promo.get("start_date", ""),
             end_date=promo.get("end_date", ""),
             location=promo.get("location", ""),
+            no_of_users=promo.get("no_of_users", 0),
             added_by=auth_user_id
         )
     
@@ -51,6 +52,7 @@ class PromoRepository:
         promo_instance.start_date = update_data.get("start_date", "")
         promo_instance.end_date = update_data.get("end_date", "")
         promo_instance.location = update_data.get("location", "")
+        promo_instance.no_of_users = update_data.get("no_of_users", 0)
         promo_instance.save()
 
         return promo_instance

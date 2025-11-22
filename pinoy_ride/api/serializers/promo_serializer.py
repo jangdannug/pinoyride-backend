@@ -20,6 +20,7 @@ class PromoSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "location",
+            "no_of_users",
             "status"
         ]
 
