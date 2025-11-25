@@ -43,9 +43,9 @@ class RiderViewSet(viewsets.ViewSet):
             personal_details['drivers_license_img'] = drivers_license_img
 
             or_cr_img= request.data.get("or_cr_img", None)
-            motorcyle_img= request.data.get("motorcyle_img", None)
+            vehicle_img= request.data.get("vehicle_img", None)
             vehicle_details['or_cr_img'] = or_cr_img
-            vehicle_details['motorcyle_img'] = motorcyle_img
+            vehicle_details['vehicle_img'] = vehicle_img
 
             # Validation
             rider_serializer = RiderSerializer(data=personal_details)
@@ -302,9 +302,9 @@ class RiderViewSet(viewsets.ViewSet):
             personal_details['drivers_license_img'] =  drivers_license_img
 
             or_cr_img= request.data.get("or_cr_img", None)
-            motorcyle_img= request.data.get("motorcyle_img", None)
+            vehicle_img= request.data.get("vehicle_img", None)
             vehicle_details['or_cr_img'] = or_cr_img
-            vehicle_details['motorcyle_img'] = motorcyle_img
+            vehicle_details['vehicle_img'] = vehicle_img
 
             # Validation
             if not rider_id:
@@ -322,7 +322,7 @@ class RiderViewSet(viewsets.ViewSet):
 
                 self.service.update_rider_details(rider_instance=rider_details, personal_details=personal_details)
 
-                self.rider_vehicle_service.update_rider_vehicle(rider_id = rider_details.id , rider_vehicle_details=vehicle_details)
+                self.rider_vehicle_service.update_rider_vehicle(rider_id = rider_details.id, vehicle_type = vehicle_details['type'], rider_vehicle_details=vehicle_details)
 
                 serializer = RiderSerializer(rider_details)
 

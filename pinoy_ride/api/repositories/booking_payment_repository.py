@@ -40,10 +40,17 @@ class BookingPaymentRepository:
         """Add tip"""
         tip = float(tip)
         minimum_fare = booking_payment_instance.minimum_fare
-        pesos_per_km = booking_payment_instance.pesos_per_km
+        base_amount = booking_payment_instance.base_amount
         booking_fee = booking_payment_instance.booking_fee
-        total_amount = minimum_fare + pesos_per_km + booking_fee + tip
+        total_amount = minimum_fare + base_amount + booking_fee + tip
         
+        # Compute commission and rider net amount
+        commission_prcentage = .20 #20%
+        commission = round(total_amount * commission_prcentage, 2)
+        rider_net_amount = round(total_amount - commission, 2)
+
+        booking_payment_instance.commission = commission
+        booking_payment_instance.rider_net_amount = rider_net_amount
         booking_payment_instance.tip = tip
         booking_payment_instance.total_amount = round(total_amount, 2)
         booking_payment_instance.save()

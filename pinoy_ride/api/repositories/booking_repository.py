@@ -45,7 +45,7 @@ class BookingRepository:
     
 
     @staticmethod
-    def pending_list(rider_lat, rider_long):
+    def pending_list(rider_lat, rider_long, booking_type):
         """Retrieve list of pending bookings"""
         rider_lat = float(rider_lat)
         rider_long = float(rider_long)
@@ -60,7 +60,7 @@ class BookingRepository:
         # Narrow down candidates from DB
         bookings = (
             Booking.objects
-            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range)
+            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range, booking_type = booking_type)
             .order_by("-id")[:50]  # limit to 50 candidates
         )
 

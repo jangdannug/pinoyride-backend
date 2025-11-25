@@ -12,6 +12,7 @@ class BookingPaymentSerializer(serializers.ModelSerializer):
             "minimum_fare",
             "pesos_per_km",
             "booking_fee",
+            "base_amount",
             "total_amount",
             "tip",
             "status"

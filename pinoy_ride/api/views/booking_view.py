@@ -41,6 +41,7 @@ class BookingViewSet(viewsets.ViewSet):
 
         try:
             customer_id = request.data.get("customer_id", "")
+            booking_type = request.data.get("booking_type", "1")
             if not customer_id:
                     return AppResponse.send_error(message="Customer id is required", code=400)
 
@@ -60,11 +61,27 @@ class BookingViewSet(viewsets.ViewSet):
             distance_km = geodesic(origin, destination).kilometers
             distance_km_round = round(distance_km, 2)
 
-            minimum_fare = 50.00
-            pesos_per_km = 10
-            booking_fee = 10
-            commission_prcentage = .20 #20%
-            
+            if booking_type == '1':
+                # Booking Type = 1 - Motorcyle
+                minimum_fare = 50.00
+                pesos_per_km = 10
+                booking_fee = 10
+                commission_prcentage = .20 #20%
+
+            elif booking_type == '2':
+                # Booking Type = 2 - Car - 4 Seaters
+                minimum_fare = 100.00
+                pesos_per_km = 10
+                booking_fee = 10
+                commission_prcentage = .20 #20%
+
+            elif booking_type == '3':
+                # Booking Type = 3 = Car - 6 Seaters
+                minimum_fare = 120.00
+                pesos_per_km = 10
+                booking_fee = 10
+                commission_prcentage = .20 #20%
+
             base_amount = distance_km_round * pesos_per_km
             total_amount= minimum_fare + base_amount + booking_fee
 
@@ -299,6 +316,7 @@ class BookingViewSet(viewsets.ViewSet):
             rider_id = request.data.get("rider_id", "")
             rider_lat = request.data.get("current_lat", "")
             rider_long = request.data.get("current_long", "")
+            booking_type = request.data.get("booking_type", "1")
 
             if not rider_id:
                 return AppResponse.send_error(message="Rider id is required", code=400)
@@ -313,7 +331,7 @@ class BookingViewSet(viewsets.ViewSet):
 
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
-                booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long)
+                booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type)
            
             return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
 
@@ -478,6 +496,9 @@ class BookingViewSet(viewsets.ViewSet):
                 booking_details = self.service.get_booking_by_id(booking_id=booking_id)
                 rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
                 
+                if booking_details.status == 3:
+                    return AppResponse.send_error(message="Booking is already completed", code=400)
+            
                 ## validate booking record if it is linked to rider_id
                 if status != "1":
                     self.service.get_booking_by_rider_and_id(rider_id=rider_id, booking_id=booking_id)
@@ -496,7 +517,7 @@ class BookingViewSet(viewsets.ViewSet):
 
                 serializer = BookingSerializer(booking_details)
            
-            return AppResponse.send_success(data=serializer.data, message="Booking updated successfully")
+            return AppResponse.send_success(data=serializer.data, message="Booking updated successfully ")
 
 
         except NotFoundError as e:

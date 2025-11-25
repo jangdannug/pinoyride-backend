@@ -19,7 +19,7 @@ class RiderVehicleDetailsRepository:
         )
 
         rider_vehicle.v_or_cr_img = rider_vehicle_details.get("or_cr_img", "")
-        rider_vehicle.v_motorcyle_img = rider_vehicle_details.get("motorcyle_img", "")
+        rider_vehicle.v_vehicle_img = rider_vehicle_details.get("vehicle_img", "")
 
         rider_vehicle.save()
         return rider_vehicle
@@ -33,7 +33,7 @@ class RiderVehicleDetailsRepository:
         rider_vehicle_instance.v_plate_number = rider_vehicle_details.get("plate_number", "")
 
         rider_vehicle_instance.v_or_cr_img = rider_vehicle_details.get("or_cr_img", "")
-        rider_vehicle_instance.v_motorcyle_img = rider_vehicle_details.get("motorcyle_img", "")
+        rider_vehicle_instance.v_vehicle_img = rider_vehicle_details.get("vehicle_img", "")
         
 
         rider_vehicle_instance.save()
@@ -45,5 +45,13 @@ class RiderVehicleDetailsRepository:
         """Get rider vehicle details by rider id"""
         try:
             return RiderVehicleDetails.objects.get(rider_id=rider_id)
+        except RiderVehicleDetails.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_vehicle_details_rider_by_id_and_type(rider_id, vehicle_type):
+        """Get rider vehicle details by rider id and vehicle type"""
+        try:
+            return RiderVehicleDetails.objects.get(rider_id=rider_id, v_type = vehicle_type)
         except RiderVehicleDetails.DoesNotExist:
             return None

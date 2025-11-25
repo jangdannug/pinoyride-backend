@@ -19,9 +19,9 @@ class BookingService:
         return new_booking
 
     ## Get pending bookings
-    def get_pending(self, rider_lat, rider_long):
+    def get_pending(self, rider_lat, rider_long, booking_type):
         """List all pending bookings"""
-        return self.booking.pending_list(rider_lat = rider_lat, rider_long=rider_long)
+        return self.booking.pending_list(rider_lat = rider_lat, rider_long=rider_long, booking_type=booking_type)
     
     ## Get random pending booking
     def get_random_pending(self, rider_lat, rider_long):

@@ -9,7 +9,7 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
     color = serializers.CharField(source='v_color', required=True)
     plate_number = serializers.CharField(source='v_plate_number', required=True)
     or_cr_img = serializers.FileField(source='v_or_cr_img', required=True)
-    motorcyle_img = serializers.FileField(source='v_motorcyle_img', required=True)
+    vehicle_img = serializers.FileField(source='v_vehicle_img', required=True)
 
     class Meta:
         model = RiderVehicleDetails
@@ -22,5 +22,5 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
             "color",
             "plate_number",
             "or_cr_img",
-            "motorcyle_img"
+            "vehicle_img"
         ]

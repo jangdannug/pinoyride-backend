@@ -23,12 +23,12 @@ class RiderVehicleDetailsService:
     
      ## Save rider vehicle details
     @transaction.atomic
-    def update_rider_vehicle(self, rider_id, rider_vehicle_details):
+    def update_rider_vehicle(self, rider_id, vehicle_type, rider_vehicle_details):
         """Update rider vehicle"""
         
         rider_instance = self.get_rider_by_id(rider_id = rider_id)
 
-        rider_vehicle_instance = self.rider_vehicle_details_repository.get_vehicle_details_rider_by_id(rider_id=rider_id)
+        rider_vehicle_instance = self.rider_vehicle_details_repository.get_vehicle_details_rider_by_id_and_type(rider_id=rider_id, vehicle_type=vehicle_type)
 
         
         if rider_vehicle_instance is None:

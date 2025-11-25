@@ -20,6 +20,12 @@ def upload_to_motorcycle(instance, filename):
     filename = f"{uuid4().hex}.{ext}"
     return f"uploads/motorcycle_img/{instance.rider.id}/{filename}"
 
+def upload_to_vehicle(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid4().hex}.{ext}"
+    return f"uploads/vehicle_img/{instance.rider.id}/{filename}"
+
+
 class RiderVehicleDetails(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     rider = models.ForeignKey(Rider, related_name='rider_vehicle', on_delete=models.CASCADE, default=None, null=True, blank=True)
@@ -29,7 +35,7 @@ class RiderVehicleDetails(SoftDeleteModel):
     v_color = models.CharField(max_length=255, null=True)
     v_plate_number = models.CharField(max_length=255, null=True)
     v_or_cr_img = models.FileField(upload_to=upload_to_or_cr, null=True, blank=True)
-    v_motorcyle_img = models.FileField(upload_to=upload_to_motorcycle, null=True, blank=True)
+    v_vehicle_img = models.FileField(upload_to=upload_to_vehicle, null=True, blank=True)
     status = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
