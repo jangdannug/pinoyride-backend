@@ -254,3 +254,31 @@ class AdminRiderViewSet(viewsets.ViewSet):
             )
 
 
+    ## Get rider  by id
+    @action(
+        detail=False, methods=["get"], url_path="get-rider"
+    )
+    def get_rider_by_id(self, request):
+        """Retrieve rider details"""
+
+        rider_id = request.query_params.get("rider_id", "")
+        if not rider_id:
+            return AppResponse.send_error(message="Rider Id is required!", code=400)
+
+        try:
+
+            rider = self.admin_service.get_rider_by_id(rider_id)
+            
+            serializer = RiderSerializer(rider)
+            response_data = serializer.data
+
+            return AppResponse.send_success(
+                data=response_data, message="Rider details fetched successfully", code=status.HTTP_200_OK
+            )
+        
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
