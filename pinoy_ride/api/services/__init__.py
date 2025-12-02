@@ -14,6 +14,7 @@ from api.services.admin_promo_service import AdminPromoService
 from api.services.admin_price_service import AdminPriceService
 from api.services.admin_rider_service import AdminRiderService
 from api.services.admin_customer_service import AdminCustomerService
+from api.services.admin_task_service import AdminTaskService
 
 from api.services.qrph_api_service import QrphApiService
 from api.services.ekyc_api_service import EkycApiService
