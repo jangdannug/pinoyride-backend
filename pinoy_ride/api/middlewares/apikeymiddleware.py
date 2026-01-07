@@ -37,12 +37,14 @@ class ApiKeyAuthenticationMiddleware:
             #             return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
                
              # Check callback routes (api-key)
-            # if request.path.startswith(callback_routes):
-            #    if api_key_callback != settings.CALLBACK_API_KEY:
+            if request.path.startswith(callback_routes):
+               if api_key_callback != settings.CALLBACK_API_KEY:
                     # return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
+                    response = self.get_response(request)
+                    return response
 
             # Check normal API routes (X-API-KEY)
-            if request.path.startswith(api_routes):
+            elif request.path.startswith(api_routes):
                 if api_key_app != settings.CUSTOM_API_KEY:
                     return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
 
