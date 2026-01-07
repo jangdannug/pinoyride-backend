@@ -58,9 +58,9 @@ class EkycViewSet(viewsets.ViewSet):
                 response = self.ekyc_service.generate_ekyc_url(
                     user_id=data['user_id'],
                     user_type=data['user_type'],
-                    success_url=data.get('success_url', 'https://pinoyride.com/success.html'),
-                    failed_url=data.get('failed_url', 'https://pinoyride.com/failed.html'),
-                    expired_url=data.get('expired_url', 'https://pinoyride.com/expire.html')
+                    success_url=data.get('success_url', 'https://pinoy-ride.vercel.app/ekyc-success'),
+                    failed_url=data.get('failed_url', 'https://pinoy-ride.vercel.app/ekyc-failed'),
+                    expired_url=data.get('expired_url', 'https://pinoy-ride.vercel.app/ekyc-expired')
                 )
             
             return AppResponse.send_success(data={
