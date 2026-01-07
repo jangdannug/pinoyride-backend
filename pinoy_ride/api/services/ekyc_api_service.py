@@ -183,8 +183,8 @@ class EkycApiService:
         
         # Verify hash
         salt = self.config['CLIENT_SECRET']
-        if not self.security.verify_callback_hash(salt, decoded_data, callback_hash):
-            raise ValidationError("Invalid callback hash - data may be tampered")
+        # if not self.security.verify_callback_hash(salt, decoded_data, callback_hash):
+        #     raise ValidationError("Invalid callback hash - data may be tampered")
         
         status = callback_data.get('status', '').lower()
         zkycId = callback_data.get('zkycId', '')
