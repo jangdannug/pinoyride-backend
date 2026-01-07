@@ -19,3 +19,4 @@ from .top_ph_ekyc_details_model import TopPhEkycDetails
 from .pinoy_ride_wallet_model import PinoyRideWallet
 from .pinoy_ride_wallet_history_model import PinoyRideWalletHistory
 from .tasks_model import Tasks
+from .top_ph_ekyc_callback_logs_model import TopPhEkycCallbackLogsModel

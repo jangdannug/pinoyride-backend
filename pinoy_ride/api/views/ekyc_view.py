@@ -9,7 +9,9 @@ from api.serializers import QRPhCallbackSerializer
 from api.services import (
     EkycApiService
 )
+from api.models.top_ph_ekyc_callback_logs_model import TopPhEkycCallbackLogsModel
 import uuid
+import json
 
 class EkycViewSet(viewsets.ViewSet):
     """EKYC Controller"""
@@ -93,6 +95,17 @@ class EkycViewSet(viewsets.ViewSet):
             encoded_data = request.data.get('data', {})
             callback_hash = request.data.get('hash', '')
             
+            request_payload = {
+                "method": request.method,
+                "path": request.path,
+                "headers": dict(request.headers),
+                "query_params": request.query_params.dict(),
+                "body": request.data,
+            }
+            TopPhEkycCallbackLogsModel.objects.create(
+                request_data=json.dumps(request_payload)
+            )
+        
             if not encoded_data or not callback_hash:
                 raise ValidationError("Missing data or hash in callback")
             
