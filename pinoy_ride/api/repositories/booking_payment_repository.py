@@ -25,6 +25,8 @@ class BookingPaymentRepository:
             tip=booking_payment.get("tip", ""),
             rider_net_amount=booking_payment.get("rider_net_amount", ""),
             commission=booking_payment.get("commission", ""),
+            promo_discount=booking_payment.get("promo_discount", ""),
+            total_amount_wo_promo=booking_payment.get("total_amount_wo_promo", ""),
             total_amount=booking_payment.get("total_amount", ""),
             base_amount=booking_payment.get("base_amount", ""),
             distance_km_round=booking_payment.get("distance_km_round", ""),

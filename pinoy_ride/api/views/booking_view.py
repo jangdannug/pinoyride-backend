@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema
 from api.utils.app_response import AppResponse
 from api.models import Test
 import json
-from api.serializers import BookingSerializer
+from api.serializers import BookingSerializer, PromoSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from django.db import transaction
 from api.services import (
@@ -13,7 +13,9 @@ from api.services import (
     RiderService,
     BookingPaymentService,
     BookingRatingsService,
-    WalletService
+    WalletService,
+    PromoService,
+    PromoAvailedService
 )
 from api.base import (
     ApiService
@@ -33,6 +35,8 @@ class BookingViewSet(viewsets.ViewSet):
         self.booking_payment_service = BookingPaymentService()
         self.booking_ratings_service = BookingRatingsService()
         self.wallet_service = WalletService()
+        self.promo_service = PromoService()
+        self.promo_availed_service = PromoAvailedService()
 
 
     @action(detail=False, methods=['post'], url_path='inquire')
@@ -42,6 +46,7 @@ class BookingViewSet(viewsets.ViewSet):
         try:
             customer_id = request.data.get("customer_id", "")
             booking_type = request.data.get("booking_type", "1")
+            promo_id = request.data.get("promo_id", "")
             if not customer_id:
                     return AppResponse.send_error(message="Customer id is required", code=400)
 
@@ -83,10 +88,26 @@ class BookingViewSet(viewsets.ViewSet):
                 commission_prcentage = .20 #20%
 
             base_amount = distance_km_round * pesos_per_km
-            total_amount= minimum_fare + base_amount + booking_fee
+            total_amount_wo_promo = minimum_fare + base_amount + booking_fee
+            total_amount = minimum_fare + base_amount + booking_fee
 
             commision = round(total_amount * commission_prcentage, 2)
             rider_net_amount = round(total_amount - commision, 2)
+
+            ## Check promo
+            promo_discount_percentage = 0
+            promo_discount = 0
+            if promo_id:
+                promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
+                validate_promo = self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
+                if promo_details:
+                    if promo_details.code == 'RIDE93333':
+                        promo_discount_percentage = .10
+                        promo_discount = round(total_amount * promo_discount_percentage, 2)
+
+                        # Change commission and total amount
+                        total_amount = round(total_amount - promo_discount, 2)
+                        commision = round(total_amount - rider_net_amount, 2)
 
             response = {
                 "distance_km_round" : distance_km_round,
@@ -94,8 +115,10 @@ class BookingViewSet(viewsets.ViewSet):
                 "pesos_per_km" : pesos_per_km,
                 "base_amount" : base_amount,
                 "booking_fee" : booking_fee,
+                "promo_discount" : promo_discount,
                 "commission" : commision,
                 "rider_net_amount" : rider_net_amount,
+                "total_amount_wo_promo" : total_amount_wo_promo,
                 "total_amount" : total_amount
             }
 
@@ -135,6 +158,13 @@ class BookingViewSet(viewsets.ViewSet):
             dropoff_long= request.data.get("dropoff_long", "")
             payment_type = request.data.get("payment_type", "")
             payment_total_amount = payment_details.get("total_amount", 0)
+            promo_id = request.data.get("promo_id", "")
+            
+
+            ## Valiate promo
+            if promo_id:
+                promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
+                self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
 
             # Validation
             booking_details = {
@@ -177,6 +207,10 @@ class BookingViewSet(viewsets.ViewSet):
 
                 # save booking payment
                 self.booking_payment_service.save_booking_payment(booking_instance=booking_details, booking_payment=payment_details) 
+
+                # save promo availed
+                if promo_id:
+                    self.promo_availed_service.save_promo_availed(promo_instance=promo_details, customer_instance=customer_details, booking_instance=booking_details)
 
                 serializer = BookingSerializer(booking_details)
            
@@ -509,6 +543,12 @@ class BookingViewSet(viewsets.ViewSet):
 
                     self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
 
+                    #check if booking has promo
+                    promo_availed_details = self.promo_availed_service.get_promo_availed_by_booking_id(booking_id=booking_id)
+                    if promo_availed_details:
+                        # Update promo availed status to completed
+                        self.promo_availed_service.update_promo_availed_status(promo_availed_instance = promo_availed_details, status=1)
+
                 self.service.update_booking_status_for_rider(booking=booking_details, booking_status = status, rider=rider_details)
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
@@ -564,12 +604,79 @@ class BookingViewSet(viewsets.ViewSet):
                         rider_details = self.rider_service.get_rider_by_id(rider_id=booking_details.rider_id)
                         self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
 
+                    #check if booking has promo
+                    promo_availed_details = self.promo_availed_service.get_promo_availed_by_booking_id(booking_id=booking_id)
+                    if promo_availed_details:
+                        # Update promo availed status to cancelled
+                        self.promo_availed_service.update_promo_availed_status(promo_availed_instance = promo_availed_details, status=2)
+
                 # refresh booking_details
                 booking_details.refresh_from_db()
 
                 serializer = BookingSerializer(booking_details)
            
             return AppResponse.send_success(data=serializer.data, message="Booking updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='get_promo_list')
+    def get_promo_list(self, request):
+        """Get Promo List"""
+        
+        try:            
+            customer_id = request.data.get("customer_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer id is required", code=400)
+
+            promos = self.promo_service.get_promo_list(
+                customer_id=customer_id
+            )
+
+            return AppResponse.send_success(
+                data=promos, message="Promos listed successfully", code=200
+            )
+    
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+        
+
+    @action(detail=False, methods=['post'], url_path='check_promo_code')
+    def check_promo_code(self, request):
+        """Check Promo Code"""
+        
+        try:            
+            customer_id = request.data.get("customer_id", "")
+            promo_code = request.data.get("promo_code", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer id is required", code=400)
+            if not promo_code:
+                return AppResponse.send_error(message="Promo code is required", code=400)
+
+            with transaction.atomic():
+                promo_details = self.promo_service.get_promo_by_code(promo_code=promo_code, customer_id=customer_id)
+
+                serializer = PromoSerializer(promo_details)
+        
+            return AppResponse.send_success(data=serializer.data, message="Promo details")
 
 
         except NotFoundError as e:

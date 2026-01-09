@@ -20,6 +20,8 @@ class BookingPayment(SoftDeleteModel):
     base_amount = models.FloatField(default=0, blank=True, null=True)
     distance_km_round = models.FloatField(default=0, blank=True, null=True)
     tip = models.FloatField(default=0, blank=True)
+    promo_discount = models.FloatField(default=0, blank=True)
+    total_amount_wo_promo = models.FloatField(default=0, blank=True)
     total_amount = models.FloatField(default=0, blank=True)
     commission = models.FloatField(default=0, blank=True, null=True)
     rider_net_amount = models.FloatField(default=0, blank=True, null=True)

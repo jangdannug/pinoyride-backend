@@ -154,3 +154,53 @@ class ApiService:
         except ValueError:
             # If response is not JSON, return text
             return response.text or f"HTTP {response.status_code} Error"
+        
+    
+    @staticmethod
+    def post_itext_mo(url, payload, headers):
+
+        try:
+            # Log request
+            app_logger(1, "API POST Request", {
+                "url": url,
+                "headers": headers,
+                "payload": payload
+            })
+
+            response = requests.post(
+                url,
+                data=payload,     # IMPORTANT: data= not json=
+                headers=headers,
+                timeout=30
+            )
+
+            try:
+                response_json = response.json()
+            except ValueError:
+                response_json = {"err_message": response.text}
+
+            # Log response status
+            app_logger(1, "ITEXTMO POST Response", {
+                "url": url,
+                "status_code": response.status_code,
+                "response" : response_json,
+            })
+            
+        
+            if response.status_code in (200, 201):  # 201 = Created
+            
+                return response.json()
+        
+            else:
+                
+                err_mesasge = ApiService.extract_error_message(response)
+                raise Exception(
+                    err_mesasge
+                )
+
+        except requests.RequestException as e:
+          app_logger(1, "API POST Error Exception Response", {
+              "url": url,
+              "err_message": (str(e))
+          })
+          raise Exception(str(e))

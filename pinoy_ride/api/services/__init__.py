@@ -9,6 +9,8 @@ from api.services.booking_payment_service import BookingPaymentService
 from api.services.booking_ratings_service import BookingRatingsService
 from api.services.wallet_service import WalletService
 from api.services.wallet_history_service import WalletHistoryService
+from api.services.promo_service import PromoService
+from api.services.promo_availed_service import PromoAvailedService
 
 from api.services.admin_promo_service import AdminPromoService
 from api.services.admin_price_service import AdminPriceService

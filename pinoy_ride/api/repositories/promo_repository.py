@@ -15,6 +15,11 @@ from api.serializers import (
     PromoSerializer, PartialPromoSerializer
 )
 
+# Status
+# 0 -> Pending (Not yet started)
+# 1 -> Active 
+# 2 -> Limit reached
+# 3 -> Expired
 
 class PromoRepository:
    
@@ -39,6 +44,14 @@ class PromoRepository:
         """Fetch promo"""
         try:
             return Promo.objects.get(id=promo_id)
+        except Promo.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_by_code(promo_code):
+        """Fetch promo by code"""
+        try:
+            return Promo.objects.get(code=promo_code)
         except Promo.DoesNotExist:
             return None
 
@@ -66,8 +79,35 @@ class PromoRepository:
         promo_instance.save()
         
         return promo_instance
-
     
+    @staticmethod
+    def promo_list(customer_id):
+        """Retrieve promos"""
+
+        promos = (
+            Promo.objects
+                .filter(status=1)
+                .annotate(
+                start_date_pretty=Func(
+                    F('start_date'),
+                    Value('FMMonth DD, YYYY'),
+                    function='TO_CHAR',
+                    output_field=CharField()
+                ),
+            )
+            .order_by('-id')
+        )
+
+
+        serialized_promos = PartialPromoSerializer(
+            promos, many=True
+        ).data
+
+        return {
+            "promos": serialized_promos
+        }
+    
+
     @staticmethod
     def admin_promo_list(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """Retrieve paginated promos with optional search query."""
