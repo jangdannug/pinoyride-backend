@@ -383,6 +383,13 @@ TOP_PH_EKYC_CONFIG = {
     'API_KEY': os.getenv('EKYC_API_KEY', '2208bed8753b'),
 }
 
+ITEXTMO_CONFIG = {
+    'ITEXTMO_BASE_URL': os.getenv('ITEXTMO_BASE_URL', 'https://api.itexmo.com/api/broadcast-otp'),
+    'ITEXTMO_EMAIL': os.getenv('ITEXTMO_EMAIL', 'ericka.c@lightweightsolutions.me'),
+    'ITEXTMO_PASSWORD': os.getenv('ITEXTMO_PASSWORD', 'c6C@cr5dPTbXnrp'),
+    'ITEXTMO_APICODE': os.getenv('ITEXTMO_APICODE', 'PR-LWSER764806_4MEXL')
+}
+
 
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')

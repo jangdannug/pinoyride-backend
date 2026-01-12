@@ -31,12 +31,11 @@ class OtpViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message=generate_otp_serializer.errors, code=400)
 
 
-            with transaction.atomic():
+            # with transaction.atomic():
+            otp_data = self.service.generate_otp(request.data)
                 
-                otp_data = self.service.generate_otp(request.data)
-
            
-            return AppResponse.send_success(data=otp_data, message="Record saved successfully")
+            return AppResponse.send_success(data=otp_data, message="Otp sent successfully")
 
 
         except NotFoundError as e:
@@ -87,5 +86,4 @@ class OtpViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
-
 

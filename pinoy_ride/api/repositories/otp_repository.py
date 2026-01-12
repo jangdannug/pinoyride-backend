@@ -14,7 +14,7 @@ from django.db import transaction
 class OtpRepository:
     
     @staticmethod
-    @transaction.atomic
+    # @transaction.atomic
     def generate(user_details):
        
         otp_code = Otp.generate_otp()

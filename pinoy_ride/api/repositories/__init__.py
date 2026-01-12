@@ -17,3 +17,4 @@ from .pinoy_ride_wallet_repository import PinoyRideWalletRepository
 from .pinoy_ride_wallet_history_repository import PinoyRideWalletHistoryRepository
 from .task_repository import TaskRepository
 from .promo_availed_repository import PromoAvailedRepository
+from .otp_api_request_repository import OtpApiRequestRepository

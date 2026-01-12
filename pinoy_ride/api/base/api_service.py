@@ -1,14 +1,15 @@
 from django.db import transaction
-from api.repositories import CustomerRepository
+from api.repositories import CustomerRepository, OtpApiRequestRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 import requests
 from api.utils.app_logger import app_logger
-
+import json
 class ApiService:
     
     def __init__(self):
         self.customer = CustomerRepository()
+        self.otp_api_request_repo = OtpApiRequestRepository()
     
 
     @staticmethod
@@ -131,6 +132,7 @@ class ApiService:
             
             # Common error message field names in order of preference
             error_fields = [
+                'Message',
                 'message',
                 'error',
                 'err_message', 
@@ -155,13 +157,12 @@ class ApiService:
             # If response is not JSON, return text
             return response.text or f"HTTP {response.status_code} Error"
         
-    
-    @staticmethod
-    def post_itext_mo(url, payload, headers):
+
+    def post_itext_mo(self, mobile_no, url, payload, headers):
 
         try:
             # Log request
-            app_logger(1, "API POST Request", {
+            app_logger(1, "ITEXTMO POST Request", {
                 "url": url,
                 "headers": headers,
                 "payload": payload
@@ -186,7 +187,9 @@ class ApiService:
                 "response" : response_json,
             })
             
-        
+            # Insert otp request and response to db
+            self.otp_api_request_repo.create(mobile_no=mobile_no, payload=payload, response_data=response_json)
+
             if response.status_code in (200, 201):  # 201 = Created
             
                 return response.json()
