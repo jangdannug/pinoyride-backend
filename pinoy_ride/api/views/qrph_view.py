@@ -12,6 +12,8 @@ from api.services import (
     RiderService
 )
 import uuid
+from api.models.top_ph_ekyc_callback_logs_model import TopPhEkycCallbackLogsModel
+import json
 
 class QrphViewSet(viewsets.ViewSet):
     """QRPH Controller"""
@@ -125,6 +127,18 @@ class QrphViewSet(viewsets.ViewSet):
             # if not serializer.is_valid():
             #         return AppResponse.send_error(message=serializer.errors, code=400)
             
+            request_payload = {
+                "method": request.method,
+                "path": request.path,
+                "headers": dict(request.headers),
+                "query_params": request.query_params.dict(),
+                "body": request.data
+            }
+            TopPhEkycCallbackLogsModel.objects.create(
+                request_data=json.dumps(request_payload),
+                callback_type = "qrph"
+            )
+
             if not callback_data or not callback_hash:
                 raise ValidationError("Missing data or hash in callback")
             

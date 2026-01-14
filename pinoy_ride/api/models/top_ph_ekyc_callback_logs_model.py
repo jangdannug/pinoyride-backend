@@ -12,6 +12,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 class TopPhEkycCallbackLogsModel(SoftDeleteModel):
 
     id = models.AutoField(primary_key=True)
+    callback_type = models.CharField(max_length=255, blank=True, null=True, default='ekyc')
     request_data = models.TextField(blank=True, null=True)
     completed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,6 +21,7 @@ class TopPhEkycCallbackLogsModel(SoftDeleteModel):
     
     class Meta:
         indexes = [
+            models.Index(fields=['callback_type'])
         ]
         db_table = "top_ph_ekyc_callback_logs"
         
