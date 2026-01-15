@@ -19,6 +19,7 @@ class BookingSerializer(serializers.ModelSerializer):
     distance_km = serializers.CharField(read_only=True)
     payment_type = serializers.CharField(read_only=True)
     customer = PartialCustomerSerializer(read_only=True)
+    note_to_rider = serializers.CharField(read_only=True)
     rider_details = serializers.SerializerMethodField()
     payment_details = serializers.SerializerMethodField()
     booking_ratings = serializers.SerializerMethodField()
