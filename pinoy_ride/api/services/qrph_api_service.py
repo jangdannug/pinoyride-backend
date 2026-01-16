@@ -184,11 +184,11 @@ class QrphApiService:
         """Process and verify callback"""
 
         # Decode the data
-        try:
-            decoded_data = base64.b64decode(callback_data).decode('utf-8')
-            callback_data = json.loads(decoded_data)
-        except Exception as e:
-            raise ValidationError(f"Invalid callback data format: {str(e)}")
+        # try:
+        #     decoded_data = base64.b64decode(callback_data).decode('utf-8')
+        #     callback_data = json.loads(decoded_data)
+        # except Exception as e:
+        #     raise ValidationError(f"Invalid callback data format: {str(e)}")
         
 
         # Verify hash
