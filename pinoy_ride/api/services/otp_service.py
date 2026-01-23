@@ -25,7 +25,7 @@ class OtpService:
         otp_code = self.otp.generate(user_details=user_details)         
         
         ## Send OTP
-        # api_response = self.call_otp_api(mobile_no, otp_code)
+        api_response = self.call_otp_api(mobile_no, otp_code)
 
         # return api_response
         return otp_code
