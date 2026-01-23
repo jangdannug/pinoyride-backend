@@ -57,12 +57,6 @@ class OtpViewSet(viewsets.ViewSet):
         
         try:
 
-            # For bypass otp only
-            code = request.data.get("code", "")
-            if code == '000000':
-                return AppResponse.send_success(data=[], message="OTP verified!")
-            # For bypass otp only
-
             # Validation
             verify_otp_serializer = VerifyOtpSerializer(data=request.data)
             if not verify_otp_serializer.is_valid():
