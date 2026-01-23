@@ -20,6 +20,7 @@ class PinoyRideWalletHistory(SoftDeleteModel):
     debitor_account_number = models.CharField(max_length=255, null=True)
     credit_amount = models.FloatField(default=0)
     debit_amount = models.FloatField(default=0)
+    tran_type = models.CharField(max_length=255, null=True)
     time_created = models.CharField(max_length=255, null=True)
     date_created = models.CharField(max_length=255, null=True)
     status = models.IntegerField(default=0)
@@ -33,6 +34,7 @@ class PinoyRideWalletHistory(SoftDeleteModel):
             models.Index(fields=['type']),
             models.Index(fields=['status']),
             models.Index(fields=['description']),
+            models.Index(fields=['tran_type']),
             models.Index(fields=['booking_id']),
         ]
         db_table = "pinoy_ride_wallet_history"

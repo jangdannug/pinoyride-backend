@@ -22,3 +22,4 @@ from .tasks_model import Tasks
 from .top_ph_ekyc_callback_logs_model import TopPhEkycCallbackLogsModel
 from .promo_availed_model import PromoAvailed
 from .otp_api_request_model import OtpApiRequest
+from .cash_out_transaction_model import CashOutTransaction

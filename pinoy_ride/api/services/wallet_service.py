@@ -84,7 +84,8 @@ class WalletService:
         top_up_details = {
             "type" : "credit",
             "credit_amount" : amount,
-            "description" : f"Top-up|Ref-{reference_id}"
+            "description" : f"Top-up|Ref-{reference_id}",
+            "tran_type" : "cash_in"
         }
 
         if user_type == 'customer':
@@ -97,6 +98,41 @@ class WalletService:
         if wallet_instance:
             # insert to wallet history
             self.wallet_history.create(wallet_instance=wallet_instance, wallet_history=top_up_details)
+            # Update wallet balance
+            total_debit_credit = self.wallet_history.get_total_debit_credit(wallet_id=wallet_instance.id)
+
+            wallet_details = {
+                "credit_amount" : total_debit_credit['total_credit'],
+                "debit_amount" : total_debit_credit['total_debit'],
+                "avail_balance" : float(total_debit_credit['total_credit']) - float(total_debit_credit['total_debit']),
+            }
+            updated_wallet = self.wallet.update_balance(wallet_instance, wallet_details)
+            
+            return updated_wallet
+        
+
+    ## Cash out user's wallet
+    @transaction.atomic
+    def cash_out_users_wallet(self, user_type, user_id, amount, reference_id):
+        """Cash out user's wallet"""
+
+        cash_out_details = {
+            "type" : "debit",
+            "debit_amount" : amount,
+            "description" : f"Cash-out|Ref-{reference_id}",
+            "tran_type" : "cash_out"
+        }
+
+        if user_type == 'customer':
+            wallet_instance = self.wallet.get_customer_wallet(customer_id=user_id)
+
+        else:
+            wallet_instance = self.wallet.get_rider_wallet(rider_id=user_id)
+        
+
+        if wallet_instance:
+            # insert to wallet history
+            self.wallet_history.create(wallet_instance=wallet_instance, wallet_history=cash_out_details)
             # Update wallet balance
             total_debit_credit = self.wallet_history.get_total_debit_credit(wallet_id=wallet_instance.id)
 
@@ -152,7 +188,8 @@ class WalletService:
                 "booking_id" : booking_id,
                 "type" : "debit",
                 "debit_amount" : booking_payment.total_amount,
-                "description" : f"Debit|Ref-{booking_details.ref_code}"
+                "description" : f"Debit|Ref-{booking_details.ref_code}",
+                "tran_type" : "booking"
             }
             # insert to wallet history
             self.wallet_history.create(wallet_instance=customer_wallet_instance, wallet_history=debit_details)
@@ -176,7 +213,8 @@ class WalletService:
                 "booking_id" : booking_id,
                 "type" : "credit",
                 "credit_amount" : rider_net_amount,
-                "description" : f"Credit|Ref-{booking_details.ref_code}"
+                "description" : f"Credit|Ref-{booking_details.ref_code}",
+                "tran_type" : "booking"
             }
             # insert to wallet history
             self.wallet_history.create(wallet_instance=rider_wallet_instance, wallet_history=credit_details)
@@ -200,7 +238,8 @@ class WalletService:
                 "booking_id" : booking_id,
                 "type" : "credit",
                 "credit_amount" : commission,
-                "description" : f"Credit|Ref-{booking_details.ref_code}"
+                "description" : f"Credit|Ref-{booking_details.ref_code}",
+                "tran_type" : "booking"
             }
             # insert to pinoy ride wallet history
             self.pinoy_ride_wallet_history.create(wallet_instance=pr_wallet_instance, wallet_history=pr_credit_details)

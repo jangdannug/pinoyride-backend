@@ -6,6 +6,7 @@ from .otp_view import OtpViewSet
 from .booking_view import BookingViewSet
 from .qrph_view import QrphViewSet
 from .ekyc_view import EkycViewSet
+from .cash_out_view import CashOutViewSet
 
 from .admin_promo_view import AdminPromoViewSet
 from .admin_price_view import AdminPriceViewSet

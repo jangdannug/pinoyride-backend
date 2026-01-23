@@ -383,6 +383,22 @@ TOP_PH_EKYC_CONFIG = {
     'API_KEY': os.getenv('EKYC_API_KEY', '2208bed8753b'),
 }
 
+CASH_OUT_CONFIG = {
+    'AUTH_BASE_URL': os.getenv('CASH_OUT_AUTH_BASE_URL', 'https://pre-payment.theorangeplatform.com/'),
+    'TOP_PH_BASE_URL': os.getenv('CASH_OUT_TOP_PH_BASE_URL', 'https://pre-payment.theorangeplatform.com/'),
+    'LOGIN_CODE_API': os.getenv('CASH_OUT_LOGIN_CODE_API', 'ext/v1/api/extclient/identity/login/code'),
+    'CASHOUT_API': os.getenv('CASH_OUT_CASHOUT_API', 'ext/v1/api/extclient/payment/cashout'),
+    'GET_BANKS_API': os.getenv('CASH_OUT_GET_BANKS_API', 'ext/v1/api/extclient/payment/get/bank'),
+    'INQUIRE_API': os.getenv('CASH_OUT_INQUIRE_API', 'ext/v1/api/extclient/payment/inquire'),
+    'USERNAME': os.getenv('CASH_OUT_USERNAME', 'topCashout'),
+    'PASSWORD': os.getenv('CASH_OUT_PASSWORD', 'Rider@2025'),
+    'DEVICE_TYPE': os.getenv('CASH_OUT_DEVICE_TYPE', 'testdevice'),
+    'CLIENT_SECRET': os.getenv('CASH_OUT_CLIENT_SECRET', '6R6I09bcy9ALM3wzlNkG33wC9jIm2Ylf6ZJkB/hxZNE='),
+    'CLIENT_ID': os.getenv('CASH_OUT_CLIENT_ID', '9a549484-99a2-4c05-8432-5985f915c942'),
+    'APP_ID': os.getenv('CASH_OUT_APP_ID', '9a549484-99a2-4c05-8432-5985f915c942'),
+    'API_KEY': os.getenv('CASH_OUT_API_KEY', '8d5ece1c36791'),
+}
+
 ITEXTMO_CONFIG = {
     'ITEXTMO_BASE_URL': os.getenv('ITEXTMO_BASE_URL', 'https://api.itexmo.com/api/broadcast-otp'),
     'ITEXTMO_EMAIL': os.getenv('ITEXTMO_EMAIL', 'ericka.c@lightweightsolutions.me'),

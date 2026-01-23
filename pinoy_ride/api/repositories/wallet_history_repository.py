@@ -26,6 +26,7 @@ class WalletHistoryRepository:
             description=wallet_history.get("description", ""),
             credit_amount=wallet_history.get("credit_amount", 0),
             debit_amount=wallet_history.get("debit_amount", 0),
+            tran_type=wallet_history.get("tran_type", ""),
             time_created=time_now,
             date_created=date_now
         )
