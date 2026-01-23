@@ -43,7 +43,7 @@ class EkycApiService:
         if not force_refresh:
             cached_token = self._get_cached_token()
             if cached_token:
-                app_logger(1, "Using cached QRPh token", {"token": cached_token, "expiry": cache.get(self.CACHE_KEY_EXPIRY)})
+                app_logger(1, "Using cached EKYC token", {"token": cached_token, "expiry": cache.get(self.CACHE_KEY_EXPIRY)})
                 return {"message" : "cached token", "result" : cached_token}
             
         auth_url = f"{self.config['AUTH_BASE_URL']}{self.config['LOGIN_CODE_API']}"
@@ -72,7 +72,7 @@ class EkycApiService:
         now = timezone.localtime(timezone.now())
         expiry = now + timedelta(minutes=1)  # Token valid for 45 mins
         self._cache_token(token, expiry)
-        app_logger(1, "QRPh Authentication Successful", {"token": token, "expiry" : expiry})
+        app_logger(1, "EKYC Authentication Successful", {"token": token, "expiry" : expiry})
         
         return response
     
