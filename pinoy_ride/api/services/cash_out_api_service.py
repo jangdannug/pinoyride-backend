@@ -71,7 +71,7 @@ class CashOutApiService:
         now = timezone.localtime(timezone.now())
         expiry = now + timedelta(minutes=1)  # Token valid for 45 mins
         self._cache_token(token, expiry)
-        app_logger(1, "QRPh Authentication Successful", {"token": token, "expiry" : expiry})
+        app_logger(1, "Cash-Out Authentication Successful", {"token": token, "expiry" : expiry})
         
         return response
     
