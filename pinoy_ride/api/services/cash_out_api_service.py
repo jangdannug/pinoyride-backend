@@ -199,9 +199,9 @@ class CashOutApiService:
             status_save = 1
             ## call cashout internal method
             self.wallet_service.cash_out_users_wallet(user_type=user_type, user_id=user_id, amount=amount, reference_id=result.get('txnRefNo'))
-        else:
+        # else:
             # throw error
-            raise ValidationError(f"Cash-out transaction failed: {result.get('message')}")
+            # raise ValidationError(f"Cash-out transaction failed: {result.get('message')}")
 
 
         # Save to database
