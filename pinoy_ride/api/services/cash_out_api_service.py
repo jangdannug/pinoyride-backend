@@ -188,7 +188,7 @@ class CashOutApiService:
         result_data = response.get('result', {})
         result = result_data.get('result', {})
 
-        status_msg =  'failed1' 
+        status_msg =  'failed' 
         status_save = 0
         resp_message_status = result.get('message', '').lower()
         
