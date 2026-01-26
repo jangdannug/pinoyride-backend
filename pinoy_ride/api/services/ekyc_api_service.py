@@ -422,6 +422,47 @@ class EkycApiService:
         
         except TopPhEkycDetails.DoesNotExist:
             return None
+        
+
+    ## Check Top Ph EKYC Status
+    @transaction.atomic
+    def top_ph_check_status(
+        self,
+        ref_id: str
+    ) -> Dict[str, Any]:
+        """Check Top Ph EKYC Status"""
+
+        get_user_details_url = f"{self.config['EKYC_BASE_URL']}{self.config['CHECK_EKYC_STATUS']}"
+        
+        # Get auth token
+        auth_response = self.authenticate()
+        auth_token = auth_response.get("result", "")
+        
+        if not auth_token:
+            raise ValidationError("Failed to get authentication token")
+        
+        # Build request data (order matters per API spec)
+        # ref_id = user_id or zkyc_id
+        data = {
+            "refId": ref_id
+        }
+        
+        exp_ms = self._get_expiration_ms()
+        payload = self._create_payload(data, token=auth_token, exp_ms=exp_ms)
+        
+        headers = {
+            "X-API-KEY": self.config['API_KEY'],
+            "Content-Type": "application/json",
+            "accept": "*/*"
+        }
+        
+        response = self.api_service.post_request(url=get_user_details_url, payload=payload, headers=headers)
+        ## Throw error if request to Check Top Ph EKYC Status
+        if response.get('statusCode') not in [200, 201]:
+            raise ValidationError(f"Request to Check Top Ph EKYC Status failed: {response.get('message')}")
+
+        return response
+    
 
     def _create_payload(
         self,

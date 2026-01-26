@@ -204,3 +204,43 @@ class EkycViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+        
+
+    @action(detail=False, methods=['post'], url_path='top_ph_check_status')
+    def top_ph_check_status(self, request):
+        """Check Top Ph EKYC Status"""
+        
+        try:            
+            data = request.data
+            app_logger(1, "Check Top Ph EKYC Status", data)
+
+            # Validate required fields
+            ref_id = request.data.get('request_user_id', '')
+            
+            if not ref_id:
+                return AppResponse.send_error(message=str("Ref ID is required"), code=400)
+            
+            with transaction.atomic():    
+                response = self.ekyc_service.top_ph_check_status(
+                    ref_id=ref_id
+                )
+        
+            return AppResponse.send_success(data={
+                "zkyc_id" : response.get('result', {}).get('zkycId', ''),
+                "user_id" : response.get('result', {}).get('userId', ''),
+                "status" : response.get('result', {}).get('status', ''),
+                "trx_date" : response.get('result', {}).get('trxDate', ''),
+                "remarks" : response.get('result', {}).get('remark', '')
+            }, message="Success")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+        
