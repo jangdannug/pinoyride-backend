@@ -129,7 +129,7 @@ class CashOutApiService:
 
 
     ## cash-out method
-    @transaction.atomic
+    # @transaction.atomic
     def cash_out(
         self,
         user_id: str,
@@ -192,18 +192,6 @@ class CashOutApiService:
         status_save = 0
         resp_message_status = result.get('message', '').lower()
         
-        ## Validate staus
-        if resp_message_status == 'accepted':
-            #debit user wallets
-            status_msg = 'success'
-            status_save = 1
-            ## call cashout internal method
-            self.wallet_service.cash_out_users_wallet(user_type=user_type, user_id=user_id, amount=amount, reference_id=result.get('txnRefNo'))
-        # else:
-            # throw error
-            # raise ValidationError(f"Cash-out transaction failed: {result.get('message')}")
-
-
         # Save to database
         transaction = CashOutTransaction.objects.create(
             user_id=user_id,
@@ -220,6 +208,18 @@ class CashOutApiService:
             response_payload=response,
             status=status_save
         )
+
+        ## Validate staus
+        if resp_message_status == 'accepted':
+            #debit user wallets
+            status_msg = 'success'
+            status_save = 1
+
+            ## call cashout internal method
+            self.wallet_service.cash_out_users_wallet(user_type=user_type, user_id=user_id, amount=amount, reference_id=result.get('txnRefNo'))
+        else:
+            # throw error based on message
+            raise ValidationError(f"Cash-out transaction failed: {result.get('message')}")
 
         return {
             "data": transaction,

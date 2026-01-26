@@ -94,14 +94,14 @@ class CashOutViewSet(viewsets.ViewSet):
             else:
                 return AppResponse.send_error(message="Invalid user type", code=400)
             
-            with transaction.atomic():
-                result = self.cash_out_service.cash_out(
-                    user_id=user_id,
-                    user_type=user_type,
-                    amount=float(data.get('amount', 0.0)),
-                    destination_acct_name=data.get('destination_acct_name', ""),
-                    destination_acct_no=data.get('destination_acct_no', ""),
-                    destination_bank_code=data.get('destination_bank_code', "")
+            # with transaction.atomic():
+            result = self.cash_out_service.cash_out(
+                user_id=user_id,
+                user_type=user_type,
+                amount=float(data.get('amount', 0.0)),
+                destination_acct_name=data.get('destination_acct_name', ""),
+                destination_acct_no=data.get('destination_acct_no', ""),
+                destination_bank_code=data.get('destination_bank_code', "")
             )
 
             return AppResponse.send_success(
