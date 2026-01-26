@@ -110,11 +110,11 @@ class EkycApiService:
         if success_url or failed_url or expired_url:
             client_pages = {}
             if failed_url:
-                client_pages["failed"] = failed_url
+                client_pages["failed"] = f"{failed_url}?req_id={request_user_id}"
             if expired_url:
-                client_pages["expired"] = expired_url
+                client_pages["expired"] = f"{expired_url}?req_id={request_user_id}"
             if success_url:
-                client_pages["success"] = success_url
+                client_pages["success"] = f"{success_url}?req_id={request_user_id}"
             data["clientPages"] = client_pages
         
         exp_ms = self._get_expiration_ms()

@@ -141,16 +141,19 @@ class EkycViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message=str("Request User ID is required"), code=400)
             
             status = 'not-found'
+            remarks = ''
 
             # Check status
             ekyc_resp = self.ekyc_service.check_status(request_user_id=request_user_id)
             if ekyc_resp:
                 status = ekyc_resp.status
+                remarks = ekyc_resp.remarks
         
             return AppResponse.send_success(
                 data={
                     "request_user_id": request_user_id,
                     "status": status,
+                    "remarks" : remarks
                 },
                 message="Success"
             )
