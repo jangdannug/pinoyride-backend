@@ -142,18 +142,21 @@ class EkycViewSet(viewsets.ViewSet):
             
             status = 'not-found'
             remarks = ''
+            result_code=''
 
             # Check status
             ekyc_resp = self.ekyc_service.check_status(request_user_id=request_user_id)
             if ekyc_resp:
                 status = ekyc_resp.status
                 remarks = ekyc_resp.remarks
+                result_code = ekyc_resp.result_code
         
             return AppResponse.send_success(
                 data={
                     "request_user_id": request_user_id,
                     "status": status,
-                    "remarks" : remarks
+                    "remarks" : remarks,
+                    "result_code" : result_code
                 },
                 message="Success"
             )
