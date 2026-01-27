@@ -50,7 +50,7 @@ class PromoService:
         
         if promo:
             if promo.status == 0:
-                raise NotFoundError("Promo "+ str(promo.code) + " not found")
+                raise NotFoundError("Promo not found")
             
             # Check start date
             if promo.start_date and promo.start_date > now:
