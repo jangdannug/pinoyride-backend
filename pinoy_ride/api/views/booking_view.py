@@ -101,7 +101,7 @@ class BookingViewSet(viewsets.ViewSet):
                 promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
                 validate_promo = self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
                 if promo_details:
-                    if promo_details.code == 'RIDE933339999':
+                    if promo_details.code == 'RIDE93333':
                         promo_discount_percentage = .10
                         promo_discount = round(total_amount * promo_discount_percentage, 2)
 
