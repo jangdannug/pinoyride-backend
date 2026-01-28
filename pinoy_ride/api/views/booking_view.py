@@ -164,11 +164,12 @@ class BookingViewSet(viewsets.ViewSet):
             dropoff_long= request.data.get("dropoff_long", "")
             payment_type = request.data.get("payment_type", "")
             payment_total_amount = payment_details.get("total_amount", 0)
+            total_amount_wo_promo = payment_details.get("total_amount_wo_promo", 0)
             promo_id = request.data.get("promo_id", "")
             
 
             ## Valiate promo
-            if promo_id:
+            if promo_id and total_amount_wo_promo >= 150:
                 promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
                 self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
 
@@ -215,7 +216,7 @@ class BookingViewSet(viewsets.ViewSet):
                 self.booking_payment_service.save_booking_payment(booking_instance=booking_details, booking_payment=payment_details) 
 
                 # save promo availed
-                if promo_id:
+                if promo_id and total_amount_wo_promo >= 150:
                     self.promo_availed_service.save_promo_availed(promo_instance=promo_details, customer_instance=customer_details, booking_instance=booking_details)
 
                 serializer = BookingSerializer(booking_details)
