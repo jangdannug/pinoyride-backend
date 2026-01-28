@@ -94,15 +94,19 @@ class BookingViewSet(viewsets.ViewSet):
             commision = round(total_amount * commission_prcentage, 2)
             rider_net_amount = round(total_amount - commision, 2)
 
-            ## Check promo
+            ## Check promo AND check the total amount if greater than 150
             promo_discount_percentage = 0
             promo_discount = 0
-            if promo_id:
+            if promo_id and total_amount >= 150:
                 promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
                 validate_promo = self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
                 if promo_details:
                     if promo_details.code == 'RIDE93333':
-                        promo_discount_percentage = .10
+
+                        promo_discount_percentage = .08 #8% Discount if total amount > 150
+                        if total_amount >= 200: 
+                            promo_discount_percentage = .10 #10% Discount if total amount > 200
+
                         promo_discount = round(total_amount * promo_discount_percentage, 2)
 
                         # Change commission and total amount
