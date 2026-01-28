@@ -113,13 +113,13 @@ class BookingViewSet(viewsets.ViewSet):
                 "distance_km_round" : distance_km_round,
                 "minimum_fare" : minimum_fare,
                 "pesos_per_km" : pesos_per_km,
-                "base_amount" : base_amount,
+                "base_amount" : round(base_amount,2),
                 "booking_fee" : booking_fee,
                 "promo_discount" : promo_discount,
                 "commission" : commision,
                 "rider_net_amount" : rider_net_amount,
-                "total_amount_wo_promo" : total_amount_wo_promo,
-                "total_amount" : total_amount
+                "total_amount_wo_promo" : round(total_amount_wo_promo,2),
+                "total_amount" : round(total_amount,2)
             }
 
             return AppResponse.send_success(data=response, message="Success")
