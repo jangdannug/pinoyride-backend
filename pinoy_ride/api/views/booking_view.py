@@ -101,7 +101,7 @@ class BookingViewSet(viewsets.ViewSet):
                 promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
                 validate_promo = self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
                 if promo_details:
-                    if promo_details.code == 'RIDE93333':
+                    if promo_details.code == 'RIDE933339999':
                         promo_discount_percentage = .10
                         promo_discount = round(total_amount * promo_discount_percentage, 2)
 
@@ -119,7 +119,9 @@ class BookingViewSet(viewsets.ViewSet):
                 "commission" : commision,
                 "rider_net_amount" : rider_net_amount,
                 "total_amount_wo_promo" : round(total_amount_wo_promo,2),
-                "total_amount" : round(total_amount,2)
+                "total_amount" : round(total_amount,2),
+                "pretty_total_amount_wo_promo" : f"{total_amount_wo_promo:,.2f}",
+                "pretty_total_amount" : f"{total_amount:,.2f}"
             }
 
             return AppResponse.send_success(data=response, message="Success")
