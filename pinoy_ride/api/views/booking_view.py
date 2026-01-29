@@ -205,7 +205,7 @@ class BookingViewSet(viewsets.ViewSet):
                 distance_km = geodesic(pickup, dropoff).kilometers
                 booking_details['distance_km'] = round(distance_km, 2)
 
-                # check customer's wallet
+                # check customer's wallet if payment_type == wallet
                 if payment_type == 'wallet':
                     self.wallet_service.check_balance(user_id = customer_id, user_type='customer', amount=payment_total_amount)
 
@@ -484,6 +484,13 @@ class BookingViewSet(viewsets.ViewSet):
                 booking_details = self.service.get_booking_by_id(booking_id=booking_id)
                 rider_details = self.rider_service.get_available_rider(rider_id=rider_id)
                 
+                if booking_details.payment_type == 'cash': #Check balance of rider if payment type == cash and must be enough for deducting of commission
+                    booking_payment_details = self.booking_payment_service.get_record_by_booking_id(booking_id=booking_details.id)
+                    commission = booking_payment_details.commission
+                    
+                    # Validate balance
+                    self.wallet_service.check_balance(user_id=rider_id, user_type='rider', amount=commission)
+                
 
                 self.service.accept_booking(booking=booking_details, rider=rider_details)
 
@@ -547,6 +554,9 @@ class BookingViewSet(viewsets.ViewSet):
                 if status == "3": #if status == completed update rider status to available and credit amount to wallet
                     if booking_details.payment_type == 'wallet':
                         self.wallet_service.update_booking_wallets(booking_details=booking_details)
+
+                    elif booking_details.payment_type == 'cash':
+                        self.wallet_service.update_booking_wallets_for_cash(booking_details=booking_details)
 
                     self.rider_service.update_rider_available_status(rider_instance=rider_details, status=1)
 
