@@ -64,32 +64,45 @@ class BookingViewSet(viewsets.ViewSet):
 
             # compute distance in kilometers
             distance_km = geodesic(origin, destination).kilometers
-            distance_km_round = round(distance_km, 2)
+            distance_km_round = round(1.21, 2)
+            km_basis = 7 #Default KM basis
 
             if booking_type == '1':
                 # Booking Type = 1 - Motorcyle
-                minimum_fare = 50.00
-                pesos_per_km = 10
-                booking_fee = 10
+                minimum_fare = 40.00
+                booking_fee = 0
                 commission_prcentage = .20 #20%
+                pesos_per_km = 10
+                pesos_per_km2 = 15
 
             elif booking_type == '2':
                 # Booking Type = 2 - Car - 4 Seaters
-                minimum_fare = 100.00
+                minimum_fare = 60.00
                 pesos_per_km = 10
-                booking_fee = 10
+                pesos_per_km2 = 15
+                booking_fee = 0
                 commission_prcentage = .20 #20%
 
             elif booking_type == '3':
                 # Booking Type = 3 = Car - 6 Seaters
-                minimum_fare = 120.00
+                minimum_fare = 80.00
                 pesos_per_km = 10
-                booking_fee = 10
+                pesos_per_km2 = 15
+                booking_fee = 0
                 commission_prcentage = .20 #20%
 
             base_amount = distance_km_round * pesos_per_km
-            total_amount_wo_promo = minimum_fare + base_amount + booking_fee
-            total_amount = minimum_fare + base_amount + booking_fee
+            exceeding_kms_total  = 0
+            exceeding_kms  = 0
+
+            if distance_km_round > km_basis:
+                base_amount = km_basis * pesos_per_km # compute first 7 KM
+                exceeding_kms  = distance_km_round - km_basis # get the exceed kms (subtract km basis)
+                exceeding_kms_total = exceeding_kms *  pesos_per_km2 ## Compute the exceed kms
+                
+
+            total_amount_wo_promo = minimum_fare + base_amount + exceeding_kms_total + booking_fee
+            total_amount = minimum_fare + base_amount + exceeding_kms_total + booking_fee
 
             commision = round(total_amount * commission_prcentage, 2)
             rider_net_amount = round(total_amount - commision, 2)
@@ -115,8 +128,11 @@ class BookingViewSet(viewsets.ViewSet):
 
             response = {
                 "distance_km_round" : distance_km_round,
+                "exceeding_kms" : exceeding_kms,
+                "exceeding_kms_total" : exceeding_kms_total,
                 "minimum_fare" : minimum_fare,
                 "pesos_per_km" : pesos_per_km,
+                "pesos_per_km2" : pesos_per_km2,
                 "base_amount" : round(base_amount,2),
                 "booking_fee" : booking_fee,
                 "promo_discount" : promo_discount,
