@@ -177,7 +177,7 @@ class WalletService:
             rider_net_amount = booking_payment.rider_net_amount
 
             #-----#-----#-----#-----#-----#-----#-----#-----#-----
-            # Customer
+            # Customer (DEBIT)
             customer_id = booking_details.customer_id
             
             # Check balance
@@ -205,7 +205,7 @@ class WalletService:
             
           
             #-----#-----#-----#-----#-----#-----#-----#-----#-----#-----
-            # Rider
+            # Rider (CREDIT)
             rider_id = booking_details.rider_id
             rider_wallet_instance = self.wallet.get_rider_wallet(rider_id=rider_id)
             
@@ -230,7 +230,71 @@ class WalletService:
 
            
             #-----#-----#-----#-----#-----#-----#-----#-----#-----#-----
-            # Pinoy Ride Wallet
+            # Pinoy Ride Wallet (CREDIT)
+            
+            pr_wallet_instance = self.pinoy_ride_wallet.get_wallet(user_id=1)
+            
+            pr_credit_details = {
+                "booking_id" : booking_id,
+                "type" : "credit",
+                "credit_amount" : commission,
+                "description" : f"Credit|Ref-{booking_details.ref_code}",
+                "tran_type" : "booking"
+            }
+            # insert to pinoy ride wallet history
+            self.pinoy_ride_wallet_history.create(wallet_instance=pr_wallet_instance, wallet_history=pr_credit_details)
+            # Update wallet balance
+            pr_total_debit_credit = self.pinoy_ride_wallet_history.get_total_debit_credit(wallet_id=pr_wallet_instance.id)
+
+            pr_wallet_details = {
+                "credit_amount" : pr_total_debit_credit['total_credit'],
+                "debit_amount" : pr_total_debit_credit['total_debit'],
+                "avail_balance" : float(pr_total_debit_credit['total_credit']) - float(pr_total_debit_credit['total_debit']),
+            }
+            self.pinoy_ride_wallet.update_balance(wallet_instance=pr_wallet_instance, wallet_details=pr_wallet_details)
+
+        return 
+    
+    
+    ## Update booking wallets for cash transaction
+    @transaction.atomic
+    def update_booking_wallets_for_cash(self, booking_details):
+        """Update wallets for cash transactions"""
+
+        booking_id = booking_details.id
+        booking_payment = self.booking_payment_repository.get_by_id(booking_id=booking_id)
+
+        if booking_payment:
+            
+            commission = booking_payment.commission
+          
+            #-----#-----#-----#-----#-----#-----#-----#-----#-----#-----
+            # Rider (DEBIT)
+            rider_id = booking_details.rider_id
+            rider_wallet_instance = self.wallet.get_rider_wallet(rider_id=rider_id)
+            
+            debit_details = {
+                "booking_id" : booking_id,
+                "type" : "debit",
+                "debit_amount" : commission,
+                "description" : f"Debit|Ref-{booking_details.ref_code}",
+                "tran_type" : "booking"
+            }
+            # insert to wallet history
+            self.wallet_history.create(wallet_instance=rider_wallet_instance, wallet_history=debit_details)
+            # Update wallet balance
+            r_total_debit_credit = self.wallet_history.get_total_debit_credit(wallet_id=rider_wallet_instance.id)
+
+            rider_wallet_details = {
+                "credit_amount" : r_total_debit_credit['total_credit'],
+                "debit_amount" : r_total_debit_credit['total_debit'],
+                "avail_balance" : float(r_total_debit_credit['total_credit']) - float(r_total_debit_credit['total_debit']),
+            }
+            self.wallet.update_balance(rider_wallet_instance, rider_wallet_details)
+
+           
+            #-----#-----#-----#-----#-----#-----#-----#-----#-----#-----
+            # Pinoy Ride Wallet (CREDIT)
             
             pr_wallet_instance = self.pinoy_ride_wallet.get_wallet(user_id=1)
             
