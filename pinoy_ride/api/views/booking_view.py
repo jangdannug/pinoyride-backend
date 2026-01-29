@@ -64,7 +64,7 @@ class BookingViewSet(viewsets.ViewSet):
 
             # compute distance in kilometers
             distance_km = geodesic(origin, destination).kilometers
-            distance_km_round = round(1.21, 2)
+            distance_km_round = round(distance_km, 2)
             km_basis = 7 #Default KM basis
 
             if booking_type == '1':
