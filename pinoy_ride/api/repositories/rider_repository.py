@@ -204,6 +204,8 @@ class RiderRepository:
                     Q(first_name__icontains=term)
                     | Q(middle_name__icontains=term)
                     | Q(last_name__icontains=term)
+                    | Q(code__icontains=term)
+                    | Q(mobile_no__icontains=term)
                 )
 
             riders = riders.filter(query_filter).distinct()
