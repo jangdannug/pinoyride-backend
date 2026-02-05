@@ -184,7 +184,7 @@ class RiderRepository:
         # application_status = 1
         riders = (
             Rider.objects
-            .filter(application_status='1', status='1')
+            .filter(application_status='1')
             .annotate()
             .order_by(sort_by)
         )

@@ -43,7 +43,7 @@ class CustomerRepository:
     def check_customer_by_mobile_kyc(customer):
         """Get customer by mobile with is_success_kyc"""
         try:
-            return Customer.objects.get(mobile=customer.get("mobile_no", ""), is_success_kyc=1)
+            return Customer.objects.get(mobile=customer.get("mobile_no", ""), is_success_kyc=1, status=1)
         except Customer.DoesNotExist:
             return None
 
