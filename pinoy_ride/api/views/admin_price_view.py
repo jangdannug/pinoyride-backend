@@ -69,6 +69,45 @@ class AdminPriceViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    ## Import prices
+    @action(
+        detail=False, methods=["post"], url_path="import"
+    )
+    def import_prices(self, request):
+        """
+        Import prices
+        """
+
+        try:
+            auth_user = get_authenticated_user(request)
+
+            import_prices = json.loads(request.data.get("import_data", "[]"))
+
+            price_serializer = PriceSerializer(data=import_prices, many=True)
+            if not price_serializer.is_valid():
+                return AppResponse.send_error(message=price_serializer.errors, code=400)
+            
+            for price in import_prices:
+                with transaction.atomic():
+                    price = self.admin_service.create_price(price = price, auth_user_id = auth_user.id)
+                    serializer = PriceSerializer(price)
+                    response_data = serializer.data
+
+            return AppResponse.send_success(
+                data=import_prices, message="Import success", code=201
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
 
     ## Get price by id
     @action(

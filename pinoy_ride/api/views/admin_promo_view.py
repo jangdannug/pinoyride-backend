@@ -69,6 +69,45 @@ class AdminPromoViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    ## Import promo
+    @action(
+        detail=False, methods=["post"], url_path="import"
+    )
+    def import_promos(self, request):
+        """
+        Import promo
+        """
+
+        try:
+            auth_user = get_authenticated_user(request)
+
+            import_promos = json.loads(request.data.get("import_data", "[]"))
+
+            promo_serializer = PromoSerializer(data=import_promos, many=True)
+            if not promo_serializer.is_valid():
+                return AppResponse.send_error(message=promo_serializer.errors, code=400)
+            
+            for promo in import_promos:
+                with transaction.atomic():
+                    promo = self.admin_service.create_promo(promo = promo, auth_user_id = auth_user.id)
+                    serializer = PromoSerializer(promo)
+                    response_data = serializer.data
+
+            return AppResponse.send_success(
+                data=import_promos, message="Import success", code=201
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
 
     ## Get promo by id
     @action(
