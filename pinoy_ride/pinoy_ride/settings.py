@@ -402,8 +402,8 @@ CASH_OUT_CONFIG = {
 
 ITEXTMO_CONFIG = {
     'ITEXTMO_BASE_URL': os.getenv('ITEXTMO_BASE_URL', 'https://api.itexmo.com/api/broadcast-otp'),
-    'ITEXTMO_EMAIL': os.getenv('ITEXTMO_EMAIL', 'ericka.c@lightweightsolutions.me'),
-    'ITEXTMO_PASSWORD': os.getenv('ITEXTMO_PASSWORD', 'c6C@cr5dPTbXnrp'),
+    'ITEXTMO_EMAIL': os.getenv('ITEXTMO_EMAIL', 'lightweightpm@gmail.com'),
+    'ITEXTMO_PASSWORD': os.getenv('ITEXTMO_PASSWORD', 'LWSPM2468*'),
     'ITEXTMO_APICODE': os.getenv('ITEXTMO_APICODE', 'PR-LWSER764806_4MEXL')
 }
 
