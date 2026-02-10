@@ -65,3 +65,13 @@ class AdminRiderService:
         """List all rider booking history with pagination"""
         return self.booking.admin_rider_booking_history(rider_id, page_number, page_size, search_query, filters, sort_by)
 
+
+
+    ## Delete rider
+    @transaction.atomic
+    def delete_rider(self, rider, auth_user_id):
+        """Delete rider"""
+
+        delete_rider = self.rider.delete_rider(rider_instance=rider, auth_user_id=auth_user_id)
+    
+        return delete_rider

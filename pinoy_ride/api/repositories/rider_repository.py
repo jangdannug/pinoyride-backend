@@ -8,6 +8,7 @@ from api.serializers import (
     PartialRiderSerializer
 )
 from django.db import transaction
+from django.utils.timezone import now
 
 class RiderRepository:
     
@@ -276,6 +277,17 @@ class RiderRepository:
     def update_auto_accept(rider_instance, status):
         
         rider_instance.auto_accept = status
+        rider_instance.save()
+        
+        return rider_instance
+    
+
+    @staticmethod
+    @transaction.atomic
+    def delete_rider(rider_instance, auth_user_id):
+        
+        rider_instance.deleted_at = now()
+        rider_instance.updated_by = auth_user_id
         rider_instance.save()
         
         return rider_instance

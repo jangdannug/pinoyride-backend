@@ -282,3 +282,36 @@ class AdminRiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+    
+    ## Delete rider
+    @action(
+        detail=False, methods=["post"], url_path="delete-rider"
+    )
+    def delete_rider(self, request):
+        """Delete rider"""
+        auth_user = get_authenticated_user(request)
+        rider_id  = request.data.get("rider_id")
+
+        if not rider_id:
+            return AppResponse.send_error(message="Rider Id is required!", code=400)
+
+        try:
+            with transaction.atomic():
+                rider = self.admin_service.get_rider_by_id(rider_id=rider_id)
+
+                delete_rider = self.admin_service.delete_rider(rider=rider, auth_user_id=auth_user.id)
+
+                serializer = RiderSerializer(delete_rider)
+                response_data = serializer.data
+
+            return AppResponse.send_success(
+                data=response_data, message="Rider deleted successfully", code=status.HTTP_200_OK
+            )
+        
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
