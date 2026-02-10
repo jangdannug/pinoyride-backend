@@ -137,6 +137,7 @@ class PromoRepository:
             for term in search_terms:
                 query_filter |= (
                     Q(name__icontains=term)
+                    | Q(code__icontains=term)
                 )
 
             promos = promos.filter(query_filter).distinct()
