@@ -133,10 +133,19 @@ class EkycApiService:
             "token": auth_token,
         })
 
+        # Check active rider
+        validate_mobile = {
+            "mobile_no" : user_id
+        }
+        active_rider = self.rider.check_rider_by_mobile(rider=validate_mobile)
+
         # Check Record
-        if TopPhEkyc.objects.filter(user_id=user_id, user_type=user_type, status="success").exists():
+        record_exists = TopPhEkyc.objects.filter(user_id=user_id, user_type=user_type, status="success").exists()
+
+        # validate mobile no if active and exists in topph ekyc table
+        if record_exists and active_rider:
             raise ValidationError("Record already exists!")
-    
+
         response = self.api_service.post_request(url=generate_url, payload=payload, headers=headers)
 
         ## Throw error if request to generate eKYC url failed
