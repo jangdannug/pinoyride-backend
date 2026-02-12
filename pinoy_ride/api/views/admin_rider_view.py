@@ -5,7 +5,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 import json
 from rest_framework.exceptions import ValidationError
 from api.services import (
-    AdminRiderService
+    AdminRiderService,
+    WalletService
 )
 from api.serializers import RiderSerializer, PartialRiderSerializer
 from api.utils.app_response import AppResponse
@@ -31,6 +32,7 @@ class AdminRiderViewSet(viewsets.ViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.admin_service = AdminRiderService()
+        self.wallet_service = WalletService()
         
 
     ## Get rider applicant list
@@ -311,6 +313,44 @@ class AdminRiderViewSet(viewsets.ViewSet):
         
         except NotFoundError as e:
             return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    
+    ## Get rider widthrawal history
+    @action(
+        detail=False, methods=["get"], url_path="get-widthrawal-history"
+    )
+    def admin_rider_widthrawal_history(self, request):
+        """List rider widthrawal history  with pagination and search query"""
+        try:
+            page = int(request.query_params.get("page", 1))
+            perpage = int(request.query_params.get("perpage", 10))
+            query = request.query_params.get("query", None)
+            sort_by = request.query_params.get("sort_by")
+            name_filter = request.query_params.get("name_filter")
+            rider_id = request.query_params.get("rider_id")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            
+            filters = {}
+
+            if name_filter:
+                filters["name_filter"] = name_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-updated_at"
+
+            wallet_history = self.wallet_service.get_widthrawal_history(
+                user_id=rider_id, user_type='rider',  page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by
+            )
+
+            return AppResponse.send_success(
+                data=wallet_history, message="Rider's widthrawal history listed successfully"
+            )
         except Exception as e:
             return AppResponse.send_error(
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR

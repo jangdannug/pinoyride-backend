@@ -119,3 +119,55 @@ class WalletHistoryRepository:
                 page.previous_page_number() if page.has_previous() else None
             ),
         }
+    
+
+    @staticmethod
+    def get_widthrawal_history(wallet_instance, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
+        """Retrieve paginated user's widthrawal history with optional search query."""
+
+        # Get credit_amount = credit otherwise get debit_amount
+        wallet_history = WalletHistory.objects.filter(wallet_id=wallet_instance.id, tran_type='cash_out').annotate(
+        amount=Case(
+            When(type='credit', then=F('credit_amount')),
+            When(type='debit', then=F('debit_amount')),
+            default=Value(0),
+            output_field=FloatField()
+        )
+        ).order_by(sort_by)
+
+        # if filters:
+        #     if "name_filter" in filters and filters["name_filter"]:
+        #         promos = promos.filter(
+        #             name=filters["name_filter"]
+        #         )
+
+        if search_query:
+            search_terms = search_query.split()
+            query_filter = Q()
+
+            for term in search_terms:
+                query_filter |= (
+                    Q(description__icontains=term)
+                    | Q(type__icontains=term)
+                )
+
+            wallet_history = wallet_history.filter(query_filter).distinct()
+
+        paginator = Paginator(wallet_history, page_size)
+        page = paginator.get_page(page_number)
+
+        serialized_wallet_history = PartiallWalletHistorySerializer(
+            page.object_list, many=True
+        ).data
+
+        return {
+            "widthrawal_history": serialized_wallet_history,
+            "total_pages": paginator.num_pages,
+            "current_page": page_number,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+            "next_page": page.next_page_number() if page.has_next() else None,
+            "previous_page": (
+                page.previous_page_number() if page.has_previous() else None
+            ),
+        }
