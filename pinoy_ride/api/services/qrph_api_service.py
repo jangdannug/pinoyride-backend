@@ -204,7 +204,8 @@ class QrphApiService:
         status = callback_data.get('status', '').lower()
         
         try:
-            transaction = QrPhTransaction.objects.get(reference_id=reference_id)
+            ## filter only non-success transaction (exclude success transaction, to avoid double credit)
+            transaction = QrPhTransaction.objects.exclude(status = 'success').get(reference_id=reference_id)
             transaction.status = status
             transaction.callback_data = callback_data
             transaction.invoice_id = callback_data.get('invoiceId')
