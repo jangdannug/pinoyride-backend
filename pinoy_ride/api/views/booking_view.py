@@ -71,7 +71,7 @@ class BookingViewSet(viewsets.ViewSet):
                 # Booking Type = 1 - Motorcyle
                 minimum_fare = 40.00
                 booking_fee = 0
-                commission_prcentage = .20 #20%
+                commission_prcentage = .15 #15%
                 pesos_per_km = 10
                 pesos_per_km2 = 15
 
@@ -81,7 +81,7 @@ class BookingViewSet(viewsets.ViewSet):
                 pesos_per_km = 10
                 pesos_per_km2 = 15
                 booking_fee = 0
-                commission_prcentage = .20 #20%
+                commission_prcentage = .15 #15%
 
             elif booking_type == '3':
                 # Booking Type = 3 = Car - 6 Seaters
@@ -89,7 +89,7 @@ class BookingViewSet(viewsets.ViewSet):
                 pesos_per_km = 10
                 pesos_per_km2 = 15
                 booking_fee = 0
-                commission_prcentage = .20 #20%
+                commission_prcentage = .15 #15%
 
             base_amount = distance_km_round * pesos_per_km
             exceeding_kms_total  = 0
@@ -114,17 +114,17 @@ class BookingViewSet(viewsets.ViewSet):
                 promo_details = self.promo_service.get_promo_by_id(promo_id=promo_id)
                 validate_promo = self.promo_service.validate_promo(promo_id=promo_id, customer_id=customer_id)
                 if promo_details:
-                    if promo_details.code == 'RIDE93333':
+                    # if promo_details.code == 'RIDE93333':
 
-                        promo_discount_percentage = .08 #8% Discount if total amount > 150
-                        if total_amount >= 200: 
-                            promo_discount_percentage = .10 #10% Discount if total amount > 200
+                    promo_discount_percentage = .08 #8% Discount if total amount > 150
+                    if total_amount >= 200: 
+                        promo_discount_percentage = .10 #10% Discount if total amount > 200
 
-                        promo_discount = round(total_amount * promo_discount_percentage, 2)
+                    promo_discount = round(total_amount * promo_discount_percentage, 2)
 
-                        # Change commission and total amount
-                        total_amount = round(total_amount - promo_discount, 2)
-                        commision = round(total_amount - rider_net_amount, 2)
+                    # Change commission and total amount
+                    total_amount = round(total_amount - promo_discount, 2)
+                    commision = round(total_amount - rider_net_amount, 2)
 
             response = {
                 "distance_km_round" : distance_km_round,

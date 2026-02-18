@@ -47,7 +47,7 @@ class BookingPaymentRepository:
         total_amount = minimum_fare + base_amount + booking_fee + tip
         
         # Compute commission and rider net amount
-        commission_prcentage = .20 #20%
+        commission_prcentage = .15 #15%
         commission = round(total_amount * commission_prcentage, 2)
         rider_net_amount = round(total_amount - commission, 2)
 
