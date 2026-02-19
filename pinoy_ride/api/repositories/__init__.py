@@ -18,3 +18,4 @@ from .pinoy_ride_wallet_history_repository import PinoyRideWalletHistoryReposito
 from .task_repository import TaskRepository
 from .promo_availed_repository import PromoAvailedRepository
 from .otp_api_request_repository import OtpApiRequestRepository
+from .booking_issues_repository import BookingIssuesRepository

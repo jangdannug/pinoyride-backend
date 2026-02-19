@@ -11,6 +11,7 @@ from api.services.wallet_service import WalletService
 from api.services.wallet_history_service import WalletHistoryService
 from api.services.promo_service import PromoService
 from api.services.promo_availed_service import PromoAvailedService
+from api.services.booking_issues_service import BookingIssuesService
 
 from api.services.admin_promo_service import AdminPromoService
 from api.services.admin_price_service import AdminPriceService

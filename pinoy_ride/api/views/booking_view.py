@@ -15,7 +15,8 @@ from api.services import (
     BookingRatingsService,
     WalletService,
     PromoService,
-    PromoAvailedService
+    PromoAvailedService,
+    BookingIssuesService
 )
 from api.base import (
     ApiService
@@ -37,6 +38,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.wallet_service = WalletService()
         self.promo_service = PromoService()
         self.promo_availed_service = PromoAvailedService()
+        self.booking_issues_service = BookingIssuesService()
 
 
     @action(detail=False, methods=['post'], url_path='inquire')
@@ -857,6 +859,52 @@ class BookingViewSet(viewsets.ViewSet):
                     return AppResponse.send_error(message="No pending bookings available", code=404)
 
             return AppResponse.send_success(data=response, message="Booking accepted")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='report_issue')
+    def report_issue(self, request):
+        """Report Booking Issue"""
+        
+        try:            
+            customer_id = request.data.get("customer_id", "")
+            booking_id = request.data.get("booking_id", "")
+            issue = request.data.get("issue", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if not issue:
+                return AppResponse.send_error(message="Issue is required", code=400)
+
+            with transaction.atomic():
+                booking_details = self.service.get_booking_by_id(booking_id=booking_id)
+
+                ## validate booking record if it is linked to customer_id
+                self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+
+                booking_issues = {
+                    "issue" : issue,
+                    "user_type" : 'customer',
+                    "reported_by" : customer_id
+                }
+
+                self.booking_issues_service.save_booking_issues(booking_instance=booking_details, booking_issues=booking_issues)
+
+                serializer = BookingSerializer(booking_details)
+           
+            return AppResponse.send_success(data=serializer.data, message="Issue submitted successfully")
 
 
         except NotFoundError as e:
