@@ -444,6 +444,20 @@ class BookingViewSet(viewsets.ViewSet):
             customer_id = request.data.get("customer_id", "")
             user_type = request.data.get("user_type", "")
 
+            page = int(request.data.get("page", 1))
+            perpage = int(request.data.get("perpage", 10))
+            query = request.data.get("query", None)
+            sort_by = request.data.get("sort_by")
+            name_filter = request.data.get("name_filter")
+
+            filters = {}
+
+            if name_filter:
+                filters["name_filter"] = name_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-updated_at"
+
             if not user_type:
                 return AppResponse.send_error(message="User type is required", code=400)
 
@@ -461,13 +475,13 @@ class BookingViewSet(viewsets.ViewSet):
                 if user_type == 'customer':
                      
                     self.customer_service.get_customer_by_id(customer_id=customer_id)
-                    booking_details = self.service.get_customer_booking_history(customer_id=customer_id)
+                    booking_details = self.service.get_customer_booking_history(customer_id=customer_id, page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by)
                     return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
 
                 elif user_type == 'rider':
 
                     self.rider_service.get_rider_by_id(rider_id=rider_id)
-                    booking_details = self.service.get_rider_booking_history(rider_id=rider_id)
+                    booking_details = self.service.get_rider_booking_history(rider_id=rider_id, page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by)
                     return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
 
 

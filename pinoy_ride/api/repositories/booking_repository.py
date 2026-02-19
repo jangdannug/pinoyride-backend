@@ -122,28 +122,80 @@ class BookingRepository:
 
 
     @staticmethod
-    def get_rider_booking_history(rider_id):
+    def get_rider_booking_history(rider_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """Retrieve rider booking history"""
+    
+        bookings = Booking.objects.filter(rider_id=rider_id).order_by(sort_by)
+      
+        if search_query:
+            search_terms = search_query.split()
+            query_filter = Q()
 
-        bookings = Booking.objects.filter(rider_id=rider_id).order_by('-id')
+            for term in search_terms:
+                query_filter |= (
+                    Q(first_name__icontains=term)
+                    | Q(middle_name__icontains=term)
+                    | Q(last_name__icontains=term)
+                )
 
-        serialized_bookings = BookingSerializer(bookings, many=True).data
+            bookings = bookings.filter(query_filter).distinct()
+
+        paginator = Paginator(bookings, page_size)
+        page = paginator.get_page(page_number)
+
+        serialized_bookings = BookingSerializer(
+            page.object_list, many=True
+        ).data
 
         return {
-            "bookings": serialized_bookings
+            "bookings": serialized_bookings,
+            "total_pages": paginator.num_pages,
+            "current_page": page_number,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+            "next_page": page.next_page_number() if page.has_next() else None,
+            "previous_page": (
+                page.previous_page_number() if page.has_previous() else None
+            ),
         }
 
 
     @staticmethod
-    def get_customer_booking_history(customer_id):
+    def get_customer_booking_history(customer_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """Retrieve customer booking history"""
 
-        bookings = Booking.objects.filter(customer_id=customer_id).order_by('-id')
+        bookings = Booking.objects.filter(customer_id=customer_id).order_by(sort_by)
+      
+        if search_query:
+            search_terms = search_query.split()
+            query_filter = Q()
 
-        serialized_bookings = BookingSerializer(bookings, many=True).data
+            for term in search_terms:
+                query_filter |= (
+                    Q(first_name__icontains=term)
+                    | Q(middle_name__icontains=term)
+                    | Q(last_name__icontains=term)
+                )
+
+            bookings = bookings.filter(query_filter).distinct()
+
+        paginator = Paginator(bookings, page_size)
+        page = paginator.get_page(page_number)
+
+        serialized_bookings = BookingSerializer(
+            page.object_list, many=True
+        ).data
 
         return {
-            "bookings": serialized_bookings
+            "bookings": serialized_bookings,
+            "total_pages": paginator.num_pages,
+            "current_page": page_number,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+            "next_page": page.next_page_number() if page.has_next() else None,
+            "previous_page": (
+                page.previous_page_number() if page.has_previous() else None
+            ),
         }
 
 

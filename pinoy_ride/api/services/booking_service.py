@@ -29,14 +29,14 @@ class BookingService:
         return self.booking.random_pending(rider_lat = rider_lat, rider_long=rider_long)
 
     ## Get rider booking history
-    def get_rider_booking_history(self, rider_id):
+    def get_rider_booking_history(self, rider_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """List all rider booking history"""
-        return self.booking.get_rider_booking_history(rider_id = rider_id)
+        return self.booking.get_rider_booking_history(rider_id, page_number, page_size, search_query, filters, sort_by)
 
     ## Get customer booking history
-    def get_customer_booking_history(self, customer_id):
+    def get_customer_booking_history(self, customer_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """List all customer booking history"""
-        return self.booking.get_customer_booking_history(customer_id = customer_id)
+        return self.booking.get_customer_booking_history(customer_id, page_number, page_size, search_query, filters, sort_by)
 
      ## Get booking by id
     def get_booking_by_id(self,booking_id):
