@@ -498,7 +498,8 @@ class BookingViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 booking_details = self.service.get_booking_by_id(booking_id=booking_id)
-                rider_details = self.rider_service.get_available_rider(rider_id=rider_id)
+                # rider_details = self.rider_service.get_available_rider(rider_id=rider_id)
+                rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
                 
                 if booking_details.payment_type == 'cash': #Check balance of rider if payment type == cash and must be enough for deducting of commission
                     booking_payment_details = self.booking_payment_service.get_record_by_booking_id(booking_id=booking_details.id)
