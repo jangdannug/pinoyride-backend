@@ -121,3 +121,19 @@ class UserService:
         user = self.user_repo.change_password(user=user_instance, new_password=hashed_password)
         return user
     
+
+    def get_by_email(self, email):
+        """Get User by email"""
+        user = self.user_repo.get_by_email(email)
+        if user is None:
+            raise ValidationError("User not found")
+
+        return user
+    
+    def update_password(self, user_instance, new_password):
+        """Update user's password"""
+        
+        hashed_password = make_password(new_password)
+        user = self.user_repo.change_password(user=user_instance, new_password=hashed_password)
+        return user
+    

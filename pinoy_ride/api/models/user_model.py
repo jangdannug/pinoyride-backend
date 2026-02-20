@@ -27,6 +27,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=255)
     access = models.CharField(max_length=255)  
     password = models.CharField(max_length=128, null=True, blank=True)  
+    mobile_no = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -42,7 +43,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = 'user'
         verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name_plural = 'Users',
+        indexes = [
+            models.Index(fields=['mobile_no']),
+        ]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

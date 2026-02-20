@@ -3,8 +3,9 @@ from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from api.utils.app_response import AppResponse
 from api.services.user_service import UserService
+from api.services.otp_service import OtpService
 from api.utils.refresh_token_management import set_refresh_token_in_cookie, get_refresh_token_in_cookie, destroy_refresh_token_in_cookie
-from api.utils.custom_error import AuthError
+from api.utils.custom_error import AuthError, ValidationError
 from api.utils.views_swagger_decorator.auth_view_decorator import auth_schema,refresh_token_schema,logout_schema
 
 class AuthViewSet(viewsets.ViewSet):
@@ -81,3 +82,109 @@ class AuthViewSet(viewsets.ViewSet):
                 return response
         except AuthError:
             return AppResponse.send_error(message="Invalid refresh token", code=401)
+
+
+    @action(detail=False, methods=['post'], url_path='fp-send-otp')
+    def fp_send_otp(self, request):
+        """Generate OTP"""
+        
+        try:
+
+            # Validation
+            email = request.data.get("email")
+
+            user_service = UserService()
+            otp_service = OtpService() 
+
+            user_details = user_service.get_by_email(email=email)
+            mobile_no  = user_details.mobile_no
+        
+            generate_data = {
+                "mobile_no" : mobile_no,
+                "user_type" : "admin"
+            }
+
+            # with transaction.atomic():
+            otp_data = otp_service.generate_otp(generate_data)
+                
+            return AppResponse.send_success(data=otp_data, message="Otp sent successfully")
+
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        # except Exception as e:
+
+        #     return AppResponse.send_error(message=str(e), code=500)
+
+
+
+
+    @action(detail=False, methods=['post'], url_path='fp-validate-otp')
+    def fp_validate_otp(self, request):
+        """Verify OTP"""
+        
+        try:
+
+            # Validation
+            email = request.data.get("email")
+            otp_code = request.data.get("otp_code")
+
+            if not otp_code:
+                return AppResponse.send_error(message="Otp code is required", code=400)
+
+            user_service = UserService()
+            otp_service = OtpService() 
+
+            user_details = user_service.get_by_email(email=email)
+            mobile_no  = user_details.mobile_no
+
+            verify_data = {
+                "mobile_no" : mobile_no,
+                "user_type" : "admin",
+                "code" : otp_code
+            }
+                
+            otp_data = otp_service.verify_otp(verify_data)
+
+            return AppResponse.send_success(data=[], message="OTP verified!")
+
+
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+
+
+    @action(detail=False, methods=['post'], url_path='update-password')
+    def update_password(self, request):
+        """Update password """
+        email = request.data.get("email")
+        password = request.data.get("password")
+        confirm_password = request.data.get("confirm_password")
+
+        if password != confirm_password:
+            return AppResponse.send_error(message="Password doesn't match!", code=400)
+        
+        try:
+            user_service = UserService() 
+            user_details = user_service.get_by_email(email=email)
+
+            user_service.update_password(user_instance=user_details, new_password=password)
+
+            return AppResponse.send_success(
+                data={},
+                message="Password updated successfully"
+            )
+        
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
