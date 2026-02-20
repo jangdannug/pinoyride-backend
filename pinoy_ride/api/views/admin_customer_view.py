@@ -5,7 +5,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 import json
 from rest_framework.exceptions import ValidationError
 from api.services import (
-    AdminCustomerService
+    AdminCustomerService,
+    WalletService
 )
 from api.serializers import CustomerSerializer, PartialCustomerSerializer
 from api.utils.app_response import AppResponse
@@ -31,6 +32,7 @@ class AdminCustomerViewSet(viewsets.ViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.admin_service = AdminCustomerService()
+        self.wallet_service = WalletService()
         
 
     ## Get customer list
@@ -178,5 +180,48 @@ class AdminCustomerViewSet(viewsets.ViewSet):
             return AppResponse.send_error(
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+
+    @action(
+        detail=False, methods=["post"], url_path="get-wallet-history"
+    )
+    def get_wallet_history(self, request):
+        """List customer wallet history with pagination and search query"""
+        try:
+            page = int(request.data.get("page", 1))
+            perpage = int(request.data.get("perpage", 10))
+            query = request.data.get("query", None)
+            sort_by = request.data.get("sort_by")
+            name_filter = request.data.get("name_filter")
+            customer_id = request.data.get("customer_id", "")
+
+            filters = {}
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer id is required", code=400)
+
+            if name_filter:
+                filters["name_filter"] = name_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-updated_at"
+
+            wallet_history = self.wallet_service.get_wallet_history(
+                user_id=customer_id, user_type='customer',  page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by
+            )
+
+            return AppResponse.send_success(
+                data=wallet_history, message="Customer's wallet history listed successfully"
+            )
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
 
 
