@@ -32,7 +32,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "your-access-key")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "your-secret-key")
-AWS_STORAGE_BUCKET_NAME = "suysing-s3"
+AWS_STORAGE_BUCKET_NAME = "s3"
 AWS_S3_REGION_NAME = "ap-southeast-1"  
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
@@ -53,11 +53,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
 API_KEY = os.getenv('API_KEY')
 CUSTOM_API_KEY= os.getenv('CUSTOM_API_KEY', '0219d7987f6d0633c31556a428a6197ef11f3b5be8121d8b31218a16c92e560e775')
-SUYSING_API_KEY= os.getenv('SUYSING_API_KEY', '1219d7987f6d0633c31556a428a12297ef11f3b5be8121d812211218a16c92e560e2')
-AUDITOR_KEY= os.getenv('AUDITOR_KEY', 'bsasc12e3459d6b68f396e55c8388e55d9afc3c17a1183f286f59f2469c8a7976a16cfsas5b06bd290e4f7f0sas8bbfc7d277ea010a4a3a24438csasdf13f9871612dsa')
-SUYSING_APP_URL= os.getenv('SUYSING_APP_URL', 'https://suysing-app.escarez.com')
-TOTAL_BOOTHS_CAP= os.getenv('TOTAL_BOOTHS_CAP', 103)
-TOTAL_DOUBLE_ZONE_CAP= os.getenv('TOTAL_DOUBLE_ZONE_CAP', 20)
 
 ENV = os.getenv('ENV', 'development')
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -102,28 +97,20 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "https://pinoy-ride.vercel.app",
-    "https://suysing-app.escarez.com",
     "http://192.168.100.40:3000",
-    "https://suki-portal.suysing.com",
-    "https://suki-app.suysing.com",
     "http://localhost:3000",
     "https://localhost:3000",
-    "http://localhost:3001",
-    # "http://192.168.100.40:3001",
+    "http://localhost:3001"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://pinoy-ride.vercel.app",
-    "https://suysing-app.escarez.com",
     "http://192.168.100.40:3000",
-    "https://suki-portal.suysing.com",
-    "https://suki-app.suysing.com",
     "http://localhost:3000",
     "https://localhost:3000",
-    "http://localhost:3001",
-    # "http://192.168.100.40:3001",
+    "http://localhost:3001"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -173,12 +160,6 @@ AUTH_USER_MODEL = 'api.User'
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
-# FOR UAT DB AWS RDS POSTGRES
-# DATABASES = {
-    # 'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    # 'default': dj_database_url.config(default=os.environ.get('postgres://postgressuysing:suysinglwsuat001*@suy-sing-lws-api.cgxwk2eig4ip.us-east-1.rds.amazonaws.com:5432/suy_sing_lws_api'))
-# }
 
 
 #FOR PROD
@@ -382,6 +363,9 @@ TOP_PH_EKYC_CONFIG = {
     'CLIENT_SECRET': os.getenv('EKYC_CLIENT_SECRET', 'SaSyTxi10iCu4HCeRP84Wwxd65H82GLQRhCkILJGlJo='),
     'APP_ID': os.getenv('EKYC_APP_ID', 'a4063e95-aa76-42a9-90e5-2208bed8753b'),
     'API_KEY': os.getenv('EKYC_API_KEY', '2208bed8753b'),
+    'SUCCESS_URL': os.getenv('EKYC_SUCCESS_URL', 'https://pinoy-ride.vercel.app/ekyc-success'),
+    'FAILED_URL': os.getenv('EKYC_FAILED_URL', 'https://pinoy-ride.vercel.app/ekyc-failed'),
+    'EXPIRED_URL': os.getenv('EKYC_EXPIRED_URL', 'https://pinoy-ride.vercel.app/ekyc-expired'),   
 }
 
 CASH_OUT_CONFIG = {
