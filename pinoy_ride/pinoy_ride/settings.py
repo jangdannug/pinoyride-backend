@@ -100,7 +100,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.100.40:3000",
     "http://localhost:3000",
     "https://localhost:3000",
-    "http://localhost:3001"
+    "http://localhost:3001",
+    "https://riderapp.escarez.com",
+    "https://pinoyrideph.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -110,7 +112,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://192.168.100.40:3000",
     "http://localhost:3000",
     "https://localhost:3000",
-    "http://localhost:3001"
+    "http://localhost:3001",
+    "https://riderapp.escarez.com",
+    "https://pinoyrideph.com"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
