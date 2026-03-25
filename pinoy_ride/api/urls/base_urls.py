@@ -11,6 +11,11 @@ urlpatterns = [
     path('ekyc/', include('api.urls.ekyc_urls')),
     path('cash_out/', include('api.urls.cash_out_urls')),
 
+    # URL for payment gateway
+    path('request/', include('api.urls.internal_request_urls')),
+    path('response/', include('api.urls.internal_response_urls')),
+    path('backend/', include('api.urls.internal_backend_urls')),
+
     path('admin/', include('api.urls.auth_urls')),
     path('admin/rider/', include('api.urls.admin_rider_urls')),
     path('admin/customer/', include('api.urls.admin_customer_urls')),

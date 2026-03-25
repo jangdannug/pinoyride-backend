@@ -8,6 +8,11 @@ from .qrph_view import QrphViewSet
 from .ekyc_view import EkycViewSet
 from .cash_out_view import CashOutViewSet
 
+# Views for Payment Gateway API
+from .internal_request_view import InternalRequestViewSet
+from .internal_response_view import InternalResponseViewSet
+from .internal_backend_view import InternalBackendViewSet
+
 from .admin_promo_view import AdminPromoViewSet
 from .admin_price_view import AdminPriceViewSet
 from .admin_rider_view import AdminRiderViewSet
