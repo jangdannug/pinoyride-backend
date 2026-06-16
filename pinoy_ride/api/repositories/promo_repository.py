@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from django.core.paginator import Paginator
 from django.db.models import Q, Max, Value, OuterRef, Subquery, Prefetch
 from django.db.models.functions import Concat
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from datetime import timedelta
 from api.serializers import (
     PromoSerializer, PartialPromoSerializer
@@ -84,9 +84,11 @@ class PromoRepository:
     def promo_list(customer_id):
         """Retrieve promos"""
 
+        current_date = localtime().date()
+
         promos = (
             Promo.objects
-                .filter(status=1)
+                .filter(status=1, end_date__gte=current_date)
                 .annotate(
                 start_date_pretty=Func(
                     F('start_date'),

@@ -23,6 +23,7 @@ from api.base import (
 )
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
+import os
 
 class BookingViewSet(viewsets.ViewSet):
     """Booking Controller"""
@@ -324,11 +325,20 @@ class BookingViewSet(viewsets.ViewSet):
             #             "long": loc.longitude
             #         })
 
-            api_key = 'AIzaSyAlpSoXuJzvo8uR1qbdtbbbk1sx4MHKIQk'
-            url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+
+            api_key = os.getenv('SEARCH_MAP_API_KEY', 'AIzaSyAlpSoXuJzvo8uR1qbdtbbbk1sx4MHKIQk')
+            url = os.getenv('SEARCH_MAP_URL', 'https://maps.googleapis.com/maps/api/place/autocomplete/json')
+
+            # Metro Manila + nearby provinces bounds (50km radius for realistic ride distances)
+            metro_manila_center = os.getenv('SEARCH_MAP_CENTER', '14.5547,121.0244')  # Makati center
+            metro_manila_radius = os.getenv('SEARCH_MAP_RADIUS', 50000)  # 50km covers Metro Manila + nearby provinces (Rizal, Bulacan, Cavite, Laguna)
+
             params = {
                 "input": location_search_key,
                 "components": "country:PH",
+                "location": metro_manila_center,
+                "radius": metro_manila_radius,
+                "strictbounds": "true",  # Enforce the boundary
                 "key": api_key
             }
             res = self.api_service.get_request(url=url, params=params)
@@ -338,7 +348,7 @@ class BookingViewSet(viewsets.ViewSet):
                 place_id = prediction["place_id"]
 
                 # Get details for each suggestion
-                details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+                details_url = os.getenv('SEARCH_MAP_DETAILS_URL', 'https://maps.googleapis.com/maps/api/place/details/json')
                 params = {"place_id": place_id, "key": api_key}
                 details_res = res = self.api_service.get_request(url=details_url, params=params)
 
