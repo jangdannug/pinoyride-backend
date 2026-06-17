@@ -35,9 +35,10 @@ class UserService:
             "first_name": user_data.get("first_name"),
             "middle_name": user_data.get("middle_name"),
             "last_name": user_data.get("last_name"),
-            "email": user_data.get("email"),
-            "position": user_data.get("position"),
-            "role": user_data.get("role"),
+            # "email": user_data.get("email"),
+            # "position": user_data.get("position"),
+            # "role": user_data.get("role"),
+            "mobile_no": user_data.get("mobile_no"),
             "access": user_data.get("access"),
         }
 

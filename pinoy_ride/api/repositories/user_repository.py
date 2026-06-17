@@ -45,9 +45,10 @@ class UserRepository:
             user.first_name = updated_user_data.get('first_name')
             user.middle_name = updated_user_data.get('middle_name')
             user.last_name = updated_user_data.get('last_name')
-            user.email = updated_user_data.get('email')
-            user.position = updated_user_data.get('position')
-            user.role = updated_user_data.get('role')
+            # user.email = updated_user_data.get('email')
+            # user.position = updated_user_data.get('position')
+            # user.role = updated_user_data.get('role')
+            user.mobile_no = updated_user_data.get('mobile_no')
             user.access = updated_user_data.get('access')
 
             user.save()
