@@ -1,14 +1,15 @@
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.db.models import Q, Value, Count, Avg, Sum
+from django.db.models import Q, Value, Count, Avg, Sum, F, Exists, OuterRef, Subquery
 from django.db.models.functions import Concat, Cast
-from django.db.models import FloatField
+from django.db.models import FloatField, CharField
 from api.models.rider_model import Rider
 from api.models.booking_model import Booking
 from api.models.booking_ratings_model import BookingRatings
 from api.models.ignored_booking_model import IgnoredBooking
 from api.models.rider_vehicle_details_model import RiderVehicleDetails
+from api.models.top_ph_ekyc_details_model import TopPhEkycDetails
 from api.serializers import (
     PartialRiderSerializer
 )
@@ -187,12 +188,38 @@ class RiderRepository:
     def admin_riders_list(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """Retrieve paginated rider list with optional search query and filters."""
 
+        # Subquery to get EKYC full name (concatenated from TopPhEkycDetails)
+        ekyc_full_name_subquery = TopPhEkycDetails.objects.filter(
+            generate_request_user_id=OuterRef('ekyc_request_user_id')
+        ).annotate(
+            ekyc_concat=Concat(
+                F('first_name'),
+                Value(' '),
+                F('middle_name'),
+                Value(' '),
+                F('last_name'),
+                output_field=CharField()
+            )
+        ).values('ekyc_concat')[:1]
+
         # application_status = 1 (active riders)
         riders = (
             Rider.objects
             .filter(application_status='1')
             .prefetch_related('rider_vehicle')  # Prefetch vehicle details for filtering
-            .annotate()
+            .annotate(
+                # Annotate full_name for search (first_name + middle_name + last_name)
+                full_name=Concat(
+                    F('first_name'),
+                    Value(' '),
+                    F('middle_name'),
+                    Value(' '),
+                    F('last_name'),
+                    output_field=CharField()
+                ),
+                # Annotate EKYC full name from TopPhEkycDetails
+                ekyc_full_name=Subquery(ekyc_full_name_subquery, output_field=CharField())
+            )
             .order_by(sort_by)
         )
 
@@ -210,15 +237,34 @@ class RiderRepository:
             if "vehicle_brand" in filters and filters["vehicle_brand"]:
                 riders = riders.filter(rider_vehicle__v_brand__icontains=filters["vehicle_brand"])
 
+            # Filter by EKYC full name (ekyc_first_name + ekyc_middle_name + ekyc_last_name)
+            if "ekyc_full_name" in filters and filters["ekyc_full_name"]:
+                riders = riders.filter(ekyc_full_name__icontains=filters["ekyc_full_name"])
+
         if search_query:
             search_terms = search_query.split()
             query_filter = Q()
 
             for term in search_terms:
+                # Build subqueries for EKYC details
+                ekyc_first_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    first_name__icontains=term
+                )
+                ekyc_middle_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    middle_name__icontains=term
+                )
+                ekyc_last_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    last_name__icontains=term
+                )
+
                 query_filter |= (
                     Q(first_name__icontains=term)
                     | Q(middle_name__icontains=term)
                     | Q(last_name__icontains=term)
+                    | Q(full_name__icontains=term)  # Search in concatenated full name
                     | Q(code__icontains=term)
                     | Q(mobile_no__icontains=term)
                     | Q(current_location__icontains=term)
@@ -226,6 +272,10 @@ class RiderRepository:
                     | Q(rider_vehicle__v_brand__icontains=term)
                     | Q(rider_vehicle__v_model__icontains=term)
                     | Q(rider_vehicle__v_plate_number__icontains=term)
+                    # Search in EKYC details
+                    | Exists(ekyc_first_name)
+                    | Exists(ekyc_middle_name)
+                    | Exists(ekyc_last_name)
                 )
 
             riders = riders.filter(query_filter).distinct()
