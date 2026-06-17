@@ -106,9 +106,10 @@ class CustomerViewSet(viewsets.ViewSet):
                 ekyc_request_user_id = customer.ekyc_request_user_id
 
                 # Check if record exist on ekyc user details table
-                check_user_details = self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
-                if check_user_details is None:
-                    self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
+                self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
+                # disable check ekyc details
+                # if check_user_details is None:
+                    # self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
 
                 # create wallet if not exist
                 self.wallet_service.create_customer_wallet(customer_id=customer.id)
