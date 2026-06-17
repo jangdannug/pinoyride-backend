@@ -1,9 +1,10 @@
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.db.models import Q, Value
+from django.db.models import Q, Value, Exists, OuterRef
 from django.db.models.functions import Concat
 from api.models.booking_model import Booking
+from api.models.ignored_booking_model import IgnoredBooking
 from django.db import transaction
 from api.serializers import (
     BookingSerializer
@@ -45,8 +46,8 @@ class BookingRepository:
     
 
     @staticmethod
-    def pending_list(rider_lat, rider_long, booking_type):
-        """Retrieve list of pending bookings"""
+    def pending_list(rider_lat, rider_long, booking_type, rider_id=None):
+        """Retrieve list of pending bookings, excluding those ignored by the rider"""
         rider_lat = float(rider_lat)
         rider_long = float(rider_long)
         rider_current_latlong = (rider_lat, rider_long)
@@ -57,12 +58,26 @@ class BookingRepository:
         lat_range = (rider_lat - lat_delta, rider_lat + lat_delta)
         lng_range = (rider_long - lng_delta, rider_long + lng_delta)
 
-        # Narrow down candidates from DB
-        bookings = (
-            Booking.objects
-            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range, booking_type = booking_type)
-            .order_by("-id")[:50]  # limit to 50 candidates
+        # Build base query
+        bookings_query = Booking.objects.filter(
+            status=0,
+            pickup_lat__range=lat_range,
+            pickup_long__range=lng_range,
+            booking_type=booking_type
         )
+
+        # Exclude bookings that this rider has already ignored
+        if rider_id:
+            # Get list of booking IDs that this rider has ignored
+            ignored_booking_ids = IgnoredBooking.objects.filter(
+                rider_id=rider_id
+            ).values_list('booking_id', flat=True)
+
+            if ignored_booking_ids:
+                bookings_query = bookings_query.exclude(id__in=ignored_booking_ids)
+
+        # Narrow down candidates from DB
+        bookings = bookings_query.order_by("-id")[:50]  # limit to 50 candidates
 
         nearby_bookings = []
         for booking in bookings:

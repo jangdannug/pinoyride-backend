@@ -400,7 +400,7 @@ class BookingViewSet(viewsets.ViewSet):
 
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
-                booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type)
+                booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type, rider_id=rider_id)
            
             return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
 

@@ -104,7 +104,35 @@ class RiderService:
     @transaction.atomic
     def update_auto_accept(self, rider_instance, status):
         """Update rider auto accept status"""
-        
+
         rider_auto_accept = self.rider.update_auto_accept(rider_instance=rider_instance, status=status)
 
         return rider_auto_accept
+
+
+    ## Get rider service details
+    def get_service_details(self, rider_id):
+        """Get rider service details including acceptance rate, ratings, and cancellation rate"""
+
+        # First verify rider exists
+        self.get_rider_by_id(rider_id=rider_id)
+
+        service_details = self.rider.get_rider_service_details(rider_id=rider_id)
+
+        return service_details
+
+
+    ## Record ignored booking
+    @transaction.atomic
+    def ignore_booking(self, rider_id, booking_id):
+        """Record when a rider ignores a booking"""
+
+        # Verify rider exists
+        self.get_rider_by_id(rider_id=rider_id)
+
+        ignored_booking = self.rider.save_ignored_booking(
+            rider_id=rider_id,
+            booking_id=booking_id
+        )
+
+        return ignored_booking

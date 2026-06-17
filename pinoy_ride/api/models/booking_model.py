@@ -44,6 +44,7 @@ class Booking(SoftDeleteModel):
             models.Index(fields=['dropoff_lat']),
             models.Index(fields=['dropoff_long']),
             models.Index(fields=['updated_by']),
+            models.Index(fields=['updated_by_user']),
             models.Index(fields=['status'])
         ]
         db_table = "booking"

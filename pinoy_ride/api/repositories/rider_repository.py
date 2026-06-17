@@ -1,9 +1,13 @@
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.db.models import Q, Value
-from django.db.models.functions import Concat
+from django.db.models import Q, Value, Count, Avg, Sum
+from django.db.models.functions import Concat, Cast
+from django.db.models import FloatField
 from api.models.rider_model import Rider
+from api.models.booking_model import Booking
+from api.models.booking_ratings_model import BookingRatings
+from api.models.ignored_booking_model import IgnoredBooking
 from api.serializers import (
     PartialRiderSerializer
 )
@@ -285,9 +289,87 @@ class RiderRepository:
     @staticmethod
     @transaction.atomic
     def delete_rider(rider_instance, auth_user_id):
-        
+
         rider_instance.deleted_at = now()
         rider_instance.updated_by = auth_user_id
         rider_instance.save()
-        
+
         return rider_instance
+
+
+    @staticmethod
+    def get_rider_service_details(rider_id):
+        """Get rider service details including acceptance rate, ratings, and cancellation rate"""
+
+        # Get total booking opportunities (accepted + ignored + pending bookings)
+        # Count of bookings where rider is assigned (status >= 1) OR rider ignored
+        accepted_count = Booking.objects.filter(
+            rider_id=rider_id,
+            status__gte=1  # Accepted or beyond
+        ).count()
+
+        ignored_count = IgnoredBooking.objects.filter(
+            rider_id=rider_id
+        ).count()
+
+        total_opportunities = accepted_count + ignored_count
+
+        # Calculate acceptance rate
+        if total_opportunities > 0:
+            acceptance_rate = round((accepted_count / total_opportunities) * 100, 2)
+        else:
+            acceptance_rate = 0.00
+
+        # Get ratings average from booking_ratings
+        # Cast rate (CharField) to DecimalField before averaging
+        ratings_data = BookingRatings.objects.filter(
+            booking__rider_id=rider_id
+        ).aggregate(
+            average_rating=Avg(Cast('rate', FloatField())),
+            total_ratings=Count('id')
+        )
+
+        average_rating = float(ratings_data['average_rating']) if ratings_data['average_rating'] else 0.0
+        total_ratings = ratings_data['total_ratings'] or 0
+
+        # Get cancellation rate (bookings cancelled by rider - status 4)
+        # Status 4 means completed/cancelled by customer, but based on booking_view code:
+        # status 4 in update_status_for_customer means cancelled
+        # We need to count bookings where rider accepted then was cancelled
+
+        cancelled_count = Booking.objects.filter(
+            rider_id=rider_id,
+            status=4  # Cancelled
+        ).count()
+
+        total_accepted = accepted_count
+        if total_accepted > 0:
+            cancellation_rate = round((cancelled_count / total_accepted) * 100, 2)
+        else:
+            cancellation_rate = 0.00
+
+        return {
+            "acceptance_rate": acceptance_rate,
+            "accepted_bookings": accepted_count,
+            "ignored_bookings": ignored_count,
+            "total_opportunities": total_opportunities,
+            "average_rating": round(average_rating, 2),
+            "total_ratings": total_ratings,
+            "cancellation_rate": cancellation_rate,
+            "cancelled_bookings": cancelled_count,
+            "total_accepted_bookings": total_accepted
+        }
+
+
+    @staticmethod
+    @transaction.atomic
+    def save_ignored_booking(rider_id, booking_id):
+        """Record when a rider ignores a booking"""
+
+        ignored_booking = IgnoredBooking.objects.create(
+            rider_id=rider_id,
+            booking_id=booking_id,
+            status=0
+        )
+
+        return ignored_booking

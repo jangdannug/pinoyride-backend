@@ -425,3 +425,58 @@ class RiderViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='get_service_details')
+    def get_service_details(self, request):
+        """Get rider service details including acceptance rate, ratings, and cancellation rate"""
+
+        try:
+            rider_id = request.data.get("rider_id", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+
+            service_details = self.service.get_service_details(rider_id=rider_id)
+
+            return AppResponse.send_success(data=service_details, message="Service details retrieved successfully")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='ignore_booking')
+    def ignore_booking(self, request):
+        """Record when a rider ignores a booking"""
+
+        try:
+            rider_id = request.data.get("rider_id", "")
+            booking_id = request.data.get("booking_id", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+
+            with transaction.atomic():
+                ignored_booking = self.service.ignore_booking(
+                    rider_id=rider_id,
+                    booking_id=booking_id
+                )
+
+            return AppResponse.send_success(data={"ignored_booking_id": ignored_booking.id}, message="Booking ignored recorded successfully")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
