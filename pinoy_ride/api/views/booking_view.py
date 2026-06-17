@@ -24,6 +24,7 @@ from api.base import (
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import os
+from api.utils.app_logger import app_logger
 
 class BookingViewSet(viewsets.ViewSet):
     """Booking Controller"""
@@ -84,6 +85,8 @@ class BookingViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='inquire')
     def inquire_booking(self, request):
         """Return booking details"""
+        
+        app_logger(1, "Inquire Booking", request.data)
 
         try:
             customer_id = request.data.get("customer_id", "")
@@ -438,6 +441,8 @@ class BookingViewSet(viewsets.ViewSet):
     def get_pending(self, request):
         """Get Pending Bookings"""
         
+        app_logger(1, "Get pending", request.data)
+
         try:            
             
             rider_id = request.data.get("rider_id", "")
