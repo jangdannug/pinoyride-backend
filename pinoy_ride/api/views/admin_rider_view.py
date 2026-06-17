@@ -152,11 +152,23 @@ class AdminRiderViewSet(viewsets.ViewSet):
             query = request.query_params.get("query", None)
             sort_by = request.query_params.get("sort_by")
             name_filter = request.query_params.get("name_filter")
+            current_location = request.query_params.get("current_location", None)
+            vehicle_type = request.query_params.get("vehicle_type", None)
+            vehicle_brand = request.query_params.get("vehicle_brand", None)
 
             filters = {}
 
             if name_filter:
                 filters["name_filter"] = name_filter
+
+            if current_location:
+                filters["current_location"] = current_location
+
+            if vehicle_type:
+                filters["vehicle_type"] = vehicle_type
+
+            if vehicle_brand:
+                filters["vehicle_brand"] = vehicle_brand
 
             if sort_by == "" or sort_by is None:
                 sort_by = "-updated_at"

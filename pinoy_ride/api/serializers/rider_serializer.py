@@ -33,6 +33,7 @@ class RiderSerializer(serializers.ModelSerializer):
             "application_status",
             "current_lat",
             "current_long",
+            "current_location",
             "auto_accept",
             "is_available", # 1 = available, 2 = unavailable
             "is_online",

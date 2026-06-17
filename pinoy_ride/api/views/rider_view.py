@@ -251,9 +251,9 @@ class RiderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='update_current_location')
     def update_current_location(self, request):
         """Update current location"""
-        
-        try:            
-            
+
+        try:
+
             rider_id = request.data.get("rider_id", "")
             rider_lat = request.data.get("current_lat", "")
             rider_long = request.data.get("current_long", "")
@@ -267,11 +267,16 @@ class RiderViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 rider_details = self.service.get_rider_by_id(rider_id=rider_id)
-                
-                self.service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
+
+                # Service layer handles reverse geocoding automatically
+                self.service.update_rider_coordinates(
+                    rider_instance=rider_details,
+                    rider_lat=rider_lat,
+                    rider_long=rider_long
+                )
 
                 serializer = RiderSerializer(rider_details)
-           
+
             return AppResponse.send_success(data=serializer.data, message="Rider location updated successfully")
 
 

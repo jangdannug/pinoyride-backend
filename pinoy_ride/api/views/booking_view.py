@@ -42,6 +42,45 @@ class BookingViewSet(viewsets.ViewSet):
         self.booking_issues_service = BookingIssuesService()
 
 
+    def _validate_coordinates_in_service_area(self, pickup_lat, pickup_long, dropoff_lat, dropoff_long):
+        """
+        Validate that pickup and dropoff coordinates are within the service area.
+        Service Area: Metro Manila + nearby provinces (50km radius from Makati center)
+        Returns error message if validation fails, None if valid.
+        """
+
+        
+        metro_manila_center_env = os.getenv('SEARCH_MAP_CENTER', '14.5547,121.0244') # Makati center
+        metro_manila_radius_env = os.getenv('SEARCH_MAP_RADIUS', '50000')  # Default radius is 50,000 meters (50 km)
+
+        # 2. Convert Center to an Array (List of floats)
+        # .split(',') turns '14.5547,121.0244' into ['14.5547', '121.0244']
+        metro_manila_center = [float(coord) for coord in metro_manila_center_env.split(',')]
+
+        # 3. Convert Radius to kilometers (km)
+        # 50000 meters / 1000 = 50.0 km
+        max_service_radius_km = int(metro_manila_radius_env) / 1000
+
+        pickup_point = (float(pickup_lat), float(pickup_long))
+        dropoff_point = (float(dropoff_lat), float(dropoff_long))
+
+        # Calculate distance from Metro Manila center
+        pickup_distance_from_center = geodesic(metro_manila_center, pickup_point).kilometers
+        dropoff_distance_from_center = geodesic(metro_manila_center, dropoff_point).kilometers
+
+        # Validate pickup location is within service area
+        if pickup_distance_from_center > max_service_radius_km:
+            # return f"Pickup location is outside our service area. Maximum distance is {max_service_radius_km}km from Metro Manila."
+            return f"Pickup location is outside our service area."
+
+        # Validate dropoff location is within service area
+        if dropoff_distance_from_center > max_service_radius_km:
+            # return f"Drop-off location is outside our service area. Maximum distance is {max_service_radius_km}km from Metro Manila."
+            return f"Drop-off location is outside our service area."
+
+        return None
+
+
     @action(detail=False, methods=['post'], url_path='inquire')
     def inquire_booking(self, request):
         """Return booking details"""
@@ -59,6 +98,16 @@ class BookingViewSet(viewsets.ViewSet):
             pickup_long = request.data.get("pickup_long", "")
             dropoff_lat = request.data.get("dropoff_lat", "")
             dropoff_long= request.data.get("dropoff_long", "")
+
+            # Validate coordinates are within service area
+            validation_error = self._validate_coordinates_in_service_area(
+                pickup_lat=pickup_lat,
+                pickup_long=pickup_long,
+                dropoff_lat=dropoff_lat,
+                dropoff_long=dropoff_long
+            )
+            if validation_error:
+                return AppResponse.send_error(message=validation_error, code=400)
 
             # origin
             origin = (pickup_lat, pickup_long)   # (lat, lng)
@@ -185,7 +234,16 @@ class BookingViewSet(viewsets.ViewSet):
             payment_total_amount = payment_details.get("total_amount", 0)
             total_amount_wo_promo = payment_details.get("total_amount_wo_promo", 0)
             promo_id = request.data.get("promo_id", "")
-            
+
+            # Validate coordinates are within service area
+            validation_error = self._validate_coordinates_in_service_area(
+                pickup_lat=pickup_lat,
+                pickup_long=pickup_long,
+                dropoff_lat=dropoff_lat,
+                dropoff_long=dropoff_long
+            )
+            if validation_error:
+                return AppResponse.send_error(message=validation_error, code=400)
 
             ## Valiate promo
             if promo_id and total_amount_wo_promo >= 150:

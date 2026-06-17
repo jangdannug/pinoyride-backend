@@ -8,6 +8,7 @@ from api.models.rider_model import Rider
 from api.models.booking_model import Booking
 from api.models.booking_ratings_model import BookingRatings
 from api.models.ignored_booking_model import IgnoredBooking
+from api.models.rider_vehicle_details_model import RiderVehicleDetails
 from api.serializers import (
     PartialRiderSerializer
 )
@@ -184,21 +185,30 @@ class RiderRepository:
 
     @staticmethod
     def admin_riders_list(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
-        """Retrieve paginated rider list with optional search query."""
+        """Retrieve paginated rider list with optional search query and filters."""
 
-        # application_status = 1
+        # application_status = 1 (active riders)
         riders = (
             Rider.objects
             .filter(application_status='1')
+            .prefetch_related('rider_vehicle')  # Prefetch vehicle details for filtering
             .annotate()
             .order_by(sort_by)
         )
 
-        # if filters:
-        #     if "name_filter" in filters and filters["name_filter"]:
-        #         promos = promos.filter(
-        #             name=filters["name_filter"]
-        #         )
+        # Apply filters
+        if filters:
+            # Filter by current location
+            if "current_location" in filters and filters["current_location"]:
+                riders = riders.filter(current_location__icontains=filters["current_location"])
+
+            # Filter by vehicle type
+            if "vehicle_type" in filters and filters["vehicle_type"]:
+                riders = riders.filter(rider_vehicle__v_type=filters["vehicle_type"])
+
+            # Filter by vehicle brand
+            if "vehicle_brand" in filters and filters["vehicle_brand"]:
+                riders = riders.filter(rider_vehicle__v_brand__icontains=filters["vehicle_brand"])
 
         if search_query:
             search_terms = search_query.split()
@@ -211,6 +221,11 @@ class RiderRepository:
                     | Q(last_name__icontains=term)
                     | Q(code__icontains=term)
                     | Q(mobile_no__icontains=term)
+                    | Q(current_location__icontains=term)
+                    | Q(rider_vehicle__v_type__icontains=term)
+                    | Q(rider_vehicle__v_brand__icontains=term)
+                    | Q(rider_vehicle__v_model__icontains=term)
+                    | Q(rider_vehicle__v_plate_number__icontains=term)
                 )
 
             riders = riders.filter(query_filter).distinct()
@@ -248,12 +263,14 @@ class RiderRepository:
 
     @staticmethod
     @transaction.atomic
-    def update_rider_coordinates(rider_instance, rider_lat, rider_long):
-        
+    def update_rider_coordinates(rider_instance, rider_lat, rider_long, current_location=None):
+
         rider_instance.current_lat = rider_lat
         rider_instance.current_long = rider_long
+        if current_location:
+            rider_instance.current_location = current_location
         rider_instance.save()
-        
+
         return rider_instance
 
     @staticmethod
