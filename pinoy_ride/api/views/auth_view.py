@@ -17,12 +17,13 @@ class AuthViewSet(viewsets.ViewSet):
         """Authenticate user and return access token; set refresh token in cookies"""
         email = request.data.get("email")
         password = request.data.get("password")
+        remember_me = request.data.get("remember_me", False)
 
         if not email or not password:
             return AppResponse.send_error(message="Email and password are required", code=400)
 
         try:
-            user_service = UserService() 
+            user_service = UserService()
             auth_response = user_service.auth(email, password)
             access_token = auth_response["access_token"]
             refresh_token = auth_response["refresh_token"]
@@ -32,8 +33,8 @@ class AuthViewSet(viewsets.ViewSet):
                 data={"access_token": access_token, "user" : first_name},
                 message="Authentication successful"
             )
-            
-            set_refresh_token_in_cookie(response, refresh_token)
+
+            set_refresh_token_in_cookie(response, refresh_token, remember_me=remember_me)
 
             return response
 

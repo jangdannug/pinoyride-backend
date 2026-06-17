@@ -4,13 +4,14 @@ def auth_schema():
     return extend_schema(
         tags=["Authentication"],
         summary="User Authentication",
-        description="Authenticates a user and returns an access token. The refresh token is set in an HTTP-only cookie.",
+        description="Authenticates a user and returns an access token. The refresh token is set in an HTTP-only cookie. Use 'remember_me' to keep the session active for 7 days.",
         request={
             "application/json": {
                 "type": "object",
                 "properties": {
                     "email": {"type": "string", "format": "email", "description": "User's email", "example": "jd@email.com"},
                     "password": {"type": "string", "format": "password", "description": "User's password", "example": "password"},
+                    "remember_me": {"type": "boolean", "description": "Keep session active for 7 days", "example": True},
                 },
                 "required": ["email", "password"],
             }

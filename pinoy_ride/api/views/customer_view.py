@@ -11,6 +11,10 @@ from api.services import (
     WalletService,
     EkycApiService
 )
+from api.repositories import (
+    BookingRepository,
+    RiderRepository
+)
 from api.serializers import CustomerSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from django.db import transaction
@@ -26,6 +30,8 @@ class CustomerViewSet(viewsets.ViewSet):
         # self.rider_vehicle_service = RiderVehicleDetailsService()
         self.wallet_service = WalletService()
         self.ekyc_service = EkycApiService()
+        self.booking_repository = BookingRepository()
+        self.rider_repository = RiderRepository()
 
 
     @action(detail=False, methods=['post'], url_path='sign_up')
@@ -167,6 +173,57 @@ class CustomerViewSet(viewsets.ViewSet):
 
             return AppResponse.send_error(message=str(e), code=500)
 
+
+    @action(detail=False, methods=['post'], url_path='get_rider_location')
+    def get_rider_location(self, request):
+        """Get rider's current location for a booking"""
+
+        try:
+
+            customer_id = request.data.get("customer_id", "")
+            booking_id = request.data.get("booking_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+
+            if not booking_id:
+                return AppResponse.send_error(message="Booking Id is required", code=400)
+
+            with transaction.atomic():
+                # Verify the booking belongs to the customer
+                booking = self.booking_repository.get_by_customer_and_id(
+                    customer_id=customer_id,
+                    booking_id=booking_id
+                )
+
+                if not booking:
+                    return AppResponse.send_error(message="Booking not found", code=404)
+
+                # Check if booking has a rider assigned
+                if not booking.rider:
+                    return AppResponse.send_error(message="No rider assigned to this booking", code=404)
+
+                # Get rider details
+                rider = booking.rider
+
+                response_data = {
+                    "rider_id": rider.id,
+                    "current_lat": rider.current_lat,
+                    "current_long": rider.current_long,
+                    "current_location": rider.current_location
+                }
+
+            return AppResponse.send_success(data=response_data, message="Rider location retrieved successfully")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
 
 
     @action(detail=False, methods=['post'], url_path='save_address')
