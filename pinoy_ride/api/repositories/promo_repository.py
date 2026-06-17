@@ -51,7 +51,7 @@ class PromoRepository:
     def get_by_code(promo_code):
         """Fetch promo by code"""
         try:
-            return Promo.objects.get(code=promo_code)
+            return Promo.objects.get(code=promo_code, status=0)
         except Promo.DoesNotExist:
             return None
 
