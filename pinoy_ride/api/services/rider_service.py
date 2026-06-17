@@ -177,6 +177,19 @@ class RiderService:
         return rider_auto_accept
 
 
+    ## Update firebase token
+    @transaction.atomic
+    def update_firebase_token(self, rider_instance, firebase_token):
+        """Update rider firebase token"""
+
+        updated_rider = self.rider.update_firebase_token(
+            rider_instance=rider_instance,
+            firebase_token=firebase_token
+        )
+
+        return updated_rider
+
+
     ## Get rider service details
     def get_service_details(self, rider_id):
         """Get rider service details including acceptance rate, ratings, and cancellation rate"""

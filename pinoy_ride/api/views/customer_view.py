@@ -88,11 +88,12 @@ class CustomerViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='login')
     def login(self, request):
         """Customer login"""
-        
+
         try:
 
             mobile_no = request.data.get("mobile_no", "")
             otp_code = request.data.get("otp_code", "")
+            firebase_token = request.data.get("firebase_token", None)
 
             if not mobile_no:
                 return AppResponse.send_error(message="Mobile number is required", code=400)
@@ -111,7 +112,11 @@ class CustomerViewSet(viewsets.ViewSet):
 
                 # create wallet if not exist
                 self.wallet_service.create_customer_wallet(customer_id=customer.id)
-                
+
+                # Update firebase_token if provided
+                if firebase_token:
+                    self.service.update_firebase_token(customer_instance=customer, firebase_token=firebase_token)
+
             serializer = CustomerSerializer(customer)
             response_data = serializer.data
 

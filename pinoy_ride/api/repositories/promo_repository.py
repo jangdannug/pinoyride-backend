@@ -3,8 +3,9 @@ from api.models import Customer
 import datetime
 from api.models import (
     Promo,
+    PromoAvailed,
 )
-from django.db.models import Func, F, Value, CharField
+from django.db.models import Func, F, Value, CharField, Exists, OuterRef
 from django.forms.models import model_to_dict
 from django.core.paginator import Paginator
 from django.db.models import Q, Max, Value, OuterRef, Subquery, Prefetch
@@ -51,7 +52,7 @@ class PromoRepository:
     def get_by_code(promo_code):
         """Fetch promo by code"""
         try:
-            return Promo.objects.get(code=promo_code, status=0)
+            return Promo.objects.get(code=promo_code, status=1)
         except Promo.DoesNotExist:
             return None
 
@@ -82,22 +83,30 @@ class PromoRepository:
     
     @staticmethod
     def promo_list(customer_id):
-        """Retrieve promos"""
+        """Retrieve promos excluding already availed ones"""
 
         current_date = localtime().date()
+
+        # Subquery to check if customer has already availed the promo (status=1 means completed/used)
+        availed_promos = PromoAvailed.objects.filter(
+            promo_id=OuterRef('id'),
+            customer_id=customer_id,
+            status=1  # Already availed/used
+        )
 
         promos = (
             Promo.objects
                 .filter(status=1, end_date__gte=current_date)
                 .annotate(
-                start_date_pretty=Func(
-                    F('start_date'),
-                    Value('FMMonth DD, YYYY'),
-                    function='TO_CHAR',
-                    output_field=CharField()
-                ),
-            )
-            .order_by('-id')
+                    start_date_pretty=Func(
+                        F('start_date'),
+                        Value('FMMonth DD, YYYY'),
+                        function='TO_CHAR',
+                        output_field=CharField()
+                    ),
+                )
+                .exclude(Exists(availed_promos))  # Exclude if already availed
+                .order_by('-id')
         )
 
 

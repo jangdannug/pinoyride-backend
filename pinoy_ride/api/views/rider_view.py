@@ -94,11 +94,12 @@ class RiderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='login')
     def login(self, request):
         """Rider login"""
-        
+
         try:
 
             mobile_no = request.data.get("mobile_no", "")
             otp_code = request.data.get("otp_code", "")
+            firebase_token = request.data.get("firebase_token", None)
 
             if not mobile_no:
                 return AppResponse.send_error(message="Mobile number is required", code=400)
@@ -111,12 +112,17 @@ class RiderViewSet(viewsets.ViewSet):
                 ekyc_request_user_id = rider.ekyc_request_user_id
 
                 # Check if record exist on ekyc user details table
-                check_user_details = self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
-                if check_user_details is None:
-                    self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
+                self.ekyc_service.check_topph_user_details(ekyc_request_user_id=ekyc_request_user_id)
+                # disable check ekyc details
+                # if check_user_details is None:
+                    # self.ekyc_service.get_topph_user_details(ref_id=ekyc_request_user_id)
 
                 # create wallet if not exist
                 self.wallet_service.create_rider_wallet(rider_id=rider.id)
+
+                # Update firebase_token if provided
+                if firebase_token:
+                    self.service.update_firebase_token(rider_instance=rider, firebase_token=firebase_token)
 
             serializer = RiderSerializer(rider)
             response_data = serializer.data

@@ -46,7 +46,20 @@ class CustomerService:
     def get_customer_by_id(self,customer_id):
         """Fetch customer"""
         customer = self.customer.get_customer_by_id(customer_id=customer_id)
-        
+
         if customer is None:
             raise NotFoundError("Customer "+ str(customer_id) + " not found")
         return customer
+
+
+    ## Update firebase token
+    @transaction.atomic
+    def update_firebase_token(self, customer_instance, firebase_token):
+        """Update customer firebase token"""
+
+        updated_customer = self.customer.update_firebase_token(
+            customer_instance=customer_instance,
+            firebase_token=firebase_token
+        )
+
+        return updated_customer

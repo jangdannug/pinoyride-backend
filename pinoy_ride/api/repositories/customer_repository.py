@@ -111,9 +111,20 @@ class CustomerRepository:
     @staticmethod
     @transaction.atomic
     def update_customer_status(customer_instance, customer_status, auth_user_id):
-        
+
         customer_instance.status = customer_status
         customer_instance.updated_by = auth_user_id
         customer_instance.save()
-        
+
+        return customer_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_firebase_token(customer_instance, firebase_token):
+        """Update customer firebase token"""
+
+        customer_instance.firebase_token = firebase_token
+        customer_instance.save()
+
         return customer_instance

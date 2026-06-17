@@ -315,6 +315,17 @@ class RiderRepository:
 
 
     @staticmethod
+    @transaction.atomic
+    def update_firebase_token(rider_instance, firebase_token):
+        """Update rider firebase token"""
+
+        rider_instance.firebase_token = firebase_token
+        rider_instance.save()
+
+        return rider_instance
+
+
+    @staticmethod
     def get_rider_service_details(rider_id):
         """Get rider service details including acceptance rate, ratings, and cancellation rate"""
 

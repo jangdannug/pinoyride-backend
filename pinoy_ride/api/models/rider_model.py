@@ -34,6 +34,7 @@ class Rider(SoftDeleteModel):
     is_online = models.IntegerField(default=0)
     is_verified = models.IntegerField(default=0)
     is_success_kyc = models.IntegerField(default=0)
+    firebase_token = models.TextField(null=True)
     status = models.IntegerField(default=0)
     updated_by = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
