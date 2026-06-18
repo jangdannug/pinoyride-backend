@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/promo/', include('api.urls.admin_promo_urls')),
     path('admin/price/', include('api.urls.admin_price_urls')),
     path('admin/task/', include('api.urls.admin_task_urls')),
+    path('admin/dashboard/', include('api.urls.admin_dashboard_urls')),
 ]

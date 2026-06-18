@@ -18,3 +18,4 @@ from .admin_price_view import AdminPriceViewSet
 from .admin_rider_view import AdminRiderViewSet
 from .admin_customer_view import AdminCustomerViewSet
 from .admin_task_view import AdminTaskViewSet
+from .admin_dashboard_view import AdminDashboardViewSet
