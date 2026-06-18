@@ -149,10 +149,10 @@ class BookingViewSet(viewsets.ViewSet):
             # Use price table values if available, otherwise use defaults
             if latest_price:
                 # Clean and use price table values, with fallback to defaults
-                km_basis = clean_numeric_value(latest_price.km) or default_km_basis
-                minimum_fare = clean_numeric_value(latest_price.price) or default_minimum_fare
+                pesos_per_km = clean_numeric_value(latest_price.price) or default_pesos_per_km
                 pesos_per_km2 = clean_numeric_value(latest_price.exceed_time_travel_price) or default_pesos_per_km2
-                pesos_per_km = default_pesos_per_km  # This is not in price table, using default
+                km_basis = default_km_basis # This is not in price table, using default
+                minimum_fare = default_minimum_fare # This is not in price table, using default
                 booking_fee = default_booking_fee  # This is not in price table, using default
                 commission_prcentage = default_commission_percentage  # This is not in price table, using default
             else:
