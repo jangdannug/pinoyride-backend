@@ -22,6 +22,8 @@ class Customer(SoftDeleteModel):
     is_verified = models.IntegerField(default=0)
     login_type = models.CharField(max_length=255, null=True)
     current_location = models.TextField(null=True)
+    current_lat = models.CharField(max_length=255, null=True, blank=True)
+    current_long = models.CharField(max_length=255, null=True, blank=True)
     updated_by = models.IntegerField(default=0)
     is_success_kyc = models.IntegerField(default=0)
     referral_code = models.CharField(max_length=255, null=True)

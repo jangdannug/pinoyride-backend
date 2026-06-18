@@ -1,9 +1,11 @@
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.db.models import Q, Value
+from django.db.models import Q, Value, F, Exists, OuterRef, Subquery
 from django.db.models.functions import Concat
+from django.db.models import CharField
 from api.models.customer_model import Customer
+from api.models.top_ph_ekyc_details_model import TopPhEkycDetails
 from api.serializers import (
     PartialCustomerSerializer
 )
@@ -59,31 +61,81 @@ class CustomerRepository:
 
     @staticmethod
     def admin_customer_list(page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
-        """Retrieve paginated customer list with optional search query."""
+        """Retrieve paginated customer list with optional search query and filters."""
+
+        # Subquery to get EKYC full name (concatenated from TopPhEkycDetails)
+        ekyc_full_name_subquery = TopPhEkycDetails.objects.filter(
+            generate_request_user_id=OuterRef('ekyc_request_user_id')
+        ).annotate(
+            ekyc_concat=Concat(
+                F('first_name'),
+                Value(' '),
+                F('middle_name'),
+                Value(' '),
+                F('last_name'),
+                output_field=CharField()
+            )
+        ).values('ekyc_concat')[:1]
 
         customers = (
             Customer.objects
-            .annotate()
+            .annotate(
+                # Annotate full_name for search (fname + mname + lname)
+                full_name=Concat(
+                    F('fname'),
+                    Value(' '),
+                    F('mname'),
+                    Value(' '),
+                    F('lname'),
+                    output_field=CharField()
+                ),
+                # Annotate EKYC full name from TopPhEkycDetails
+                ekyc_full_name=Subquery(ekyc_full_name_subquery, output_field=CharField())
+            )
             .order_by(sort_by)
         )
 
-        # if filters:
-        #     if "name_filter" in filters and filters["name_filter"]:
-        #         promos = promos.filter(
-        #             name=filters["name_filter"]
-        #         )
+        # Apply filters
+        if filters:
+            # Filter by current location
+            if "current_location" in filters and filters["current_location"]:
+                customers = customers.filter(current_location__icontains=filters["current_location"])
+
+            # Filter by EKYC full name (ekyc_first_name + ekyc_middle_name + ekyc_last_name)
+            if "ekyc_full_name" in filters and filters["ekyc_full_name"]:
+                customers = customers.filter(ekyc_full_name__icontains=filters["ekyc_full_name"])
 
         if search_query:
             search_terms = search_query.split()
             query_filter = Q()
 
             for term in search_terms:
+                # Build subqueries for EKYC details
+                ekyc_first_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    first_name__icontains=term
+                )
+                ekyc_middle_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    middle_name__icontains=term
+                )
+                ekyc_last_name = TopPhEkycDetails.objects.filter(
+                    generate_request_user_id=OuterRef('ekyc_request_user_id'),
+                    last_name__icontains=term
+                )
+
                 query_filter |= (
                     Q(code__icontains=term)
                     | Q(fname__icontains=term)
                     | Q(mname__icontains=term)
                     | Q(lname__icontains=term)
+                    | Q(full_name__icontains=term)  # Search in concatenated full name
                     | Q(mobile__icontains=term)
+                    | Q(current_location__icontains=term)
+                    # Search in EKYC details
+                    | Exists(ekyc_first_name)
+                    | Exists(ekyc_middle_name)
+                    | Exists(ekyc_last_name)
                 )
 
             customers = customers.filter(query_filter).distinct()
@@ -125,6 +177,20 @@ class CustomerRepository:
         """Update customer firebase token"""
 
         customer_instance.firebase_token = firebase_token
+        customer_instance.save()
+
+        return customer_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_coordinates(customer_instance, customer_lat, customer_long, current_location=None):
+        """Update customer coordinates"""
+
+        customer_instance.current_lat = customer_lat
+        customer_instance.current_long = customer_long
+        if current_location:
+            customer_instance.current_location = current_location
         customer_instance.save()
 
         return customer_instance

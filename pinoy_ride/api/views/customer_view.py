@@ -226,6 +226,49 @@ class CustomerViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(detail=False, methods=['post'], url_path='update_current_location')
+    def update_current_location(self, request):
+        """Update current location"""
+
+        try:
+
+            customer_id = request.data.get("customer_id", "")
+            current_lat = request.data.get("current_lat", "")
+            current_long = request.data.get("current_long", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer id is required", code=400)
+            if not current_lat:
+                return AppResponse.send_error(message="Current lat is required", code=400)
+            if not current_long:
+                return AppResponse.send_error(message="Current long is required", code=400)
+
+            with transaction.atomic():
+                customer_details = self.service.get_customer_by_id(customer_id=customer_id)
+
+                # Service layer handles reverse geocoding automatically
+                self.service.update_customer_coordinates(
+                    customer_instance=customer_details,
+                    customer_lat=current_lat,
+                    customer_long=current_long
+                )
+
+                serializer = CustomerSerializer(customer_details)
+
+            return AppResponse.send_success(data=serializer.data, message="Customer location updated successfully")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
     @action(detail=False, methods=['post'], url_path='save_address')
     def save_address(self, request):
         """Save customer address"""
