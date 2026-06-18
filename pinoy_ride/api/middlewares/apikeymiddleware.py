@@ -24,6 +24,7 @@ class ApiKeyAuthenticationMiddleware:
                 '/api/otp/',
                 '/api/qrph/',
                 '/api/ekyc/',
+                '/api/promo/'
             )
 
             callback_routes = (

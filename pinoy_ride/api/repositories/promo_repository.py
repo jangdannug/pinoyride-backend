@@ -171,3 +171,26 @@ class PromoRepository:
                 page.previous_page_number() if page.has_previous() else None
             ),
         }
+
+
+    @staticmethod
+    @transaction.atomic
+    def check_and_update_expired_promos():
+        """Check and update expired promos status from active to expired"""
+
+        current_date = localtime().date()
+
+        # Find all active promos (status=1) where end_date has passed
+        expired_promos = Promo.objects.filter(
+            status=1,
+            end_date__lt=current_date
+        )
+
+        # Update all expired promos to status=0 (Inactive)
+        updated_count = expired_promos.update(status=0)
+
+        return {
+            'checked': Promo.objects.filter(status=1).count() + updated_count,
+            'expired_count': updated_count,
+            'current_active_count': Promo.objects.filter(status=1).count()
+        }

@@ -51,3 +51,10 @@ class AdminPromoService:
     def admin_list_promos(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """List all promos with pagination"""
         return self.promo.admin_promo_list(page_number, page_size, search_query, filters, sort_by)
+
+
+    ## Check and update expired promos
+    @transaction.atomic
+    def check_and_update_expired_promos(self):
+        """Check and update expired promos status from active to expired"""
+        return self.promo.check_and_update_expired_promos()
