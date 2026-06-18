@@ -22,9 +22,19 @@ class AdminPriceService:
     def get_price_by_id(self,price_id):
         """Fetch price"""
         price = self.price.get_by_id(price_id=price_id)
-        
+
         if price is None:
             raise NotFoundError("Price "+ str(price_id) + " not found")
+        return price
+
+
+    ## Get latest price
+    def get_latest_price(self):
+        """Fetch the latest active price"""
+        price = self.price.get_latest_price()
+
+        if price is None:
+            return None
         return price
 
     ## Update price

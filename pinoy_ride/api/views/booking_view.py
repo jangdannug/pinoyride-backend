@@ -16,7 +16,8 @@ from api.services import (
     WalletService,
     PromoService,
     PromoAvailedService,
-    BookingIssuesService
+    BookingIssuesService,
+    AdminPriceService
 )
 from api.base import (
     ApiService
@@ -24,6 +25,7 @@ from api.base import (
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import os
+import re
 from api.utils.app_logger import app_logger
 
 class BookingViewSet(viewsets.ViewSet):
@@ -41,6 +43,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.promo_service = PromoService()
         self.promo_availed_service = PromoAvailedService()
         self.booking_issues_service = BookingIssuesService()
+        self.price_service = AdminPriceService()
 
 
     def _validate_coordinates_in_service_area(self, pickup_lat, pickup_long, dropoff_lat, dropoff_long):
@@ -120,17 +123,47 @@ class BookingViewSet(viewsets.ViewSet):
             # compute distance in kilometers
             distance_km = geodesic(origin, destination).kilometers
             distance_km_round = round(distance_km, 2)
-            km_basis = 7 #Default KM basis
 
-            if booking_type == '1':
-                # Booking Type = 1 - Motorcyle
-                minimum_fare = 40.00
-                booking_fee = 0
-                commission_prcentage = .15 #15%
-                pesos_per_km = 10
-                pesos_per_km2 = 15
+            # Get latest price from price table with fallback defaults
+            latest_price = self.price_service.get_latest_price()
 
-            elif booking_type == '2':
+            # Helper function to clean non-numeric characters from database values
+            def clean_numeric_value(value):
+                """Remove all non-numeric characters except decimal point"""
+                if value is None or value == '':
+                    return None
+                # Remove all characters except digits and decimal point
+                cleaned = re.sub(r'[^\d.]', '', str(value))
+                return float(cleaned) if cleaned else None
+
+            # Booking Type = 1 - Motorcycle
+            # Default values (fallback)
+
+            default_km_basis = 7
+            default_minimum_fare = 40.00
+            default_pesos_per_km = 10
+            default_pesos_per_km2 = 15
+            default_booking_fee = 0
+            default_commission_percentage = 0.15
+
+            # Use price table values if available, otherwise use defaults
+            if latest_price:
+                # Clean and use price table values, with fallback to defaults
+                km_basis = clean_numeric_value(latest_price.km) or default_km_basis
+                minimum_fare = clean_numeric_value(latest_price.price) or default_minimum_fare
+                pesos_per_km2 = clean_numeric_value(latest_price.exceed_time_travel_price) or default_pesos_per_km2
+                pesos_per_km = default_pesos_per_km  # This is not in price table, using default
+                booking_fee = default_booking_fee  # This is not in price table, using default
+                commission_prcentage = default_commission_percentage  # This is not in price table, using default
+            else:
+                km_basis = default_km_basis
+                minimum_fare = default_minimum_fare
+                pesos_per_km2 = default_pesos_per_km2
+                pesos_per_km = default_pesos_per_km
+                booking_fee = default_booking_fee
+                commission_prcentage = default_commission_percentage
+
+            if booking_type == '2':
                 # Booking Type = 2 - Car - 4 Seaters
                 minimum_fare = 60.00
                 pesos_per_km = 10
@@ -182,6 +215,7 @@ class BookingViewSet(viewsets.ViewSet):
                     commision = round(total_amount - rider_net_amount, 2)
 
             response = {
+                "km_basis" : km_basis,
                 "distance_km_round" : distance_km_round,
                 "exceeding_kms" : exceeding_kms,
                 "exceeding_kms_total" : exceeding_kms_total,

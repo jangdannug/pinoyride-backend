@@ -42,6 +42,15 @@ class PriceRepository:
 
 
     @staticmethod
+    def get_latest_price():
+        """Fetch the latest active price (most recent by updated_at)"""
+        try:
+            return Price.objects.filter(status=1, deleted_at__isnull=True).order_by('-id').first()
+        except Price.DoesNotExist:
+            return None
+
+
+    @staticmethod
     @transaction.atomic
     def update_price(price_instance, update_data):
         
