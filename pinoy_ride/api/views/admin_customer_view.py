@@ -225,3 +225,30 @@ class AdminCustomerViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(
+        detail=False, methods=["get"], url_path="get-wallet-summary"
+    )
+    def get_customer_wallet_summary(self, request):
+        """Get customer wallet summary (current balance, total spent, total top-ups)"""
+        try:
+            customer_id = request.query_params.get("customer_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required!", code=400)
+
+            wallet_summary = self.admin_service.get_customer_wallet_summary(customer_id)
+
+            return AppResponse.send_success(
+                data=wallet_summary,
+                message="Customer wallet summary retrieved successfully",
+                code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+

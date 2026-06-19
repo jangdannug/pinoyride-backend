@@ -1,12 +1,13 @@
 from django.db import transaction
-from api.repositories import CustomerRepository, BookingRepository
-from api.utils.custom_error import NotFoundError,ValidationError
+from api.repositories import CustomerRepository, BookingRepository, WalletRepository
+from api.utils.custom_error import NotFoundError, ValidationError
 from api.utils.auth import get_authenticated_user
 class AdminCustomerService:
-    
+
     def __init__(self):
         self.customer = CustomerRepository()
         self.booking = BookingRepository()
+        self.wallet = WalletRepository()
 
     ## Admin get list of customers
     def admin_customer_list(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
@@ -38,3 +39,9 @@ class AdminCustomerService:
     def admin_list_customer_booking_history(self, customer_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """List all customer booking history with pagination"""
         return self.booking.admin_customer_booking_history(customer_id, page_number, page_size, search_query, filters, sort_by)
+
+
+    ## Get customer wallet summary
+    def get_customer_wallet_summary(self, customer_id):
+        """Get customer wallet summary (current balance, total spent, total top-ups)"""
+        return self.wallet.get_wallet_summary(user_id=customer_id, user_type='customer')
