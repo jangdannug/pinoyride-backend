@@ -45,3 +45,9 @@ class AdminCustomerService:
     def get_customer_wallet_summary(self, customer_id):
         """Get customer wallet summary (current balance, total spent, total top-ups)"""
         return self.wallet.get_wallet_summary(user_id=customer_id, user_type='customer')
+
+
+    ## Get customer wallet movements (all transactions)
+    def get_customer_wallet_movements(self, customer_id, page_number=1, page_size=10):
+        """Get customer wallet movements (all transactions) with pagination"""
+        return self.wallet.get_recent_topups(user_id=customer_id, user_type='customer', page_number=page_number, page_size=page_size)

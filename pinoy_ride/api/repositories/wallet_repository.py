@@ -89,3 +89,60 @@ class WalletRepository:
             'total_spent': round(total_debit, 2),
             'total_topups': round(total_credit, 2)
         }
+
+
+    @staticmethod
+    def get_recent_topups(user_id, user_type='customer', page_number=1, page_size=10):
+        """Get recent wallet movements (all transactions) with pagination"""
+
+        # Get the wallet
+        try:
+            wallet = Wallet.objects.get(user_id=user_id, user_type=user_type, type='user-wallet')
+        except Wallet.DoesNotExist:
+            return {
+                'transactions': [],
+                'total_pages': 0,
+                'current_page': page_number,
+                'has_next': False,
+                'has_previous': False,
+                'next_page': None,
+                'previous_page': None,
+                'total_count': 0
+            }
+
+        # Get all wallet transactions (both credit and debit)
+        all_transactions = WalletHistory.objects.filter(
+            wallet_id=wallet.id
+        ).order_by('-id')
+
+        # Paginate
+        paginator = Paginator(all_transactions, page_size)
+        page = paginator.get_page(page_number)
+
+        # Format the transaction data
+        transactions = []
+        for transaction in page.object_list:
+            transactions.append({
+                'id': transaction.id,
+                'type': transaction.type,
+                'description': transaction.description,
+                'credit_amount': transaction.credit_amount,
+                'debit_amount': transaction.debit_amount,
+                'tran_type': transaction.tran_type,
+                'time_created': transaction.time_created,
+                'date_created': transaction.date_created,
+                'created_at': transaction.created_at.isoformat() if transaction.created_at else None
+            })
+
+        return {
+            'transactions': transactions,
+            'total_pages': paginator.num_pages,
+            'current_page': page_number,
+            'has_next': page.has_next(),
+            'has_previous': page.has_previous(),
+            'next_page': page.next_page_number() if page.has_next() else None,
+            'previous_page': (
+                page.previous_page_number() if page.has_previous() else None
+            ),
+            'total_count': paginator.count
+        }

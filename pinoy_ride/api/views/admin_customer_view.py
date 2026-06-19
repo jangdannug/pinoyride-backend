@@ -252,3 +252,36 @@ class AdminCustomerViewSet(viewsets.ViewSet):
             )
 
 
+    @action(
+        detail=False, methods=["get"], url_path="get-wallet-movements"
+    )
+    def get_customer_wallet_movements(self, request):
+        """Get customer wallet movements (all transactions) with pagination"""
+        try:
+            customer_id = request.query_params.get("customer_id", "")
+            page = int(request.query_params.get("page", 1))
+            perpage = int(request.query_params.get("perpage", 10))
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required!", code=400)
+
+            movements_data = self.admin_service.get_customer_wallet_movements(
+                customer_id=customer_id,
+                page_number=page,
+                page_size=perpage
+            )
+
+            return AppResponse.send_success(
+                data=movements_data,
+                message="Wallet movements retrieved successfully",
+                code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
