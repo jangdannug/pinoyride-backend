@@ -251,6 +251,8 @@ class BookingViewSet(viewsets.ViewSet):
     def create_booking(self, request):
         """Create Booking"""
         
+        app_logger(1, "Create booking", request.data)
+
         try:            
             
             customer_id = request.data.get("customer_id", "")
