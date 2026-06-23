@@ -2,11 +2,13 @@ from django.db import transaction
 from api.repositories import RiderRepository, BookingRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
+from api.services import BookingIssuesService
 class AdminRiderService:
-    
+
     def __init__(self):
         self.rider = RiderRepository()
         self.booking = BookingRepository()
+        self.booking_issues = BookingIssuesService()
 
     ## Admin get list of applicants
     def admin_list_applicants(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
@@ -73,5 +75,34 @@ class AdminRiderService:
         """Delete rider"""
 
         delete_rider = self.rider.delete_rider(rider_instance=rider, auth_user_id=auth_user_id)
-    
+
         return delete_rider
+
+
+    ## Get rider current location
+    def get_rider_current_location(self, rider_id):
+        """Get rider current location"""
+
+        rider = self.get_rider_by_id(rider_id=rider_id)
+
+        return {
+            'rider_id': rider.id,
+            'rider_code': rider.code,
+            'first_name': rider.first_name,
+            'last_name': rider.last_name,
+            'current_location': rider.current_location,
+            'current_lat': rider.current_lat,
+            'current_long': rider.current_long,
+        }
+
+
+    ## Get all complaints
+    def get_all_complaints(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-created_at"):
+        """Get all complaints with pagination"""
+        return self.booking_issues.get_all_complaints(
+            page_number=page_number,
+            page_size=page_size,
+            search_query=search_query,
+            filters=filters,
+            sort_by=sort_by
+        )

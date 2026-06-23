@@ -367,3 +367,73 @@ class AdminRiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+    ## Get rider current location
+    @action(
+        detail=False, methods=["get"], url_path="get-rider-location"
+    )
+    def get_rider_current_location(self, request):
+        """Get rider current location"""
+
+        rider_id = request.query_params.get("rider_id", "")
+        if not rider_id:
+            return AppResponse.send_error(message="Rider Id is required!", code=400)
+
+        try:
+            rider_location = self.admin_service.get_rider_current_location(rider_id=rider_id)
+
+            return AppResponse.send_success(
+                data=rider_location, message="Rider current location fetched successfully", code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+    ## Get all complaints
+    @action(
+        detail=False, methods=["get"], url_path="get-complaints"
+    )
+    def get_all_complaints(self, request):
+        """Get rider complaints with pagination and search query"""
+        try:
+            rider_id = request.query_params.get("rider_id", "")
+            if not rider_id:
+                return AppResponse.send_error(message="Rider Id is required!", code=400)
+
+            page = int(request.query_params.get("page", 1))
+            perpage = int(request.query_params.get("perpage", 10))
+            query = request.query_params.get("query", None)
+            sort_by = request.query_params.get("sort_by")
+            status_filter = request.query_params.get("status")
+            user_type_filter = request.query_params.get("user_type")
+
+            filters = {}
+
+            filters["rider_id"] = rider_id
+
+            if status_filter:
+                filters["status"] = status_filter
+
+            if user_type_filter:
+                filters["user_type"] = user_type_filter
+
+            if sort_by == "" or sort_by is None:
+                sort_by = "-created_at"
+
+            complaints = self.admin_service.get_all_complaints(
+                page_number=page, page_size=perpage, search_query=query, filters=filters, sort_by=sort_by
+            )
+
+            return AppResponse.send_success(
+                data=complaints, message="Rider complaints listed successfully", code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return AppResponse.send_error(
+                message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
