@@ -5,6 +5,7 @@ from .rider_address_serializer import RiderAddressSerializer
 from .partial_wallet_serializer import PartialWalletSerializer
 from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
 from django.db.models import Sum
+from api.utils.customer_utils import CustomUtils
 
 class RiderSerializer(serializers.ModelSerializer):
 

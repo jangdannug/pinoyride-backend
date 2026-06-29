@@ -22,3 +22,4 @@ from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
 from .partial_wallet_history_serializer import PartiallWalletHistorySerializer
 from .task_serializer import TaskSerializer
 from .booking_issues_serializer import BookingIssuesSerializer
+from .message_serializer import MessageSerializer, SendMessageSerializer, MarkReadSerializer
