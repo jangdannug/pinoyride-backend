@@ -70,11 +70,56 @@ class RiderSerializer(serializers.ModelSerializer):
         return value
 
     def get_ekyc_details(self, obj):
+        """
+        Get EKYC details from TopPhEkycDetails table.
+        If ekyc_request_user_id is empty or record doesn't exist, fallback to rider's own details.
+        When source is 'rider_profile', only populate basic fields and leave others empty.
+        """
+        # Helper function to get empty ekyc details with rider's basic info
+        def get_rider_profile_ekyc(rider_obj):
+            return {
+                'id': None,
+                'generate_request_user_id': '',
+                'kyc_id': '',
+                'first_name': rider_obj.first_name or '',
+                'middle_name': rider_obj.middle_name or '',
+                'last_name': rider_obj.last_name or '',
+                'email_address': '',
+                'mobile_no': rider_obj.mobile_no or '',
+                'date_of_birth': '',
+                'place_of_birth': '',
+                'nationality': '',
+                'gender': '',
+                'current_country': '',
+                'current_address': '',
+                'nature_of_work': '',
+                'source_of_fund': '',
+                'id_type': '',
+                'id_number': '',
+                'id_front': '',
+                'id_back': '',
+                'selfie': '',
+                'status': 0,
+                'pretty_mobile_no': '',
+                'permanent_address': '',
+                'permanent_country': '',
+                'create_date': '',
+                'source': 'rider_profile'
+            }
+
+        # Check if ekyc_request_user_id exists and is not empty
+        if not obj.ekyc_request_user_id or obj.ekyc_request_user_id.strip() == '':
+            # Fallback to rider's own details
+            return get_rider_profile_ekyc(obj)
+
         try:
             record = TopPhEkycDetails.objects.get(generate_request_user_id=obj.ekyc_request_user_id)
-            return TopPhEkycDetailsSerializer(record).data
+            data = TopPhEkycDetailsSerializer(record).data
+            data['source'] = 'top_ph_ekyc'
+            return data
         except TopPhEkycDetails.DoesNotExist:
-            return None
+            # Fallback to rider's own details if EKYC record not found
+            return get_rider_profile_ekyc(obj)
     
     def get_rider_address(self, obj):
         # get the related table rider_address

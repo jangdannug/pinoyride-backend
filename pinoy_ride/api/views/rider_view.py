@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema
 from api.utils.app_response import AppResponse
 from api.models import Test
@@ -14,10 +15,13 @@ from api.services import (
 )
 from api.serializers import RiderSerializer, RiderVehicleDetailsSerializer, WalletSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
+from api.utils.customer_utils import CustomUtils
 from django.db import transaction
 
 class RiderViewSet(viewsets.ViewSet):
     """Riders Controller"""
+
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,10 +108,20 @@ class RiderViewSet(viewsets.ViewSet):
             if not mobile_no:
                 return AppResponse.send_error(message="Mobile number is required", code=400)
 
+            # Normalize mobile number to handle both 09 and 639 prefixes
+            normalized_mobile_no = CustomUtils.convert_mobile_no(mobile_no)
+
+            # Create mutable data copy with normalized mobile number
+            rider_data = {
+                "mobile_no": normalized_mobile_no,
+                "otp_code": otp_code,
+                "firebase_token": firebase_token
+            }
+
             response_data = []
 
             with transaction.atomic():
-                rider = self.service.login_mobile_no(request.data)
+                rider = self.service.login_mobile_no(rider_data)
 
                 ekyc_request_user_id = rider.ekyc_request_user_id
 

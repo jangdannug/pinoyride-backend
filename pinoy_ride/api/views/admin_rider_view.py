@@ -3,10 +3,12 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 import json
+import pandas as pd
 from rest_framework.exceptions import ValidationError
 from api.services import (
     AdminRiderService,
-    WalletService
+    WalletService,
+    RiderService
 )
 from api.serializers import RiderSerializer, PartialRiderSerializer
 from api.utils.app_response import AppResponse
@@ -16,7 +18,7 @@ from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from rest_framework.permissions import IsAuthenticated
 from api.utils.auth import get_authenticated_user
-
+from api.utils.app_logger import app_logger
 
 class AdminRiderViewSet(viewsets.ViewSet):
     """
@@ -33,6 +35,7 @@ class AdminRiderViewSet(viewsets.ViewSet):
         super().__init__(*args, **kwargs)
         self.admin_service = AdminRiderService()
         self.wallet_service = WalletService()
+        self.rider_service = RiderService()
         
 
     ## Get rider applicant list
@@ -437,3 +440,79 @@ class AdminRiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(
                 message=str(e), code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+    ## Bulk load riders from Excel file
+    @action(
+        detail=False, methods=["post"], url_path="bulk-load"
+    )
+    def bulk_load_riders(self, request):
+        """
+        Bulk load riders from Excel file.
+
+        Expected Excel columns:
+        - first_name (required)
+        - mobile_no (required)
+        - drivers_license_no (optional)
+        - plate_number (optional)
+        - brand (optional)
+        - model (optional)
+        - color (optional)
+        - middle_name (optional)
+        - last_name (optional)
+        """
+
+        try:
+            excel_file = request.FILES.get('file')
+
+            if not excel_file:
+                return AppResponse.send_error(message="Excel file is required", code=400)
+
+            # Check file extension
+            file_name = excel_file.name.lower()
+            if not (file_name.endswith('.xlsx') or file_name.endswith('.xls')):
+                return AppResponse.send_error(message="Only Excel files (.xlsx, .xls) are allowed", code=400)
+
+            # Read Excel file
+            try:
+                df = pd.read_excel(excel_file, engine='openpyxl' if file_name.endswith('.xlsx') else 'xlrd')
+            except Exception as e:
+                return AppResponse.send_error(message=f"Failed to read Excel file: {str(e)}", code=400)
+
+            # Validate required columns
+            required_columns = ['first_name', 'mobile_no']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+
+            if missing_columns:
+                return AppResponse.send_error(
+                    message=f"Missing required columns: {', '.join(missing_columns)}",
+                    code=400
+                )
+
+            # Convert DataFrame to list of dictionaries
+            # Replace NaN with empty string
+            df = df.fillna('')
+            riders_data = df.to_dict('records')
+
+            # Clean up data (convert to string and strip whitespace)
+            for rider_data in riders_data:
+                for key, value in rider_data.items():
+                    if pd.notna(value):
+                        rider_data[key] = str(value).strip()
+                    else:
+                        rider_data[key] = ''
+
+
+            if len(riders_data) == 0:
+                return AppResponse.send_error(message="Excel file is empty", code=400)
+
+            with transaction.atomic():
+                results = self.rider_service.bulk_load_riders(riders_data=riders_data)
+
+            return AppResponse.send_success(
+                data=results,
+                message=f"Bulk load completed: {results['total_created']} created, {results['total_skipped']} skipped, {results['total_failed']} failed"
+            )
+
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)

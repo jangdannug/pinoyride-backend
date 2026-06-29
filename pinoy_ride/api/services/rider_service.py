@@ -1,10 +1,16 @@
 from django.db import transaction
 from api.repositories import RiderRepository
+from api.models.rider_model import Rider
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 from api.utils.sha_generator import generate_sha512
 import base64
 from geopy.geocoders import Nominatim
+import logging
+
+logger = logging.getLogger('myapp')
+from api.utils.app_logger import app_logger
+
 class RiderService:
     
     def __init__(self):
@@ -216,3 +222,191 @@ class RiderService:
         )
 
         return ignored_booking
+
+
+    ## Bulk load riders
+    @transaction.atomic
+    def bulk_load_riders(self, riders_data, batch_size=100):
+        """
+        Bulk load riders from array of objects.
+        Processes in batches to handle large datasets efficiently.
+
+        Each object should contain: first_name, mobile_no, drivers_license_no,
+        plate_number, v_brand, v_model, v_color
+        """
+        results = {
+            'success': [],
+            'failed': [],
+            'skipped': [],
+            'total_processed': 0,
+            'total_created': 0,
+            'total_skipped': 0,
+            'total_failed': 0
+        }
+
+        # Import vehicle repo once
+        from api.repositories import RiderVehicleDetailsRepository
+        rider_vehicle_repo = RiderVehicleDetailsRepository()
+
+        # Helper function to normalize mobile number
+        def normalize_mobile_number(mobile_no: str) -> str:
+            """
+            Normalize mobile number to format: 63 + last 10 digits
+            Examples:
+            - 09171234567 -> 639171234567
+            - +639171234567 -> 639171234567
+            - 639171234567 -> 639171234567
+            """
+            # Remove all non-numeric characters
+            digits_only = ''.join(c for c in mobile_no if c.isdigit())
+
+            # Get last 10 digits
+            last_10_digits = digits_only[-10:] if len(digits_only) >= 10 else digits_only
+
+            # Prepend 63 (Philippines country code)
+            return '63' + last_10_digits
+
+        # Pre-fetch all existing mobile numbers for faster duplicate checking
+        all_mobiles = set(
+            Rider.objects.filter(
+                application_status=1,
+                status=1
+            ).values_list('mobile_no', flat=True)
+        )
+
+        for rider_data in riders_data:
+            results['total_processed'] += 1
+
+            try:
+                # Extract required fields
+                first_name = rider_data.get('first_name', '').strip()
+                mobile_no = rider_data.get('mobile_no', '').strip()
+                drivers_license_no = rider_data.get('drivers_license_no', '').strip()
+                plate_number = rider_data.get('plate_number', '').strip()
+                v_brand = rider_data.get('brand', rider_data.get('v_brand', '')).strip()
+                v_model = rider_data.get('model', rider_data.get('v_model', '')).strip()
+                v_color = rider_data.get('color', rider_data.get('v_color', '')).strip()
+
+                # Validate required fields
+                if not first_name:
+                    results['failed'].append({
+                        'row': results['total_processed'],
+                        'data': rider_data,
+                        'error': 'first_name is required'
+                    })
+                    results['total_failed'] += 1
+                    logger.warning(f"Row {results['total_processed']}: first_name is required")
+                    continue
+
+                if not mobile_no:
+                    results['failed'].append({
+                        'row': results['total_processed'],
+                        'data': rider_data,
+                        'error': 'mobile_no is required'
+                    })
+                    results['total_failed'] += 1
+                    logger.warning(f"Row {results['total_processed']}: mobile_no is required")
+                    continue
+
+                # Normalize mobile number (get last 10 digits + prepend 63)
+                original_mobile = mobile_no
+                mobile_no = normalize_mobile_number(mobile_no)
+
+                if len(mobile_no) < 12:
+                    results['failed'].append({
+                        'row': results['total_processed'],
+                        'data': rider_data,
+                        'error': f'Invalid mobile number: {original_mobile} (normalized to {mobile_no}, but must be at least 12 digits)',
+                        'original_mobile': original_mobile,
+                        'normalized_mobile': mobile_no
+                    })
+                    results['total_failed'] += 1
+                    logger.warning(f"Row {results['total_processed']}: Invalid mobile number: {original_mobile}")
+                    continue
+
+                # Check if rider already exists (using pre-fetched mobile numbers)
+                if mobile_no in all_mobiles:
+                    # Get the actual rider for the ID
+                    existing_rider = Rider.objects.filter(
+                        mobile_no=mobile_no,
+                        application_status=1,
+                        status=1
+                    ).first()
+
+                    results['skipped'].append({
+                        'row': results['total_processed'],
+                        'original_mobile': original_mobile,
+                        'mobile_no': mobile_no,
+                        'reason': f'Rider already exists with ID: {existing_rider.id if existing_rider else "N/A"}'
+                    })
+                    results['total_skipped'] += 1
+                    logger.info(f"Row {results['total_processed']}: Skipping existing rider: {original_mobile} (normalized: {mobile_no})")
+                    continue
+
+                # Prepare rider details
+                personal_details = {
+                    'first_name': first_name,
+                    'middle_name': rider_data.get('middle_name', ''),
+                    'last_name': rider_data.get('last_name', ''),
+                    'mobile_no': mobile_no,
+                    'drivers_license_no': drivers_license_no,
+                    'ekyc_request_user_id': '',  # Empty for bulk load
+                    'application_status': 1,
+                    'status': 1,
+                    'is_success_kyc': 1
+                }
+
+                # Create rider
+                new_rider = self.save_rider(personal_details=personal_details)
+
+                # Add to pre-fetched set for subsequent duplicate checks
+                all_mobiles.add(mobile_no)
+
+                # Create vehicle details if provided
+                logger.info(f"Row {results['total_processed']}: Checking vehicle details - plate_number={plate_number}, v_brand={v_brand}, v_model={v_model}, v_color={v_color}")
+
+                if plate_number or v_brand or v_model or v_color:
+
+                    vehicle_details = {
+                        'rider_id': new_rider.id,
+                        'plate_number': plate_number,
+                        'brand': v_brand,      # Repository expects 'brand', not 'v_brand'
+                        'model': v_model,       # Repository expects 'model', not 'v_model'
+                        'color': v_color,       # Repository expects 'color', not 'v_color'
+                        'type': 1     # Default vehicle type = motorcycle
+                    }
+
+                    # Log response status
+                    app_logger(1, "Rider Data", {
+                        "rider_data": vehicle_details
+                    })
+
+                    logger.info(f"Row {results['total_processed']}: Creating vehicle details: {vehicle_details}")
+
+                    rider_vehicle_repo.create(
+                        rider_instance=new_rider,
+                        rider_vehicle_details=vehicle_details
+                    )
+                else:
+                    logger.warning(f"Row {results['total_processed']}: No vehicle details provided, skipping vehicle creation")
+
+                results['success'].append({
+                    'row': results['total_processed'],
+                    'rider_id': new_rider.id,
+                    'original_mobile': original_mobile,
+                    'mobile_no': mobile_no,
+                    'first_name': first_name
+                })
+                results['total_created'] += 1
+                logger.info(f"Row {results['total_processed']}: Created rider: {original_mobile} (normalized: {mobile_no}) with ID: {new_rider.id}")
+
+            except Exception as e:
+                results['failed'].append({
+                    'row': results['total_processed'],
+                    'data': rider_data,
+                    'error': str(e)
+                })
+                results['total_failed'] += 1
+                logger.error(f"Row {results['total_processed']}: Failed to create rider - Error: {str(e)}")
+
+        return results

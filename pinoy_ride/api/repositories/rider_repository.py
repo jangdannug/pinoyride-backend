@@ -78,13 +78,34 @@ class RiderRepository:
 
     @staticmethod
     def check_rider_by_mobile_kyc(rider):
-        """Get rider by mobile with success kyc"""
+        """Get rider by mobile with success kyc - checks both 09+10digits and 63+10digits formats"""
 
-        ## get active rider
+        mobile_no = rider.get("mobile_no", "")
+
+        ## get active rider - check both formats
         try:
-            return Rider.objects.get(mobile_no=rider.get("mobile_no", ""),  application_status=1, status=1, is_success_kyc=1)
+            return Rider.objects.get(mobile_no=mobile_no, application_status=1, status=1, is_success_kyc=1)
         except Rider.DoesNotExist:
-            return None
+            pass
+
+        # If not found, try with 09 prefix (convert 63 to 09)
+        if mobile_no.startswith('63'):
+            mobile_no_09 = '0' + mobile_no[2:]  # 63... -> 09...
+            try:
+                return Rider.objects.get(mobile_no=mobile_no_09, application_status=1, status=1, is_success_kyc=1)
+            except Rider.DoesNotExist:
+                pass
+
+        # If not found, try with 63 prefix (convert 09 to 63)
+        original_mobile = rider.get("mobile_no", "")
+        if original_mobile.startswith('09'):
+            mobile_no_63 = '63' + original_mobile[2:]  # 09... -> 63...
+            try:
+                return Rider.objects.get(mobile_no=mobile_no_63, application_status=1, status=1, is_success_kyc=1)
+            except Rider.DoesNotExist:
+                pass
+
+        return None
 
 
     @staticmethod
