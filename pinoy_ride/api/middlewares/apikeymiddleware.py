@@ -10,16 +10,45 @@ class ApiKeyAuthenticationMiddleware:
     """
     Middleware to check for a valid API key in the request headers for API access.
     Also checks app version and returns update link if version is outdated.
+    Separate version checking for customer and rider apps.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
-        # Get update link from settings (this rarely changes)
-        self.app_update_link = os.getenv('APP_DOWNLOAD_LINK', 'https://drive.google.com/')
 
-    def get_min_app_version(self):
-        """Get minimum app version from environment (reads dynamically)"""
+        # Customer routes and version settings
+        self.customer_routes = ('/api/customers/',)
+        self.customer_min_version = os.getenv('MIN_CUSTOMER_APP_VERSION', '1.0.0')
+        self.customer_download_link = os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', 'https://drive.google.com/')
+
+        # Rider routes and version settings
+        self.rider_routes = ('/api/riders/',)
+        self.rider_min_version = os.getenv('MIN_RIDER_APP_VERSION', '1.0.0')
+        self.rider_download_link = os.getenv('RIDER_APP_DOWNLOAD_LINK', 'https://drive.google.com/')
+
+    def get_user_type_from_path(self, path):
+        """Determine user type from request path"""
+        if path.startswith(self.customer_routes):
+            return 'customer'
+        elif path.startswith(self.rider_routes):
+            return 'rider'
+        return None
+
+    def get_min_app_version(self, user_type):
+        """Get minimum app version from environment based on user type"""
+        if user_type == 'customer':
+            return self.customer_min_version
+        elif user_type == 'rider':
+            return self.rider_min_version
         return os.getenv('MIN_APP_VERSION', '1.0.0')
+
+    def get_download_link(self, user_type):
+        """Get download link based on user type"""
+        if user_type == 'customer':
+            return self.customer_download_link
+        elif user_type == 'rider':
+            return self.rider_download_link
+        return self.customer_download_link
 
     def compare_versions(self, current_version, min_version):
         """Compare two version strings (e.g., '1.0.0' <= '1.2.3' returns True)"""
@@ -66,15 +95,9 @@ class ApiKeyAuthenticationMiddleware:
                  '/api/qrph/callback/'
             )
 
-            # if request.path.startswith(api_routes):
-
-            #    if api_key_app != settings.CUSTOM_API_KEY:
-            #             return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
-
-             # Check callback routes (api-key)
+            # Check callback routes (api-key)
             if request.path.startswith(callback_routes):
                if api_key_callback != settings.CALLBACK_API_KEY:
-                    # return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
                     response = self.get_response(request)
                     return response
 
@@ -82,7 +105,7 @@ class ApiKeyAuthenticationMiddleware:
             elif request.path.startswith(api_routes):
                 if api_key_app != settings.CUSTOM_API_KEY:
                     return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
-                
+
                 # Check app version from request data
                 app_version = None
                 try:
@@ -101,12 +124,16 @@ class ApiKeyAuthenticationMiddleware:
                 except Exception as e:
                     print(f"Error parsing app_version: {e}")
                     pass
-                
+
                 # Default app version
                 if not app_version:
                     app_version = '1.0.0'
 
-                min_version = self.get_min_app_version()
+                # Determine user type from path and get corresponding version
+                user_type = self.get_user_type_from_path(request.path)
+                min_version = self.get_min_app_version(user_type)
+                download_link = self.get_download_link(user_type)
+
                 if app_version and self.compare_versions(app_version, min_version):
                     response_data = {
                         'status': 'error',
@@ -115,9 +142,10 @@ class ApiKeyAuthenticationMiddleware:
                         'code': 426,
                         'data': {
                             'update_required': True,
-                            'update_link': self.app_update_link,
+                            'update_link': download_link,
                             'current_version': app_version,
-                            'minimum_version': min_version
+                            'minimum_version': min_version,
+                            'user_type': user_type
                         }
                     }
                     return JsonResponse(response_data, status=426)
