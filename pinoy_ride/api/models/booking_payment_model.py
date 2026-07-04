@@ -25,6 +25,7 @@ class BookingPayment(SoftDeleteModel):
     total_amount = models.FloatField(default=0, blank=True)
     commission = models.FloatField(default=0, blank=True, null=True)
     rider_net_amount = models.FloatField(default=0, blank=True, null=True)
+    all_payment_details = models.JSONField(default=dict, null=True, blank=True)
     status = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

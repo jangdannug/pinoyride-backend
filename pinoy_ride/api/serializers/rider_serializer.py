@@ -16,6 +16,7 @@ class RiderSerializer(serializers.ModelSerializer):
     rider_address = serializers.SerializerMethodField()
     ekyc_details = serializers.SerializerMethodField()
     wallet_details = serializers.SerializerMethodField()
+    pr_wallet_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Rider
@@ -42,7 +43,8 @@ class RiderSerializer(serializers.ModelSerializer):
             "ekyc_details",
             "vehicle_details",
             "rider_address",
-            "wallet_details"
+            "wallet_details",
+            "pr_wallet_details"
         ]
     
     def validate_email_address(self, value):
@@ -134,7 +136,29 @@ class RiderSerializer(serializers.ModelSerializer):
         avail_balance = 0
         wallet_details = {}
 
-        wallet = Wallet.objects.filter(user_id=obj.id, user_type='rider').first()
+        wallet = Wallet.objects.filter(user_id=obj.id, user_type='rider', type='user-wallet').first()
+        if not wallet:
+            return wallet_details
+        
+        # get details in wallet history
+        total_credit = wallet.wallet_ref.aggregate(total=Sum('credit_amount'))['total'] or 0
+        total_debit = wallet.wallet_ref.aggregate(total=Sum('debit_amount'))['total'] or 0
+        avail_balance = round(float(total_credit) - float(total_debit),2)
+
+        wallet_details['id'] = wallet.id
+        wallet_details['user_type'] = wallet.user_type
+        wallet_details['wallet_type'] = wallet.type
+        wallet_details['avail_balance'] = avail_balance
+
+        return wallet_details
+    
+
+    def get_pr_wallet_details(self, obj):
+        # Safely handle if wallet doesn't exist yet
+        avail_balance = 0
+        wallet_details = {}
+
+        wallet = Wallet.objects.filter(user_id=obj.id, user_type='rider', type='pr-user-wallet').first()
         if not wallet:
             return wallet_details
         

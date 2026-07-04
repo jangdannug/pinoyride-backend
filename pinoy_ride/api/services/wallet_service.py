@@ -48,6 +48,7 @@ class WalletService:
     def create_customer_wallet(self,customer_id):
         """Create customer wallet if not exist"""
 
+        # Create user-wallet if not exist
         wallet = self.wallet.get_customer_wallet(customer_id=customer_id)
         if wallet is None:
             wallet_details = {
@@ -56,7 +57,17 @@ class WalletService:
                 "type" : "user-wallet"
             }
             wallet = self.wallet.create(wallet_details=wallet_details)
-            
+
+        # Create pr-user-wallet if not exist
+        pr_wallet = self.wallet.get_customer_wallet_by_type(customer_id=customer_id, wallet_type='pr-user-wallet')
+        if pr_wallet is None:
+            pr_wallet_details = {
+                "user_id" : customer_id,
+                "user_type" : "customer",
+                "type" : "pr-user-wallet"
+            }
+            self.wallet.create(wallet_details=pr_wallet_details)
+
         return wallet
     
 
@@ -65,6 +76,7 @@ class WalletService:
     def create_rider_wallet(self,rider_id):
         """Create rider wallet if not exist"""
 
+        # Create user-wallet if not exist
         wallet = self.wallet.get_rider_wallet(rider_id=rider_id)
         if wallet is None:
             wallet_details = {
@@ -73,7 +85,17 @@ class WalletService:
                 "type" : "user-wallet"
             }
             wallet = self.wallet.create(wallet_details=wallet_details)
-            
+
+        # Create pr-user-wallet if not exist
+        pr_wallet = self.wallet.get_rider_wallet_by_type(rider_id=rider_id, wallet_type='pr-user-wallet')
+        if pr_wallet is None:
+            pr_wallet_details = {
+                "user_id" : rider_id,
+                "user_type" : "rider",
+                "type" : "pr-user-wallet"
+            }
+            self.wallet.create(wallet_details=pr_wallet_details)
+
         return wallet
     
     ## Top-up customer's wallet

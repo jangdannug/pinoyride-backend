@@ -35,10 +35,26 @@ class WalletRepository:
             return None
 
     @staticmethod
+    def get_rider_wallet_by_type(rider_id, wallet_type='user-wallet'):
+        """Get rider wallet by type"""
+        try:
+            return Wallet.objects.get(user_id=rider_id, user_type='rider', type=wallet_type)
+        except Wallet.DoesNotExist:
+            return None
+
+    @staticmethod
     def get_customer_wallet(customer_id):
         """Get customer wallet"""
         try:
             return Wallet.objects.get(user_id=customer_id, user_type='customer', type='user-wallet')
+        except Wallet.DoesNotExist:
+            return None
+
+    @staticmethod
+    def get_customer_wallet_by_type(customer_id, wallet_type='user-wallet'):
+        """Get customer wallet by type"""
+        try:
+            return Wallet.objects.get(user_id=customer_id, user_type='customer', type=wallet_type)
         except Wallet.DoesNotExist:
             return None
 

@@ -17,5 +17,6 @@ class BookingPaymentSerializer(serializers.ModelSerializer):
             "total_amount_wo_promo",
             "total_amount",
             "tip",
+            "all_payment_details",
             "status"
         ]

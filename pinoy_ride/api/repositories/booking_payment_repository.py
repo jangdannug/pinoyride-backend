@@ -30,6 +30,7 @@ class BookingPaymentRepository:
             total_amount=booking_payment.get("total_amount", ""),
             base_amount=booking_payment.get("base_amount", ""),
             distance_km_round=booking_payment.get("distance_km_round", ""),
+            all_payment_details=booking_payment.get("all_payment_details", {}),
         )
 
         new_booking_pament.save()

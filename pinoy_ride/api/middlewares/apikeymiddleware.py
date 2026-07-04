@@ -19,19 +19,26 @@ class ApiKeyAuthenticationMiddleware:
         # Customer routes and version settings
         self.customer_routes = ('/api/customers/',)
         self.customer_min_version = os.getenv('MIN_CUSTOMER_APP_VERSION', '1.0.0')
-        self.customer_download_link = os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', 'https://drive.google.com/')
+        self.customer_download_link = os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', 'https://drive.google.com/customer')
 
         # Rider routes and version settings
         self.rider_routes = ('/api/riders/',)
         self.rider_min_version = os.getenv('MIN_RIDER_APP_VERSION', '1.0.0')
-        self.rider_download_link = os.getenv('RIDER_APP_DOWNLOAD_LINK', 'https://drive.google.com/')
+        self.rider_download_link = os.getenv('RIDER_APP_DOWNLOAD_LINK', 'https://drive.google.com/driver')
 
-    def get_user_type_from_path(self, path):
-        """Determine user type from request path"""
+    def get_user_type_from_path(self, path, user_type=None):
+        """Determine user type from request path or request data"""
+        # First check if path is in customer_routes or rider_routes
         if path.startswith(self.customer_routes):
             return 'customer'
         elif path.startswith(self.rider_routes):
             return 'rider'
+
+        # If not in routes, check if user_type field exists in request data
+        if user_type:
+            if user_type in ['customer', 'rider']:
+                return user_type
+
         return None
 
     def get_min_app_version(self, user_type):
@@ -40,7 +47,7 @@ class ApiKeyAuthenticationMiddleware:
             return self.customer_min_version
         elif user_type == 'rider':
             return self.rider_min_version
-        return os.getenv('MIN_APP_VERSION', '1.0.0')
+        return self.customer_min_version
 
     def get_download_link(self, user_type):
         """Get download link based on user type"""
@@ -108,29 +115,42 @@ class ApiKeyAuthenticationMiddleware:
 
                 # Check app version from request data
                 app_version = None
+                request_data = None
                 try:
                     if request.method == 'POST':
                         if request.content_type and 'multipart' in request.content_type:
                             # Use Django's request.POST for multipart/form-data
                             app_version = request.POST.get('app_version')
+                            user_type = request.POST.get('user_type')
+                            request_data = dict(request.POST)
                         elif request.content_type and 'json' in request.content_type:
                             # Parse JSON for application/json
                             import json
                             body_data = json.loads(request.body)
                             app_version = body_data.get('app_version')
+                            user_type = request.POST.get('user_type')
+                            request_data = body_data
                         elif request.content_type and 'application/x-www-form-urlencoded' in request.content_type:
                             # Use Django's request.POST for URL encoded
                             app_version = request.POST.get('app_version')
+                            user_type = request.POST.get('user_type')
+                            request_data = dict(request.POST)
                 except Exception as e:
                     print(f"Error parsing app_version: {e}")
                     pass
 
                 # Default app version
                 if not app_version:
-                    app_version = '1.0.0'
+                    app_version = None
 
                 # Determine user type from path and get corresponding version
-                user_type = self.get_user_type_from_path(request.path)
+                user_type = self.get_user_type_from_path(request.path, user_type)
+              
+                # Skip version check if user_type is None or app version is None
+                if user_type is None or app_version is None:
+                    response = self.get_response(request)
+                    return response
+
                 min_version = self.get_min_app_version(user_type)
                 download_link = self.get_download_link(user_type)
 

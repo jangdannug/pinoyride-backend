@@ -250,13 +250,14 @@ class BookingViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='create')
     def create_booking(self, request):
         """Create Booking"""
-        
+
         app_logger(1, "Create booking", request.data)
 
-        try:            
-            
+        try:
+
             customer_id = request.data.get("customer_id", "")
             payment_details = json.loads(request.data.get("payment_details", "{}") or "{}")
+            all_payment_details = json.loads(request.data.get("all_payment_details", "{}") or "{}")
 
             if not customer_id:
                 return AppResponse.send_error(message="Customer id is required", code=400)
@@ -309,7 +310,7 @@ class BookingViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message=booking_serializer.errors, code=400)
 
             with transaction.atomic():
-                
+
                 customer_details = self.customer_service.get_customer_by_id(customer_id=customer_id)
 
                 # pickup
@@ -328,15 +329,18 @@ class BookingViewSet(viewsets.ViewSet):
                 # save booking
                 booking_details = self.service.save_booking(customer_instance = customer_details, booking_details=booking_details)
 
+                # Add all_payment_details to payment_details
+                payment_details['all_payment_details'] = all_payment_details
+
                 # save booking payment
-                self.booking_payment_service.save_booking_payment(booking_instance=booking_details, booking_payment=payment_details) 
+                self.booking_payment_service.save_booking_payment(booking_instance=booking_details, booking_payment=payment_details)
 
                 # save promo availed
                 if promo_id and total_amount_wo_promo >= 150:
                     self.promo_availed_service.save_promo_availed(promo_instance=promo_details, customer_instance=customer_details, booking_instance=booking_details)
 
                 serializer = BookingSerializer(booking_details)
-           
+
             return AppResponse.send_success(data=serializer.data, message="Booking saved successfully")
 
 
