@@ -58,7 +58,7 @@ class ApiKeyAuthenticationMiddleware:
         return self.customer_download_link
 
     def compare_versions(self, current_version, min_version):
-        """Compare two version strings (e.g., '1.0.0' <= '1.2.3' returns True)"""
+        """Compare two version strings (e.g., '1.0.0' < '1.2.3' returns True)"""
         try:
             current_parts = list(map(int, current_version.split('.')))
             min_parts = list(map(int, min_version.split('.')))
@@ -75,7 +75,7 @@ class ApiKeyAuthenticationMiddleware:
                 elif c > m:
                     return False  # Current version is greater than minimum
 
-            return True  # Versions are equal
+            return False  # Versions are equal
         except (ValueError, AttributeError):
             # If version parsing fails, return False (allow request)
             return False
