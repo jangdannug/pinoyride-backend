@@ -67,14 +67,14 @@ class BookingRepository:
         )
 
         # Exclude bookings that this rider has already ignored
-        if rider_id:
-            # Get list of booking IDs that this rider has ignored
-            ignored_booking_ids = IgnoredBooking.objects.filter(
-                rider_id=rider_id
-            ).values_list('booking_id', flat=True)
+        # if rider_id:
+        #     # Get list of booking IDs that this rider has ignored
+        #     ignored_booking_ids = IgnoredBooking.objects.filter(
+        #         rider_id=rider_id
+        #     ).values_list('booking_id', flat=True)
 
-            if ignored_booking_ids:
-                bookings_query = bookings_query.exclude(id__in=ignored_booking_ids)
+        #     if ignored_booking_ids:
+        #         bookings_query = bookings_query.exclude(id__in=ignored_booking_ids)
 
         # Narrow down candidates from DB
         bookings = bookings_query.order_by("-id")[:50]  # limit to 50 candidates
