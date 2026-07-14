@@ -51,6 +51,17 @@ class CustomerRepository:
 
 
     @staticmethod
+    def check_customer_mobile_exists_for_login(mobile_no):
+        """Check if customer exists with given mobile number - for login validation"""
+
+        ## Check if any customer exists with this mobile (excluding soft-deleted)
+        try:
+            return Customer.objects.filter(mobile=mobile_no, deleted_at__isnull=True).exists()
+        except:
+            return False
+
+
+    @staticmethod
     def get_customer_by_id(customer_id):
         """Get customer by id"""
         try:

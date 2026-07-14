@@ -135,11 +135,12 @@ class PromoRepository:
             .order_by(sort_by)
         )
 
-        # if filters:
-        #     if "name_filter" in filters and filters["name_filter"]:
-        #         promos = promos.filter(
-        #             name=filters["name_filter"]
-        #         )
+        # Apply filters
+        if filters:
+            if "name_filter" in filters and filters["name_filter"]:
+                promos = promos.filter(
+                    name=filters["name_filter"]
+                )
 
         if search_query:
             search_terms = search_query.split()
@@ -149,6 +150,7 @@ class PromoRepository:
                 query_filter |= (
                     Q(name__icontains=term)
                     | Q(code__icontains=term)
+                    | Q(location__icontains=term)
                 )
 
             promos = promos.filter(query_filter).distinct()

@@ -1,5 +1,5 @@
 from django.db import transaction
-from api.repositories import OtpRepository
+from api.repositories import OtpRepository, RiderRepository, CustomerRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 from api.utils.sha_generator import generate_sha512
@@ -10,20 +10,22 @@ from api.base import (
 from django.conf import settings
 import json
 class OtpService:
-    
+
     def __init__(self):
         self.otp = OtpRepository()
+        self.rider = RiderRepository()
+        self.customer = CustomerRepository()
         self.api_service = ApiService()
         self.config = settings.ITEXTMO_CONFIG
-    
+
     ## Generate OTP
     # @transaction.atomic
     def generate_otp(self, user_details):
         """Generate OTP"""
-        
+
         mobile_no = user_details.get("mobile_no", "")
-        otp_code = self.otp.generate(user_details=user_details)         
-        
+        otp_code = self.otp.generate(user_details=user_details)
+
         ## Send OTP
         api_response = self.call_otp_api(mobile_no, otp_code)
 
@@ -37,7 +39,7 @@ class OtpService:
         """Verify OTP"""
 
         otp_record = self.otp.check_if_exists(otp_data=otp_data)
-        
+
         if otp_record is None:
             raise ValidationError("Invalid OTP")
 
@@ -45,7 +47,68 @@ class OtpService:
             raise ValidationError("OTP expired")
 
         return otp_record
-    
+
+
+    ## Generate Login OTP
+    # @transaction.atomic
+    def generate_login_otp(self, user_details):
+        """Generate OTP for login"""
+
+        mobile_no = user_details.get("mobile_no", "")
+        user_type = user_details.get("user_type", "")
+
+        # Validate that mobile_no exists in the respective table
+        if user_type == 'rider':
+            exists = self.rider.check_rider_mobile_exists_for_login(mobile_no)
+            if not exists:
+                raise ValidationError("Rider with this mobile number does not exist")
+        elif user_type == 'customer':
+            exists = self.customer.check_customer_mobile_exists_for_login(mobile_no)
+            if not exists:
+                raise ValidationError("Customer with this mobile number does not exist")
+        else:
+            raise ValidationError("Invalid user_type.")
+
+        # Generate OTP
+        otp_code = self.otp.generate(user_details=user_details)
+
+        ## Send OTP
+        api_response = self.call_otp_api(mobile_no, otp_code)
+
+        return otp_code
+
+
+    ## Verify Login OTP
+    @transaction.atomic
+    def verify_login_otp(self, otp_data):
+        """Verify OTP for login"""
+
+        mobile_no = otp_data.get("mobile_no", "")
+        user_type = otp_data.get("user_type", "")
+
+        # Validate that mobile_no exists in the respective table
+        if user_type == 'rider':
+            exists = self.rider.check_rider_mobile_exists_for_login(mobile_no)
+            if not exists:
+                raise ValidationError("Rider with this mobile number does not exist")
+        elif user_type == 'customer':
+            exists = self.customer.check_customer_mobile_exists_for_login(mobile_no)
+            if not exists:
+                raise ValidationError("Customer with this mobile number does not exist")
+        else:
+            raise ValidationError("Invalid user_type. Must be 'rider' or 'customer'")
+
+        # Verify OTP
+        otp_record = self.otp.check_if_exists(otp_data=otp_data)
+
+        if otp_record is None:
+            raise ValidationError("Invalid OTP")
+
+        if otp_record.is_expired():
+            raise ValidationError("OTP expired")
+
+        return otp_record
+
 
     # @transaction.atomic
     def call_otp_api(self, mobile_no, otp_code):
@@ -62,7 +125,7 @@ class OtpService:
             "Recipients": json.dumps([mobile_no]),
             "Message": f"Your OTP is {otp_code['code']}. It will expire in 5 minutes."
         }
-        
+
         api_response = self.api_service.post_itext_mo(mobile_no=mobile_no, url = url, payload = payload, headers=headers)
-        
+
         return api_response

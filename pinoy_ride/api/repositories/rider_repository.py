@@ -109,6 +109,35 @@ class RiderRepository:
 
 
     @staticmethod
+    def check_rider_mobile_exists_for_login(mobile_no):
+        """Check if rider exists with given mobile number - for login validation"""
+
+        ## Check if any rider exists with this mobile (excluding soft-deleted)
+        try:
+            return Rider.objects.filter(mobile_no=mobile_no, deleted_at__isnull=True).exists()
+        except:
+            pass
+
+        # If not found with original format, try with 09 prefix (convert 63 to 09)
+        if mobile_no.startswith('63'):
+            mobile_no_09 = '0' + mobile_no[2:]  # 63... -> 09...
+            try:
+                return Rider.objects.filter(mobile_no=mobile_no_09, deleted_at__isnull=True).exists()
+            except:
+                pass
+
+        # If not found, try with 63 prefix (convert 09 to 63)
+        if mobile_no.startswith('09'):
+            mobile_no_63 = '63' + mobile_no[2:]  # 09... -> 63...
+            try:
+                return Rider.objects.filter(mobile_no=mobile_no_63, deleted_at__isnull=True).exists()
+            except:
+                pass
+
+        return False
+
+
+    @staticmethod
     def get_by_id(rider_id):
         """Get rider by id"""
         try:
