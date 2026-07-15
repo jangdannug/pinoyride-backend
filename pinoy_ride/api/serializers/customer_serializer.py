@@ -57,11 +57,56 @@ class CustomerSerializer(serializers.ModelSerializer):
         return value
 
     def get_ekyc_details(self, obj):
+        """
+        Get EKYC details from TopPhEkycDetails table.
+        If ekyc_request_user_id is empty or record doesn't exist, fallback to customer's own details.
+        When source is 'customer_profile', only populate basic fields and leave others empty.
+        """
+        # Helper function to get empty ekyc details with customer's basic info
+        def get_customer_profile_ekyc(customer_obj):
+            return {
+                'id': None,
+                'generate_request_user_id': '',
+                'kyc_id': '',
+                'first_name': customer_obj.fname or '',
+                'middle_name': customer_obj.mname or '',
+                'last_name': customer_obj.lname or '',
+                'email_address': customer_obj.email or '',
+                'mobile_no': customer_obj.mobile or '',
+                'date_of_birth': '',
+                'place_of_birth': '',
+                'nationality': '',
+                'gender': '',
+                'current_country': '',
+                'current_address': '',
+                'nature_of_work': '',
+                'source_of_fund': '',
+                'id_type': '',
+                'id_number': '',
+                'id_front': '',
+                'id_back': '',
+                'selfie': '',
+                'status': 0,
+                'pretty_mobile_no': '',
+                'permanent_address': '',
+                'permanent_country': '',
+                'create_date': '',
+                'source': 'customer_profile'
+            }
+
+        # Check if ekyc_request_user_id exists and is not empty
+        if not obj.ekyc_request_user_id or obj.ekyc_request_user_id.strip() == '':
+            # Fallback to customer's own details
+            return get_customer_profile_ekyc(obj)
+
         try:
             record = TopPhEkycDetails.objects.get(generate_request_user_id=obj.ekyc_request_user_id)
-            return TopPhEkycDetailsSerializer(record).data
+            data = TopPhEkycDetailsSerializer(record).data
+            data['source'] = 'top_ph_ekyc'
+            return data
         except TopPhEkycDetails.DoesNotExist:
-            return None
+            # Fallback to customer's own details if EKYC record not found
+            return get_customer_profile_ekyc(obj)
         
     def get_customer_address(self, obj):
         # get the related table customer_address
