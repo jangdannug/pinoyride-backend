@@ -72,7 +72,7 @@ class BookingService:
 
         accept_booking = self.booking.accept_booking(booking_instance=booking, rider_instance=rider)
         if accept_booking is None:
-            raise NotFoundError("Booking already assigned")
+            raise NotFoundError("Booking is already assigned or cancelled.")
 
         return accept_booking
 
