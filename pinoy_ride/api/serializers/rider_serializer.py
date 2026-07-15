@@ -13,7 +13,8 @@ class RiderSerializer(serializers.ModelSerializer):
     vehicle_details = RiderVehicleDetailsSerializer(source='rider_vehicle', many=True, read_only=False, required=False)
     code = serializers.CharField(read_only=True)
     auto_accept = serializers.IntegerField(read_only=True)
-    drivers_license_img = serializers.SerializerMethodField()
+    drivers_license_img = serializers.FileField(required=True)
+    drivers_license_img_pretty = serializers.SerializerMethodField()
     rider_address = serializers.SerializerMethodField()
     ekyc_details = serializers.SerializerMethodField()
     wallet_details = serializers.SerializerMethodField()
@@ -33,6 +34,7 @@ class RiderSerializer(serializers.ModelSerializer):
             "drivers_license_no",
             "drivers_license_no_expiration_date",
             "drivers_license_img",
+            "drivers_license_img_pretty",
             "application_status",
             "current_lat",
             "current_long",
@@ -61,7 +63,7 @@ class RiderSerializer(serializers.ModelSerializer):
         return value
 
 
-    def get_drivers_license_img(self, obj):
+    def get_drivers_license_img_pretty(self, obj):
         """Return full URL for driver's license image"""
         if obj.drivers_license_img and hasattr(obj.drivers_license_img, 'name'):
             base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
