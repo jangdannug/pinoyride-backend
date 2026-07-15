@@ -182,15 +182,19 @@ class AuthViewSet(viewsets.ViewSet):
     def update_password(self, request):
         """Update password """
         email = request.data.get("email")
+        mobile_no = request.data.get("mobile_no")
         password = request.data.get("password")
         confirm_password = request.data.get("confirm_password")
 
+        if not email and not mobile_no:
+            return AppResponse.send_error(message="Email or mobile number is required", code=400)
+
         if password != confirm_password:
             return AppResponse.send_error(message="Password doesn't match!", code=400)
-        
+
         try:
-            user_service = UserService() 
-            user_details = user_service.get_by_email(email=email)
+            user_service = UserService()
+            user_details = user_service.get_user_by_email_or_mobile(email=email, mobile_no=mobile_no)
 
             user_service.update_password(user_instance=user_details, new_password=password)
 
