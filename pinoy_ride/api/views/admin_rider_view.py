@@ -10,7 +10,7 @@ from api.services import (
     WalletService,
     RiderService
 )
-from api.serializers import RiderSerializer, PartialRiderSerializer
+from api.serializers import RiderSerializer, PartialRiderSerializer, RiderImageUploadSerializer
 from api.utils.app_response import AppResponse
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from django.db import transaction
@@ -514,5 +514,46 @@ class AdminRiderViewSet(viewsets.ViewSet):
                 message=f"Bulk load completed: {results['total_created']} created, {results['total_skipped']} skipped, {results['total_failed']} failed"
             )
 
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    ## Upload rider images
+    @action(
+        detail=False, methods=["post"], url_path="upload-images"
+    )
+    def upload_rider_images(self, request):
+        """Upload rider images (drivers_license_img, v_vehicle_img, v_or_cr_img)"""
+
+        try:
+            # Validate request
+            upload_serializer = RiderImageUploadSerializer(data=request.data)
+            if not upload_serializer.is_valid():
+                return AppResponse.send_error(message=upload_serializer.errors, code=400)
+
+            rider_id = request.data.get("rider_id")
+            drivers_license_img = request.FILES.get("drivers_license_img")
+            v_vehicle_img = request.FILES.get("v_vehicle_img")
+            v_or_cr_img = request.FILES.get("v_or_cr_img")
+
+            if not any([drivers_license_img, v_vehicle_img, v_or_cr_img]):
+                return AppResponse.send_error(message="At least one image file is required", code=400)
+
+            with transaction.atomic():
+                uploaded_images = self.admin_service.upload_rider_images(
+                    rider_id=rider_id,
+                    drivers_license_img=drivers_license_img,
+                    v_vehicle_img=v_vehicle_img,
+                    v_or_cr_img=v_or_cr_img
+                )
+
+            return AppResponse.send_success(
+                data=uploaded_images,
+                message="Images uploaded successfully",
+                code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
         except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)

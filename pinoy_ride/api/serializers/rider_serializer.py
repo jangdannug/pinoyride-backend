@@ -6,13 +6,14 @@ from .partial_wallet_serializer import PartialWalletSerializer
 from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
 from django.db.models import Sum
 from api.utils.customer_utils import CustomUtils
+import os
 
 class RiderSerializer(serializers.ModelSerializer):
 
     vehicle_details = RiderVehicleDetailsSerializer(source='rider_vehicle', many=True, read_only=False, required=False)
     code = serializers.CharField(read_only=True)
     auto_accept = serializers.IntegerField(read_only=True)
-    drivers_license_img = serializers.FileField(required=True)
+    drivers_license_img = serializers.SerializerMethodField()
     rider_address = serializers.SerializerMethodField()
     ekyc_details = serializers.SerializerMethodField()
     wallet_details = serializers.SerializerMethodField()
@@ -58,6 +59,14 @@ class RiderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This email address already exists.")
         
         return value
+
+
+    def get_drivers_license_img(self, obj):
+        """Return full URL for driver's license image"""
+        if obj.drivers_license_img and hasattr(obj.drivers_license_img, 'name'):
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            return f"{base_url}/{obj.drivers_license_img.name}"
+        return None
 
 
     def validate_mobile_no(self, value):

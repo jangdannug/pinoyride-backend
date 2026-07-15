@@ -1,5 +1,5 @@
 from django.db import transaction
-from api.repositories import RiderRepository, BookingRepository
+from api.repositories import RiderRepository, BookingRepository, RiderVehicleDetailsRepository
 from api.utils.custom_error import NotFoundError,ValidationError
 from api.utils.auth import get_authenticated_user
 from api.services import BookingIssuesService
@@ -9,6 +9,7 @@ class AdminRiderService:
         self.rider = RiderRepository()
         self.booking = BookingRepository()
         self.booking_issues = BookingIssuesService()
+        self.rider_vehicle = RiderVehicleDetailsRepository()
 
     ## Admin get list of applicants
     def admin_list_applicants(self, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
@@ -106,3 +107,45 @@ class AdminRiderService:
             filters=filters,
             sort_by=sort_by
         )
+
+
+    ## Upload rider images
+    @transaction.atomic
+    def upload_rider_images(self, rider_id, drivers_license_img=None, v_vehicle_img=None, v_or_cr_img=None):
+        """Upload and save rider images"""
+
+        # Get rider
+        rider = self.get_rider_by_id(rider_id)
+
+        uploaded_images = {}
+
+        # Upload and save driver's license image to rider table
+        if drivers_license_img:
+            rider.drivers_license_img = drivers_license_img
+            rider.save()
+            # Return the relative path
+            if rider.drivers_license_img and hasattr(rider.drivers_license_img, 'name'):
+                uploaded_images['drivers_license_img'] = rider.drivers_license_img.name
+
+        # Upload and save vehicle images to rider_vehicle_details table
+        if v_vehicle_img or v_or_cr_img:
+            # Get existing vehicle details for this rider
+            vehicle_details = self.rider_vehicle.get_vehicle_details_rider_by_id_and_type(rider_id, 1)
+
+            if vehicle_details is None:
+                raise ValidationError("Vehicle details not found for this rider. Please create vehicle details first.")
+
+            # Update only the image fields, retain other existing values
+            if v_vehicle_img:
+                vehicle_details.v_vehicle_img = v_vehicle_img
+            if v_or_cr_img:
+                vehicle_details.v_or_cr_img = v_or_cr_img
+            vehicle_details.save()
+
+            # Return the relative paths
+            if v_vehicle_img and hasattr(vehicle_details, 'v_vehicle_img') and vehicle_details.v_vehicle_img:
+                uploaded_images['v_vehicle_img'] = vehicle_details.v_vehicle_img.name
+            if v_or_cr_img and hasattr(vehicle_details, 'v_or_cr_img') and vehicle_details.v_or_cr_img:
+                uploaded_images['v_or_cr_img'] = vehicle_details.v_or_cr_img.name
+
+        return uploaded_images
