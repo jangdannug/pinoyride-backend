@@ -15,6 +15,14 @@ class UserRepository:
             return user
         except User.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_by_mobile_no(mobile_no):
+        try:
+            user = User.objects.get(mobile_no=mobile_no, deleted_at__isnull=True)
+            return user
+        except User.DoesNotExist:
+            return None
         
     @staticmethod
     def get_by_id(user_id):

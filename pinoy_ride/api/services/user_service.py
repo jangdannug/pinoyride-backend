@@ -130,6 +130,28 @@ class UserService:
             raise ValidationError("User not found")
 
         return user
+
+    def get_by_mobile_no(self, mobile_no):
+        """Get User by mobile number"""
+        user = self.user_repo.get_by_mobile_no(mobile_no)
+        if user is None:
+            raise ValidationError("User not found")
+
+        return user
+
+    def get_user_by_email_or_mobile(self, email=None, mobile_no=None):
+        """Get User by email or mobile number"""
+        if email:
+            user = self.user_repo.get_by_email(email)
+            if user:
+                return user
+
+        if mobile_no:
+            user = self.user_repo.get_by_mobile_no(mobile_no)
+            if user:
+                return user
+
+        raise ValidationError("User not found")
     
     def update_password(self, user_instance, new_password):
         """Update user's password"""
