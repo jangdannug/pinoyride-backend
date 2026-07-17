@@ -15,6 +15,7 @@ from .internal_backend_view import InternalBackendViewSet
 
 from .admin_promo_view import AdminPromoViewSet
 from .admin_price_view import AdminPriceViewSet
+from .price_config_view import PriceConfigViewSet
 from .admin_rider_view import AdminRiderViewSet
 from .admin_customer_view import AdminCustomerViewSet
 from .admin_task_view import AdminTaskViewSet

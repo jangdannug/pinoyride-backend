@@ -26,3 +26,4 @@ from .task_serializer import TaskSerializer
 from .booking_issues_serializer import BookingIssuesSerializer
 from .message_serializer import MessageSerializer, SendMessageSerializer, MarkReadSerializer
 from .rider_image_upload_serializer import RiderImageUploadSerializer
+from .price_config_serializer import PriceConfigSerializer, PriceConfigDetailSerializer

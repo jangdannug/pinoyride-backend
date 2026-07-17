@@ -17,7 +17,8 @@ from api.services import (
     PromoService,
     PromoAvailedService,
     BookingIssuesService,
-    AdminPriceService
+    AdminPriceService,
+    PriceConfigService
 )
 from api.base import (
     ApiService
@@ -44,6 +45,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.promo_availed_service = PromoAvailedService()
         self.booking_issues_service = BookingIssuesService()
         self.price_service = AdminPriceService()
+        self.price_config_service = PriceConfigService()
 
 
     def _validate_coordinates_in_service_area(self, pickup_lat, pickup_long, dropoff_lat, dropoff_long):
@@ -124,9 +126,7 @@ class BookingViewSet(viewsets.ViewSet):
             distance_km = geodesic(origin, destination).kilometers
             distance_km_round = round(distance_km, 2)
 
-            # Get latest price from price table with fallback defaults
-            latest_price = self.price_service.get_latest_price()
-
+            # Get pricing configuration from price_config and price tables
             # Helper function to clean non-numeric characters from database values
             def clean_numeric_value(value):
                 """Remove all non-numeric characters except decimal point"""
@@ -136,48 +136,36 @@ class BookingViewSet(viewsets.ViewSet):
                 cleaned = re.sub(r'[^\d.]', '', str(value))
                 return float(cleaned) if cleaned else None
 
-            # Booking Type = 1 - Motorcycle
-            # Default values (fallback)
-
-            default_km_basis = 7
-            default_minimum_fare = 40.00
-            default_pesos_per_km = 10
-            default_pesos_per_km2 = 15
-            default_booking_fee = 0
+            # Default fallback values
+            default_km_basis = 7.0
+            default_minimum_fare = 40.0
+            default_pesos_per_km = 10.0
+            default_pesos_per_km2 = 15.0
+            default_booking_fee = 0.0
             default_commission_percentage = 0.15
 
-            # Use price table values if available, otherwise use defaults
-            if latest_price:
-                # Clean and use price table values, with fallback to defaults
-                pesos_per_km = clean_numeric_value(latest_price.price) or default_pesos_per_km
-                pesos_per_km2 = clean_numeric_value(latest_price.exceed_time_travel_price) or default_pesos_per_km2
-                km_basis = default_km_basis # This is not in price table, using default
-                minimum_fare = default_minimum_fare # This is not in price table, using default
-                booking_fee = default_booking_fee  # This is not in price table, using default
-                commission_prcentage = default_commission_percentage  # This is not in price table, using default
-            else:
+            # Get km_basis, minimum_fare, booking_fee, commission_percentage from price_config table
+            try:
+                pricing_config = self.price_config_service.get_pricing_for_booking(booking_type)
+                km_basis = pricing_config['km_basis']
+                minimum_fare = pricing_config['minimum_fare']
+                booking_fee = pricing_config['booking_fee']
+                commission_prcentage = pricing_config['commission_percentage']
+            except NotFoundError:
+                # Fallback to default values if price_config not found
                 km_basis = default_km_basis
                 minimum_fare = default_minimum_fare
-                pesos_per_km2 = default_pesos_per_km2
-                pesos_per_km = default_pesos_per_km
                 booking_fee = default_booking_fee
                 commission_prcentage = default_commission_percentage
 
-            if booking_type == '2':
-                # Booking Type = 2 - Car - 4 Seaters
-                minimum_fare = 60.00
-                pesos_per_km = 10
-                pesos_per_km2 = 15
-                booking_fee = 0
-                commission_prcentage = .15 #15%
-
-            elif booking_type == '3':
-                # Booking Type = 3 = Car - 6 Seaters
-                minimum_fare = 80.00
-                pesos_per_km = 10
-                pesos_per_km2 = 15
-                booking_fee = 0
-                commission_prcentage = .15 #15%
+            # Get pesos_per_km and pesos_per_km2 from price table
+            latest_price = self.price_service.get_latest_price()
+            if latest_price:
+                pesos_per_km = clean_numeric_value(latest_price.price) or default_pesos_per_km
+                pesos_per_km2 = clean_numeric_value(latest_price.exceed_time_travel_price) or default_pesos_per_km2
+            else:
+                pesos_per_km = default_pesos_per_km
+                pesos_per_km2 = default_pesos_per_km2
 
             base_amount = distance_km_round * pesos_per_km
             exceeding_kms_total  = 0

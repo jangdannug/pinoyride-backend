@@ -20,3 +20,4 @@ from .promo_availed_repository import PromoAvailedRepository
 from .otp_api_request_repository import OtpApiRequestRepository
 from .booking_issues_repository import BookingIssuesRepository
 from .message_repository import MessageRepository
+from .price_config_repository import PriceConfigRepository
