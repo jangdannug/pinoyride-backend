@@ -3,7 +3,7 @@ from api.models import Rider, TopPhEkycDetails
 from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
 from .rider_address_serializer import RiderAddressSerializer
 from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
-
+import os
 class PartialRiderSerializer(serializers.ModelSerializer):
 
     vehicle_details = RiderVehicleDetailsSerializer(source='rider_vehicle', many=True, read_only=False, required=False)
@@ -52,6 +52,16 @@ class PartialRiderSerializer(serializers.ModelSerializer):
         """
         # Helper function to get empty ekyc details with rider's basic info
         def get_rider_profile_ekyc(rider_obj):
+            # Format selfie URL
+            selfie_url = ''
+            if rider_obj.selfie and hasattr(rider_obj.selfie, 'name'):
+                img_name = str(rider_obj.selfie.name)
+                if img_name.startswith('http://') or img_name.startswith('https://'):
+                    selfie_url = img_name
+                else:
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    selfie_url = f"{base_url}/{img_name}"
+
             return {
                 'id': None,
                 'generate_request_user_id': '',
@@ -73,7 +83,7 @@ class PartialRiderSerializer(serializers.ModelSerializer):
                 'id_number': '',
                 'id_front': '',
                 'id_back': '',
-                'selfie': '',
+                'selfie': selfie_url,
                 'status': 0,
                 'pretty_mobile_no': '',
                 'permanent_address': '',
