@@ -386,12 +386,22 @@ class RiderRepository:
     @staticmethod
     @transaction.atomic
     def update_rider_online_status(rider_instance, status):
-        
-        rider_instance.is_online = status
-        rider_instance.save()
-        
-        return rider_instance
+        from django.utils.timezone import now
 
+        # Convert to integer if status is string
+        status_int = int(status) if isinstance(status, str) else status
+
+        rider_instance.is_online = status_int
+
+        # Update datetime fields based on status
+        if status_int == 1:  # Online
+            rider_instance.last_online_datetime = now()
+        elif status_int == 0:  # Offline
+            rider_instance.last_offline_datetime = now()
+
+        rider_instance.save()
+
+        return rider_instance
     
     @staticmethod
     @transaction.atomic

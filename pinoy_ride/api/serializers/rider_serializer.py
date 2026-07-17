@@ -5,6 +5,7 @@ from .rider_address_serializer import RiderAddressSerializer
 from .partial_wallet_serializer import PartialWalletSerializer
 from .top_ph_ekyc_details_serializer import TopPhEkycDetailsSerializer
 from django.db.models import Sum
+from django.utils import timezone
 from api.utils.customer_utils import CustomUtils
 import os
 
@@ -19,6 +20,7 @@ class RiderSerializer(serializers.ModelSerializer):
     ekyc_details = serializers.SerializerMethodField()
     wallet_details = serializers.SerializerMethodField()
     pr_wallet_details = serializers.SerializerMethodField()
+    hours_online = serializers.SerializerMethodField()
 
     class Meta:
         model = Rider
@@ -43,6 +45,9 @@ class RiderSerializer(serializers.ModelSerializer):
             "is_available", # 1 = available, 2 = unavailable
             "is_online",
             "status",
+            "hours_online",
+            "last_online_datetime",
+            "last_offline_datetime",
             "ekyc_details",
             "vehicle_details",
             "rider_address",
@@ -172,7 +177,7 @@ class RiderSerializer(serializers.ModelSerializer):
         wallet = Wallet.objects.filter(user_id=obj.id, user_type='rider', type='pr-user-wallet').first()
         if not wallet:
             return wallet_details
-        
+
         # get details in wallet history
         total_credit = wallet.wallet_ref.aggregate(total=Sum('credit_amount'))['total'] or 0
         total_debit = wallet.wallet_ref.aggregate(total=Sum('debit_amount'))['total'] or 0
@@ -184,4 +189,38 @@ class RiderSerializer(serializers.ModelSerializer):
         wallet_details['avail_balance'] = avail_balance
 
         return wallet_details
+
+
+    def get_hours_online(self, obj):
+        """Calculate hours online and return formatted string (e.g., '5 Hrs', '55 Mins', '2 Seconds')"""
+        if not obj.last_online_datetime:
+            return "0 Seconds"
+
+        # Determine end time
+        if obj.is_online == 1:
+            # Rider is currently online, calculate duration until now
+            end_time = timezone.now()
+        else:
+            # Rider is offline, use last offline datetime
+            if not obj.last_offline_datetime:
+                # Fallback: use last online datetime as end time (shouldn't happen normally)
+                end_time = obj.last_online_datetime
+            else:
+                end_time = obj.last_offline_datetime
+
+        # Calculate duration in seconds
+        duration = end_time - obj.last_online_datetime
+        total_seconds = max(0, duration.total_seconds())
+
+        # Format output
+        hours = int(total_seconds / 3600)
+        minutes = int((total_seconds % 3600) / 60)
+        seconds = int(total_seconds % 60)
+
+        if hours > 0:
+            return f"{hours} Hrs"
+        elif minutes > 0:
+            return f"{minutes} Mins"
+        else:
+            return f"{seconds} Secs"
         
