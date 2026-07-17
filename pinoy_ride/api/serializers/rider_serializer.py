@@ -16,6 +16,8 @@ class RiderSerializer(serializers.ModelSerializer):
     auto_accept = serializers.IntegerField(read_only=True)
     drivers_license_img = serializers.FileField(required=True)
     drivers_license_img_pretty = serializers.SerializerMethodField()
+    selfie = serializers.FileField(required=False, allow_null=True)
+    selfie_pretty = serializers.SerializerMethodField()
     rider_address = serializers.SerializerMethodField()
     ekyc_details = serializers.SerializerMethodField()
     wallet_details = serializers.SerializerMethodField()
@@ -37,6 +39,8 @@ class RiderSerializer(serializers.ModelSerializer):
             "drivers_license_no_expiration_date",
             "drivers_license_img",
             "drivers_license_img_pretty",
+            "selfie",
+            "selfie_pretty",
             "application_status",
             "current_lat",
             "current_long",
@@ -75,6 +79,18 @@ class RiderSerializer(serializers.ModelSerializer):
             return f"{base_url}/{obj.drivers_license_img.name}"
         return None
 
+    def get_selfie_pretty(self, obj):
+        """Return full URL for selfie image"""
+        if obj.selfie and hasattr(obj.selfie, 'name'):
+            img_name = str(obj.selfie.name)
+            # If already a full URL, return as-is
+            if img_name.startswith('http://') or img_name.startswith('https://'):
+                return img_name
+            # Otherwise, concat with base URL
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            return f"{base_url}/{img_name}"
+        return None
+
 
     def validate_mobile_no(self, value):
         """Validate the mobile_no to ensure it is unique (excluding soft-deleted records)"""
@@ -96,6 +112,16 @@ class RiderSerializer(serializers.ModelSerializer):
         """
         # Helper function to get empty ekyc details with rider's basic info
         def get_rider_profile_ekyc(rider_obj):
+            # Format selfie URL
+            selfie_url = ''
+            if rider_obj.selfie and hasattr(rider_obj.selfie, 'name'):
+                img_name = str(rider_obj.selfie.name)
+                if img_name.startswith('http://') or img_name.startswith('https://'):
+                    selfie_url = img_name
+                else:
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    selfie_url = f"{base_url}/{img_name}"
+
             return {
                 'id': None,
                 'generate_request_user_id': '',
@@ -117,7 +143,7 @@ class RiderSerializer(serializers.ModelSerializer):
                 'id_number': '',
                 'id_front': '',
                 'id_back': '',
-                'selfie': '',
+                'selfie': selfie_url,
                 'status': 0,
                 'pretty_mobile_no': '',
                 'permanent_address': '',

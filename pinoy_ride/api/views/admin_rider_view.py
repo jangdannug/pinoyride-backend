@@ -523,7 +523,7 @@ class AdminRiderViewSet(viewsets.ViewSet):
         detail=False, methods=["post"], url_path="upload-images"
     )
     def upload_rider_images(self, request):
-        """Upload rider images (drivers_license_img, v_vehicle_img, v_or_cr_img)"""
+        """Upload rider images (drivers_license_img, selfie, v_vehicle_img, v_or_cr_img)"""
 
         try:
             # Validate request
@@ -533,16 +533,18 @@ class AdminRiderViewSet(viewsets.ViewSet):
 
             rider_id = request.data.get("rider_id")
             drivers_license_img = request.FILES.get("drivers_license_img")
+            selfie = request.FILES.get("selfie")
             v_vehicle_img = request.FILES.get("v_vehicle_img")
             v_or_cr_img = request.FILES.get("v_or_cr_img")
 
-            if not any([drivers_license_img, v_vehicle_img, v_or_cr_img]):
+            if not any([drivers_license_img, selfie, v_vehicle_img, v_or_cr_img]):
                 return AppResponse.send_error(message="At least one image file is required", code=400)
 
             with transaction.atomic():
                 uploaded_images = self.admin_service.upload_rider_images(
                     rider_id=rider_id,
                     drivers_license_img=drivers_license_img,
+                    selfie=selfie,
                     v_vehicle_img=v_vehicle_img,
                     v_or_cr_img=v_or_cr_img
                 )

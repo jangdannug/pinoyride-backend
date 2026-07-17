@@ -111,7 +111,7 @@ class AdminRiderService:
 
     ## Upload rider images
     @transaction.atomic
-    def upload_rider_images(self, rider_id, drivers_license_img=None, v_vehicle_img=None, v_or_cr_img=None):
+    def upload_rider_images(self, rider_id, drivers_license_img=None, selfie=None, v_vehicle_img=None, v_or_cr_img=None):
         """Upload and save rider images"""
 
         # Get rider
@@ -126,6 +126,14 @@ class AdminRiderService:
             # Return the relative path
             if rider.drivers_license_img and hasattr(rider.drivers_license_img, 'name'):
                 uploaded_images['drivers_license_img'] = rider.drivers_license_img.name
+
+        # Upload and save selfie to rider table
+        if selfie:
+            rider.selfie = selfie
+            rider.save()
+            # Return the relative path
+            if rider.selfie and hasattr(rider.selfie, 'name'):
+                uploaded_images['selfie'] = rider.selfie.name
 
         # Upload and save vehicle images to rider_vehicle_details table
         if v_vehicle_img or v_or_cr_img:

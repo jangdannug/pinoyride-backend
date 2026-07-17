@@ -13,6 +13,11 @@ def upload_to_driver_license_img(instance, filename):
     filename = f"{uuid4().hex}.{ext}"
     return f"uploads/drivers_license_img/{instance.id}/{filename}"
 
+def upload_to_selfie_img(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid4().hex}.{ext}"
+    return f"uploads/selfie/{instance.id}/{filename}"
+
 class Rider(SoftDeleteModel):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=255, unique=True)
@@ -25,6 +30,7 @@ class Rider(SoftDeleteModel):
     drivers_license_no = models.CharField(max_length=255,null=True)
     drivers_license_no_expiration_date = models.DateField(max_length=255,null=True, blank=True)
     drivers_license_img = models.FileField(upload_to=upload_to_driver_license_img, null=True, blank=True)
+    selfie = models.FileField(upload_to=upload_to_selfie_img, null=True, blank=True)
     application_status = models.IntegerField(default=0)
     current_location = models.TextField(null=True)
     current_lat = models.CharField(max_length=255, null=True)
