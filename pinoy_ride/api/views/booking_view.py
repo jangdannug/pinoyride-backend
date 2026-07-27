@@ -444,8 +444,9 @@ class BookingViewSet(viewsets.ViewSet):
                 if "result" in details_res:
                     loc = details_res["result"]["geometry"]["location"]
                     results.append({
-                        "description": prediction["description"],  # user-friendly address
-                        "address": details_res["result"].get("formatted_address"),
+                        "display_name": details_res["result"].get("name", ""),  # Exact/familiar name (e.g., "SM North Edsa")
+                        "description": prediction["description"],  # user-friendly full description
+                        "address": f"{details_res['result'].get('name', '')}\n{details_res['result'].get('formatted_address', '')}",
                         "lat": loc["lat"],
                         "long": loc["lng"],
                         "place_id": place_id
