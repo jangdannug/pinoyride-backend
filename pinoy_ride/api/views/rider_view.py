@@ -123,6 +123,10 @@ class RiderViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 rider = self.service.login_mobile_no(rider_data)
 
+                # Check if rider is already logged in
+                if rider.is_login == 1:
+                    return AppResponse.send_error(message="This account is currently logged in. Please log out before logging in again.", code=400)
+
                 ekyc_request_user_id = rider.ekyc_request_user_id
 
                 # Check if record exist on ekyc user details table
@@ -138,11 +142,44 @@ class RiderViewSet(viewsets.ViewSet):
                 if firebase_token:
                     self.service.update_firebase_token(rider_instance=rider, firebase_token=firebase_token)
 
+                # Update login status to 1 (logged in)
+                self.service.update_login_status(rider_instance=rider, status=1)
+
             serializer = RiderSerializer(rider)
             response_data = serializer.data
 
 
             return AppResponse.send_success(data=response_data, message="Login success")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='logout')
+    def logout(self, request):
+        """Rider logout"""
+
+        try:
+
+            rider_id = request.data.get("rider_id", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider Id is required", code=400)
+
+            with transaction.atomic():
+                rider = self.service.get_rider_by_id(rider_id=rider_id)
+
+                # Update login status to 0 (logged out)
+                self.service.update_login_status(rider_instance=rider, status=0)
+
+            return AppResponse.send_success(data=[], message="Logout successful")
 
         except NotFoundError as e:
             return AppResponse.send_error(message=str(e), code=404)

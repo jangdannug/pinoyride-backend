@@ -559,3 +559,33 @@ class AdminRiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=404)
         except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(
+        detail=False, methods=["post"], url_path="force_logout_rider"
+    )
+    def force_logout_rider(self, request):
+        """Force logout a rider by setting is_login to 0"""
+
+        try:
+            rider_id = request.data.get("rider_id", "")
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider Id is required", code=400)
+
+            with transaction.atomic():
+                rider = self.rider_service.get_rider_by_id(rider_id=rider_id)
+
+                # Update login status to 0 (force logout)
+                self.rider_service.update_login_status(rider_instance=rider, status=0)
+
+            return AppResponse.send_success(
+                data=[],
+                message="Rider logged out successfully",
+                code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)

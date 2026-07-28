@@ -196,6 +196,19 @@ class RiderService:
         return updated_rider
 
 
+    ## Update rider login status
+    @transaction.atomic
+    def update_login_status(self, rider_instance, status):
+        """Update rider login status"""
+
+        updated_rider = self.rider.update_login_status(
+            rider_instance=rider_instance,
+            status=status
+        )
+
+        return updated_rider
+
+
     ## Get rider service details
     def get_service_details(self, rider_id):
         """Get rider service details including acceptance rate, ratings, and cancellation rate"""

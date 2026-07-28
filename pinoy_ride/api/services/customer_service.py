@@ -65,6 +65,19 @@ class CustomerService:
 
         return updated_customer
 
+
+    ## Update customer login status
+    @transaction.atomic
+    def update_login_status(self, customer_instance, status):
+        """Update customer login status"""
+
+        updated_customer = self.customer.update_login_status(
+            customer_instance=customer_instance,
+            status=status
+        )
+
+        return updated_customer
+
     ## Update customer coordinates
     @transaction.atomic
     def update_customer_coordinates(self, customer_instance, customer_lat, customer_long, current_location=None):

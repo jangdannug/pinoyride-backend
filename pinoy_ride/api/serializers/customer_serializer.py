@@ -25,6 +25,7 @@ class CustomerSerializer(serializers.ModelSerializer):
             "mobile",
             "email",
             "status",
+            "is_login",
             "customer_address",
             "ekyc_details",
             "wallet_details",

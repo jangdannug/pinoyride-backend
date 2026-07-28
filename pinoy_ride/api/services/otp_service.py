@@ -59,13 +59,21 @@ class OtpService:
 
         # Validate that mobile_no exists in the respective table
         if user_type == 'rider':
-            exists = self.rider.check_rider_mobile_exists_for_login(mobile_no)
-            if not exists:
+            # Check if rider is already logged in
+            rider = self.rider.get_rider_by_mobile_for_login(mobile_no)
+            if rider is None:
                 raise ValidationError("Rider with this mobile number does not exist")
+            # Check if rider is already logged in
+            if rider.is_login == 1:
+                raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         elif user_type == 'customer':
-            exists = self.customer.check_customer_mobile_exists_for_login(mobile_no)
-            if not exists:
+            # Check if customer is already logged in
+            customer = self.customer.get_customer_by_mobile_for_login(mobile_no)
+            if customer is None:
                 raise ValidationError("Customer with this mobile number does not exist")
+            # Check if customer is already logged in
+            if customer.is_login == 1:
+                raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         else:
             raise ValidationError("Invalid user_type.")
 
@@ -88,13 +96,21 @@ class OtpService:
 
         # Validate that mobile_no exists in the respective table
         if user_type == 'rider':
-            exists = self.rider.check_rider_mobile_exists_for_login(mobile_no)
-            if not exists:
+            # Check if rider is already logged in
+            rider = self.rider.get_rider_by_mobile_for_login(mobile_no)
+            if rider is None:
                 raise ValidationError("Rider with this mobile number does not exist")
+            # Check if rider is already logged in
+            if rider.is_login == 1:
+                raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         elif user_type == 'customer':
-            exists = self.customer.check_customer_mobile_exists_for_login(mobile_no)
-            if not exists:
+            # Check if customer is already logged in
+            customer = self.customer.get_customer_by_mobile_for_login(mobile_no)
+            if customer is None:
                 raise ValidationError("Customer with this mobile number does not exist")
+            # Check if customer is already logged in
+            if customer.is_login == 1:
+                raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         else:
             raise ValidationError("Invalid user_type. Must be 'rider' or 'customer'")
 

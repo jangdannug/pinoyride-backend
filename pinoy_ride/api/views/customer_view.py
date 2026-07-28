@@ -108,6 +108,9 @@ class CustomerViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 customer = self.service.login_mobile_no(request.data)
+                # Check if rider is already logged in
+                if customer.is_login == 1:
+                    return AppResponse.send_error(message="This account is currently logged in. Please log out before logging in again.", code=400)
 
                 ekyc_request_user_id = customer.ekyc_request_user_id
 
@@ -124,6 +127,9 @@ class CustomerViewSet(viewsets.ViewSet):
                 if firebase_token:
                     self.service.update_firebase_token(customer_instance=customer, firebase_token=firebase_token)
 
+                # Update login status to 1 (logged in)
+                self.service.update_login_status(customer_instance=customer, status=1)
+
             serializer = CustomerSerializer(customer)
             response_data = serializer.data
 
@@ -139,7 +145,37 @@ class CustomerViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
-    
+
+
+    @action(detail=False, methods=['post'], url_path='logout')
+    def logout(self, request):
+        """Customer logout"""
+
+        try:
+
+            customer_id = request.data.get("customer_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+
+            with transaction.atomic():
+                customer = self.service.get_customer_by_id(customer_id=customer_id)
+
+                # Update login status to 0 (logged out)
+                self.service.update_login_status(customer_instance=customer, status=0)
+
+            return AppResponse.send_success(data=[], message="Logout successful")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
 
     @action(detail=False, methods=['post'], url_path='get_customer_details')
     def get_customer_details(self, request):

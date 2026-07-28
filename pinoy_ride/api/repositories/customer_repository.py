@@ -60,6 +60,36 @@ class CustomerRepository:
         except:
             return False
 
+    @staticmethod
+    def get_customer_by_mobile_for_login(mobile_no):
+        """Get customer by mobile number for login validation - checks both 09 and 63 formats"""
+
+        from api.models import Customer
+
+        ## Try to get customer with original format (excluding soft-deleted)
+        try:
+            return Customer.objects.get(mobile=mobile_no, deleted_at__isnull=True)
+        except Customer.DoesNotExist:
+            pass
+
+        # If not found with original format, try with 09 prefix (convert 63 to 09)
+        if mobile_no.startswith('63'):
+            mobile_no_09 = '0' + mobile_no[2:]  # 63... -> 09...
+            try:
+                return Customer.objects.get(mobile=mobile_no_09, deleted_at__isnull=True)
+            except Customer.DoesNotExist:
+                pass
+
+        # If not found, try with 63 prefix (convert 09 to 63)
+        if mobile_no.startswith('09'):
+            mobile_no_63 = '63' + mobile_no[2:]  # 09... -> 63...
+            try:
+                return Customer.objects.get(mobile=mobile_no_63, deleted_at__isnull=True)
+            except Customer.DoesNotExist:
+                pass
+
+        return None
+
 
     @staticmethod
     def get_customer_by_id(customer_id):
@@ -188,6 +218,17 @@ class CustomerRepository:
         """Update customer firebase token"""
 
         customer_instance.firebase_token = firebase_token
+        customer_instance.save()
+
+        return customer_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_login_status(customer_instance, status):
+        """Update customer login status"""
+
+        customer_instance.is_login = status
         customer_instance.save()
 
         return customer_instance

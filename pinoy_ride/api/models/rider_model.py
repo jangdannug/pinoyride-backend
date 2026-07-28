@@ -38,6 +38,7 @@ class Rider(SoftDeleteModel):
     auto_accept = models.IntegerField(default=0)
     is_available = models.IntegerField(default=1)
     is_online = models.IntegerField(default=0)
+    is_login = models.IntegerField(default=0, null=True, blank=True)
     last_online_datetime = models.DateTimeField(null=True)
     last_offline_datetime = models.DateTimeField(null=True)
     is_verified = models.IntegerField(default=0)
@@ -60,6 +61,7 @@ class Rider(SoftDeleteModel):
             models.Index(fields=['application_status']),
             models.Index(fields=['updated_by']),
             models.Index(fields=['is_success_kyc']),
+            models.Index(fields=['is_login']),
             models.Index(fields=['ekyc_request_user_id']),
             models.Index(fields=['deleted_at']),
         ]

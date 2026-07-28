@@ -48,6 +48,7 @@ class RiderSerializer(serializers.ModelSerializer):
             "auto_accept",
             "is_available", # 1 = available, 2 = unavailable
             "is_online",
+            "is_login",
             "status",
             "hours_online",
             "last_online_datetime",

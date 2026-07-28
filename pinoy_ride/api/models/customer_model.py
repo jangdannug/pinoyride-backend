@@ -20,6 +20,7 @@ class Customer(SoftDeleteModel):
     mobile = models.CharField(max_length=255)
     email = models.CharField(max_length=255,null=True)
     is_verified = models.IntegerField(default=0)
+    is_login = models.IntegerField(default=0, null=True, blank=True)
     login_type = models.CharField(max_length=255, null=True)
     current_location = models.TextField(null=True)
     current_lat = models.CharField(max_length=255, null=True, blank=True)
@@ -46,6 +47,7 @@ class Customer(SoftDeleteModel):
             models.Index(fields=['updated_by']),
             models.Index(fields=['session_id']),
             models.Index(fields=['is_success_kyc']),
+            models.Index(fields=['is_login']),
             models.Index(fields=['referral_code']),
             models.Index(fields=['referral_code_used']),
             models.Index(fields=['ekyc_request_user_id']),

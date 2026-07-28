@@ -6,7 +6,8 @@ import json
 from rest_framework.exceptions import ValidationError
 from api.services import (
     AdminCustomerService,
-    WalletService
+    WalletService,
+    CustomerService
 )
 from api.serializers import CustomerSerializer, PartialCustomerSerializer
 from api.utils.app_response import AppResponse
@@ -33,6 +34,7 @@ class AdminCustomerViewSet(viewsets.ViewSet):
         super().__init__(*args, **kwargs)
         self.admin_service = AdminCustomerService()
         self.wallet_service = WalletService()
+        self.customer_service = CustomerService()
         
 
     ## Get customer list
@@ -285,3 +287,33 @@ class AdminCustomerViewSet(viewsets.ViewSet):
             )
 
 
+
+
+    @action(
+        detail=False, methods=["post"], url_path="force_logout_customer"
+    )
+    def force_logout_customer(self, request):
+        """Force logout a customer by setting is_login to 0"""
+
+        try:
+            customer_id = request.data.get("customer_id", "")
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+
+            with transaction.atomic():
+                customer = self.customer_service.get_customer_by_id(customer_id=customer_id)
+
+                # Update login status to 0 (force logout)
+                self.customer_service.update_login_status(customer_instance=customer, status=0)
+
+            return AppResponse.send_success(
+                data=[],
+                message="Customer logged out successfully",
+                code=status.HTTP_200_OK
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)

@@ -12,6 +12,7 @@ class PartialCustomerSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "code",
+            "is_login",
             "fname",
             "mname",
             "lname",

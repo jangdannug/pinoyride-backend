@@ -136,6 +136,36 @@ class RiderRepository:
 
         return False
 
+    @staticmethod
+    def get_rider_by_mobile_for_login(mobile_no):
+        """Get rider by mobile number for login validation - checks both 09 and 63 formats"""
+
+        from api.models import Rider
+
+        ## Try to get rider with original format (excluding soft-deleted)
+        try:
+            return Rider.objects.get(mobile_no=mobile_no, deleted_at__isnull=True)
+        except Rider.DoesNotExist:
+            pass
+
+        # If not found with original format, try with 09 prefix (convert 63 to 09)
+        if mobile_no.startswith('63'):
+            mobile_no_09 = '0' + mobile_no[2:]  # 63... -> 09...
+            try:
+                return Rider.objects.get(mobile_no=mobile_no_09, deleted_at__isnull=True)
+            except Rider.DoesNotExist:
+                pass
+
+        # If not found, try with 63 prefix (convert 09 to 63)
+        if mobile_no.startswith('09'):
+            mobile_no_63 = '63' + mobile_no[2:]  # 09... -> 63...
+            try:
+                return Rider.objects.get(mobile_no=mobile_no_63, deleted_at__isnull=True)
+            except Rider.DoesNotExist:
+                pass
+
+        return None
+
 
     @staticmethod
     def get_by_id(rider_id):
@@ -430,6 +460,17 @@ class RiderRepository:
         """Update rider firebase token"""
 
         rider_instance.firebase_token = firebase_token
+        rider_instance.save()
+
+        return rider_instance
+
+
+    @staticmethod
+    @transaction.atomic
+    def update_login_status(rider_instance, status):
+        """Update rider login status"""
+
+        rider_instance.is_login = status
         rider_instance.save()
 
         return rider_instance

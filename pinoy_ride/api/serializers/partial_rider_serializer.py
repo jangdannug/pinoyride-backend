@@ -31,6 +31,7 @@ class PartialRiderSerializer(serializers.ModelSerializer):
             "current_location",
             "status",
             "auto_accept",
+            "is_login",
             "vehicle_details",
             "rider_address",
             "ekyc_details"
