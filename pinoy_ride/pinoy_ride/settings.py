@@ -85,7 +85,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -102,7 +101,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000",
     "http://localhost:3001",
     "https://riderapp.escarez.com",
-    "https://pinoyrideph.com"
+    "https://pinoyrideph.com",
+    "https://pinoyride-admin.lwsdemo.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -114,7 +114,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost:3000",
     "http://localhost:3001",
     "https://riderapp.escarez.com",
-    "https://pinoyrideph.com"
+    "https://pinoyrideph.com",
+    "https://pinoyride-admin.lwsdemo.com",
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
