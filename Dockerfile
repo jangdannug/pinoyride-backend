@@ -27,4 +27,4 @@ RUN mkdir -p /app/pinoy_ride/media /app/pinoy_ride/api/logs \
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python pinoy_ride/manage.py migrate --noinput && gunicorn pinoy_ride.pinoy_ride.wsgi:application --bind 0.0.0.0:${PORT} --workers 3 --timeout 120"]
+CMD ["sh", "-c", "cd /app/pinoy_ride && python manage.py migrate --noinput && gunicorn pinoy_ride.wsgi:application --bind 0.0.0.0:${PORT} --workers 3 --timeout 120"]
