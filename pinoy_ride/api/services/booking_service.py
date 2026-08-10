@@ -47,6 +47,27 @@ class BookingService:
             raise NotFoundError("Booking "+ str(booking_id) + " not found")
         return booking
 
+
+    ## check customer's ongoing booking
+    def check_customer_ongoing_booking(self,customer_id):
+        """Fetch booking"""
+        booking = self.booking.check_customer_ongoing_booking(customer_id=customer_id)
+        
+        if booking:
+            raise ValidationError("You have an ongoing booking. Please complete your current booking first.")
+        return booking
+
+
+    ## check rider's ongoing booking
+    def check_rider_ongoing_booking(self,rider_id):
+        """Fetch booking"""
+        booking = self.booking.check_rider_ongoing_booking(rider_id=rider_id)
+        
+        if booking:
+            raise ValidationError("You have an ongoing booking. Please complete your current booking first.")
+        return booking
+
+
     ## Get booking by rider and id
     def get_booking_by_rider_and_id(self,rider_id, booking_id):
         """Fetch booking"""

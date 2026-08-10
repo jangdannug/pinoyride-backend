@@ -6,6 +6,7 @@ from api.utils.app_response import AppResponse
 from api.models import Test
 import json
 from api.services import (
+    BookingService,
     RiderService,
     RiderVehicleDetailsService,
     OtpService,
@@ -31,6 +32,7 @@ class RiderViewSet(viewsets.ViewSet):
         self.rider_address_service = RiderAddressService()
         self.wallet_service = WalletService()
         self.ekyc_service = EkycApiService()
+        self.booking_service = BookingService()
 
 
     @action(detail=False, methods=['post'], url_path='apply')
@@ -175,6 +177,9 @@ class RiderViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 rider = self.service.get_rider_by_id(rider_id=rider_id)
+                
+                # check if rider has ongoing booking
+                self.booking_service.check_rider_ongoing_booking(rider_id=rider)
 
                 # Update login status to 0 (logged out)
                 self.service.update_login_status(rider_instance=rider, status=0)
