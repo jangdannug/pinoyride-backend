@@ -223,6 +223,22 @@ class BookingRepository:
             return None
 
     @staticmethod
+    def check_customer_ongoing_booking(customer_id):
+        """Check if customer has ongoing bookings"""
+        return Booking.objects.filter(
+            customer_id=customer_id,
+            status__in=[1, 2]
+        ).first()
+    
+    @staticmethod
+    def check_rider_ongoing_booking(rider_id):
+        """Check if rider has ongoing bookings"""
+        return Booking.objects.filter(
+            rider_id=rider_id,
+            status__in=[1, 2]
+        ).first()
+        
+    @staticmethod
     def get_by_rider_and_id(rider_id, booking_id):
         """Get booking by rider id and id"""
         try:

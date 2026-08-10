@@ -9,7 +9,8 @@ from api.services import (
     OtpService,
     CustomerAddressService,
     WalletService,
-    EkycApiService
+    EkycApiService,
+    BookingService
 )
 from api.repositories import (
     BookingRepository,
@@ -32,6 +33,7 @@ class CustomerViewSet(viewsets.ViewSet):
         self.ekyc_service = EkycApiService()
         self.booking_repository = BookingRepository()
         self.rider_repository = RiderRepository()
+        self.booking_service = BookingService()
 
 
     @action(detail=False, methods=['post'], url_path='sign_up')
@@ -160,6 +162,9 @@ class CustomerViewSet(viewsets.ViewSet):
 
             with transaction.atomic():
                 customer = self.service.get_customer_by_id(customer_id=customer_id)
+                
+                # check if customer has ongoing booking
+                self.booking_service.check_customer_ongoing_booking(customer_id=customer_id)
 
                 # Update login status to 0 (logged out)
                 self.service.update_login_status(customer_instance=customer, status=0)
