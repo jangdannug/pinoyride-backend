@@ -108,6 +108,10 @@ class CustomerViewSet(viewsets.ViewSet):
 
             response_data = []
 
+            # Check if mobile number is already logged in as rider
+            if self.service.check_rider_logged_in_by_mobile(mobile_no=mobile_no):
+                return AppResponse.send_error(message="This mobile number is currently logged in as a rider. Please log out from the rider account first.", code=400)
+
             with transaction.atomic():
                 customer = self.service.login_mobile_no(request.data)
                 # Check if rider is already logged in

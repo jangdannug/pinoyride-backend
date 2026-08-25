@@ -152,3 +152,10 @@ class CustomerService:
         )
 
         return updated_customer
+
+
+    ## Check if rider is logged in by mobile number
+    def check_rider_logged_in_by_mobile(self, mobile_no):
+        """Check if rider exists with given mobile number and is_login=1"""
+
+        return self.customer.check_rider_logged_in_by_mobile(mobile_no=mobile_no)

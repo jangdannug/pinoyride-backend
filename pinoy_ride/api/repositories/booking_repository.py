@@ -13,6 +13,31 @@ from geopy.distance import geodesic
 from api.utils.app_logger import app_logger
 import math, random
 import os
+
+def format_eta_minutes(minutes: int) -> str:
+    """
+    Format minutes into human-readable time string
+    Examples:
+        5 -> "5 mins"
+        45 -> "45 mins"
+        60 -> "1 hr"
+        75 -> "1 hr 15 mins"
+        120 -> "2 hrs"
+        135 -> "2 hrs 15 mins"
+    """
+    if minutes <= 0:
+        return "0 mins"
+
+    if minutes < 60:
+        return f"{minutes} min{'s' if minutes != 1 else ''}"
+
+    hours = minutes // 60
+    remaining_minutes = minutes % 60
+
+    if remaining_minutes == 0:
+        return f"{hours} hr{'s' if hours != 1 else ''}"
+    else:
+        return f"{hours} hr{'s' if hours != 1 else ''} {remaining_minutes} min{'s' if remaining_minutes != 1 else ''}"
 class BookingRepository:
     
     @staticmethod
@@ -87,8 +112,65 @@ class BookingRepository:
             if distance <= radius_km:
                 nearby_bookings.append(booking)
 
+        # Calculate ETAs for nearby bookings
+        # Import GoogleMapsService here to avoid circular imports
+        from api.services.google_maps_service import GoogleMapsService
+        google_maps_service = GoogleMapsService()
 
-        serialized_bookings = BookingSerializer(nearby_bookings, many=True).data
+        serialized_bookings = []
+        for booking in nearby_bookings:
+            booking_data = BookingSerializer(booking).data
+
+            # Calculate distance from rider to pickup
+            distance_from_rider = geodesic(
+                rider_current_latlong,
+                (booking.pickup_lat, booking.pickup_long)
+            ).kilometers
+            booking_data['distance_from_rider_km'] = round(distance_from_rider, 2)
+
+            # Get ETA from rider to pickup
+            try:
+                eta_to_pickup = google_maps_service.get_eta(
+                    origin_lat=rider_lat,
+                    origin_lng=rider_long,
+                    dest_lat=float(booking.pickup_lat),
+                    dest_lng=float(booking.pickup_long),
+                    mode="driving"
+                )
+                eta_rider_to_pickup = eta_to_pickup.get('duration_in_traffic_minutes', eta_to_pickup.get('duration_minutes', 0))
+                booking_data['eta_rider_to_pickup_minutes'] = eta_rider_to_pickup
+                booking_data['pretty_eta_rider_to_pickup'] = format_eta_minutes(eta_rider_to_pickup)
+            except Exception as e:
+                app_logger(1, f"Error calculating ETA to pickup: {str(e)}", [])
+                # Fallback to simple calculation
+                eta_rider_to_pickup = round((distance_from_rider / 30) * 60)
+                booking_data['eta_rider_to_pickup_minutes'] = eta_rider_to_pickup
+                booking_data['pretty_eta_rider_to_pickup'] = format_eta_minutes(eta_rider_to_pickup)
+
+            # Get ETA from pickup to dropoff (total trip time)
+            try:
+                eta_to_dropoff = google_maps_service.get_eta(
+                    origin_lat=float(booking.pickup_lat),
+                    origin_lng=float(booking.pickup_long),
+                    dest_lat=float(booking.dropoff_lat),
+                    dest_lng=float(booking.dropoff_long),
+                    mode="driving"
+                )
+                eta_pickup_to_dropoff = eta_to_dropoff.get('duration_in_traffic_minutes', eta_to_dropoff.get('duration_minutes', 0))
+                booking_data['eta_pickup_to_dropoff_minutes'] = eta_pickup_to_dropoff
+                booking_data['pretty_eta_pickup_to_dropoff'] = format_eta_minutes(eta_pickup_to_dropoff)
+            except Exception as e:
+                app_logger(1, f"Error calculating ETA to dropoff: {str(e)}", [])
+                # Fallback: calculate pickup->dropoff
+                pickup_to_dropoff_distance = geodesic(
+                    (booking.pickup_lat, booking.pickup_long),
+                    (booking.dropoff_lat, booking.dropoff_long)
+                ).kilometers
+                eta_pickup_to_dropoff = round((pickup_to_dropoff_distance / 30) * 60)
+                booking_data['eta_pickup_to_dropoff_minutes'] = eta_pickup_to_dropoff
+                booking_data['pretty_eta_pickup_to_dropoff'] = format_eta_minutes(eta_pickup_to_dropoff)
+
+            serialized_bookings.append(booking_data)
 
         return {
             "bookings": serialized_bookings
@@ -132,6 +214,57 @@ class BookingRepository:
             # Choose random 1 booking
             random_booking = random.choice(nearby_bookings)
             serialized_booking = BookingSerializer(random_booking).data
+
+            # Add ETA calculations for the selected booking
+            from api.services.google_maps_service import GoogleMapsService
+            google_maps_service = GoogleMapsService()
+
+            # Calculate distance from rider to pickup
+            distance_from_rider = geodesic(
+                rider_current_latlong,
+                (random_booking.pickup_lat, random_booking.pickup_long)
+            ).kilometers
+            serialized_booking['distance_from_rider_km'] = round(distance_from_rider, 2)
+
+            # Get ETA from rider to pickup
+            try:
+                eta_to_pickup = google_maps_service.get_eta(
+                    origin_lat=rider_lat,
+                    origin_lng=rider_long,
+                    dest_lat=float(random_booking.pickup_lat),
+                    dest_lng=float(random_booking.pickup_long),
+                    mode="driving"
+                )
+                eta_rider_to_pickup = eta_to_pickup.get('duration_in_traffic_minutes', eta_to_pickup.get('duration_minutes', 0))
+                serialized_booking['eta_rider_to_pickup_minutes'] = eta_rider_to_pickup
+                serialized_booking['pretty_eta_rider_to_pickup'] = format_eta_minutes(eta_rider_to_pickup)
+            except Exception as e:
+                app_logger(1, f"Error calculating ETA to pickup: {str(e)}", [])
+                eta_rider_to_pickup = round((distance_from_rider / 30) * 60)
+                serialized_booking['eta_rider_to_pickup_minutes'] = eta_rider_to_pickup
+                serialized_booking['pretty_eta_rider_to_pickup'] = format_eta_minutes(eta_rider_to_pickup)
+
+            # Get ETA from pickup to dropoff (total trip time)
+            try:
+                eta_to_dropoff = google_maps_service.get_eta(
+                    origin_lat=float(random_booking.pickup_lat),
+                    origin_lng=float(random_booking.pickup_long),
+                    dest_lat=float(random_booking.dropoff_lat),
+                    dest_lng=float(random_booking.dropoff_long),
+                    mode="driving"
+                )
+                eta_pickup_to_dropoff = eta_to_dropoff.get('duration_in_traffic_minutes', eta_to_dropoff.get('duration_minutes', 0))
+                serialized_booking['eta_pickup_to_dropoff_minutes'] = eta_pickup_to_dropoff
+                serialized_booking['pretty_eta_pickup_to_dropoff'] = format_eta_minutes(eta_pickup_to_dropoff)
+            except Exception as e:
+                app_logger(1, f"Error calculating ETA to dropoff: {str(e)}", [])
+                pickup_to_dropoff_distance = geodesic(
+                    (random_booking.pickup_lat, random_booking.pickup_long),
+                    (random_booking.dropoff_lat, random_booking.dropoff_long)
+                ).kilometers
+                eta_pickup_to_dropoff = round((pickup_to_dropoff_distance / 30) * 60)
+                serialized_booking['eta_pickup_to_dropoff_minutes'] = eta_pickup_to_dropoff
+                serialized_booking['pretty_eta_pickup_to_dropoff'] = format_eta_minutes(eta_pickup_to_dropoff)
 
         return serialized_booking
 

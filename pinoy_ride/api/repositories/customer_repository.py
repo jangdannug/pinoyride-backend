@@ -246,3 +246,34 @@ class CustomerRepository:
         customer_instance.save()
 
         return customer_instance
+
+
+    @staticmethod
+    def check_rider_logged_in_by_mobile(mobile_no):
+        """Check if rider exists with given mobile number and is_login=1"""
+
+        from api.models.rider_model import Rider
+
+        ## Check if any rider exists with this mobile and is_login=1 (excluding soft-deleted)
+        try:
+            return Rider.objects.filter(mobile_no=mobile_no, is_login=1, deleted_at__isnull=True).exists()
+        except:
+            pass
+
+        # If not found with original format, try with 09 prefix (convert 63 to 09)
+        if mobile_no.startswith('63'):
+            mobile_no_09 = '0' + mobile_no[2:]  # 63... -> 09...
+            try:
+                return Rider.objects.filter(mobile_no=mobile_no_09, is_login=1, deleted_at__isnull=True).exists()
+            except:
+                pass
+
+        # If not found, try with 63 prefix (convert 09 to 63)
+        if mobile_no.startswith('09'):
+            mobile_no_63 = '63' + mobile_no[2:]  # 09... -> 63...
+            try:
+                return Rider.objects.filter(mobile_no=mobile_no_63, is_login=1, deleted_at__isnull=True).exists()
+            except:
+                pass
+
+        return False
