@@ -59,7 +59,11 @@ class OtpService:
 
         # Validate that mobile_no exists in the respective table
         if user_type == 'rider':
-            # Check if rider is already logged in
+            # Check if mobile number is already logged in as customer
+            if self.customer.check_rider_logged_in_by_mobile(mobile_no):
+                raise ValidationError("This mobile number is currently logged in as a customer. Please log out from the customer account first.")
+
+            # Check if rider exists
             rider = self.rider.get_rider_by_mobile_for_login(mobile_no)
             if rider is None:
                 raise ValidationError("Rider with this mobile number does not exist")
@@ -67,7 +71,11 @@ class OtpService:
             if rider.is_login == 1:
                 raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         elif user_type == 'customer':
-            # Check if customer is already logged in
+            # Check if mobile number is already logged in as rider
+            if self.rider.check_customer_logged_in_by_mobile(mobile_no):
+                raise ValidationError("This mobile number is currently logged in as a rider. Please log out from the rider account first.")
+
+            # Check if customer exists
             customer = self.customer.get_customer_by_mobile_for_login(mobile_no)
             if customer is None:
                 raise ValidationError("Customer with this mobile number does not exist")
@@ -96,7 +104,11 @@ class OtpService:
 
         # Validate that mobile_no exists in the respective table
         if user_type == 'rider':
-            # Check if rider is already logged in
+            # Check if mobile number is already logged in as customer
+            if self.customer.check_rider_logged_in_by_mobile(mobile_no):
+                raise ValidationError("This mobile number is currently logged in as a customer. Please log out from the customer account first.")
+
+            # Check if rider exists
             rider = self.rider.get_rider_by_mobile_for_login(mobile_no)
             if rider is None:
                 raise ValidationError("Rider with this mobile number does not exist")
@@ -104,7 +116,11 @@ class OtpService:
             if rider.is_login == 1:
                 raise ValidationError("This account is currently logged in. Please log out before logging in again.")
         elif user_type == 'customer':
-            # Check if customer is already logged in
+            # Check if mobile number is already logged in as rider
+            if self.rider.check_customer_logged_in_by_mobile(mobile_no):
+                raise ValidationError("This mobile number is currently logged in as a rider. Please log out from the rider account first.")
+
+            # Check if customer exists
             customer = self.customer.get_customer_by_mobile_for_login(mobile_no)
             if customer is None:
                 raise ValidationError("Customer with this mobile number does not exist")
