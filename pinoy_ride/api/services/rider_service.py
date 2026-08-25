@@ -237,6 +237,13 @@ class RiderService:
         return ignored_booking
 
 
+    ## Check if customer is logged in by mobile number
+    def check_customer_logged_in_by_mobile(self, mobile_no):
+        """Check if customer exists with given mobile number and is_login=1"""
+
+        return self.rider.check_customer_logged_in_by_mobile(mobile_no=mobile_no)
+
+
     ## Bulk load riders
     @transaction.atomic
     def bulk_load_riders(self, riders_data, batch_size=100):

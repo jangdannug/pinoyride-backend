@@ -24,3 +24,4 @@ from api.services.qrph_api_service import QrphApiService
 from api.services.ekyc_api_service import EkycApiService
 from api.services.cash_out_api_service import CashOutApiService
 from api.services.price_config_service import PriceConfigService
+from api.services.google_maps_service import GoogleMapsService

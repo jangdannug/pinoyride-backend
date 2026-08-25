@@ -18,8 +18,34 @@ from api.services import (
     PromoAvailedService,
     BookingIssuesService,
     AdminPriceService,
-    PriceConfigService
+    PriceConfigService,
+    GoogleMapsService
 )
+
+def format_eta_minutes(minutes: int) -> str:
+    """
+    Format minutes into human-readable time string
+    Examples:
+        5 -> "5 mins"
+        45 -> "45 mins"
+        60 -> "1 hr"
+        75 -> "1 hr 15 mins"
+        120 -> "2 hrs"
+        135 -> "2 hrs 15 mins"
+    """
+    if minutes <= 0:
+        return "0 mins"
+
+    if minutes < 60:
+        return f"{minutes} min{'s' if minutes != 1 else ''}"
+
+    hours = minutes // 60
+    remaining_minutes = minutes % 60
+
+    if remaining_minutes == 0:
+        return f"{hours} hr{'s' if hours != 1 else ''}"
+    else:
+        return f"{hours} hr{'s' if hours != 1 else ''} {remaining_minutes} min{'s' if remaining_minutes != 1 else ''}"
 from api.base import (
     ApiService
 )
@@ -27,7 +53,10 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import os
 import re
+import logging
 from api.utils.app_logger import app_logger
+
+logger = logging.getLogger('myapp')
 
 class BookingViewSet(viewsets.ViewSet):
     """Booking Controller"""
@@ -46,6 +75,7 @@ class BookingViewSet(viewsets.ViewSet):
         self.booking_issues_service = BookingIssuesService()
         self.price_service = AdminPriceService()
         self.price_config_service = PriceConfigService()
+        self.google_maps_service = GoogleMapsService()
 
 
     def _validate_coordinates_in_service_area(self, pickup_lat, pickup_long, dropoff_lat, dropoff_long):
@@ -183,6 +213,23 @@ class BookingViewSet(viewsets.ViewSet):
             commision = round(total_amount * commission_prcentage, 2)
             rider_net_amount = round(total_amount - commision, 2)
 
+            # Get ETA from pickup to dropoff using Google Maps
+            eta_pickup_to_dropoff = 0
+            try:
+                eta_result = self.google_maps_service.get_eta(
+                    origin_lat=float(pickup_lat),
+                    origin_lng=float(pickup_long),
+                    dest_lat=float(dropoff_lat),
+                    dest_lng=float(dropoff_long),
+                    mode="driving"
+                )
+                # Use duration_in_traffic if available, otherwise use duration
+                eta_pickup_to_dropoff = eta_result.get('duration_in_traffic_minutes', eta_result.get('duration_minutes', 0))
+            except Exception as e:
+                logger.error(f"Error calculating ETA: {str(e)}")
+                # Fallback to simple calculation
+                eta_pickup_to_dropoff = round((distance_km_round / 30) * 60)  # 30 km/h average speed
+
             ## Check promo AND check the total amount if greater than 150
             promo_discount_percentage = 0
             promo_discount = 0
@@ -218,7 +265,9 @@ class BookingViewSet(viewsets.ViewSet):
                 "total_amount_wo_promo" : round(total_amount_wo_promo,2),
                 "total_amount" : round(total_amount,2),
                 "pretty_total_amount_wo_promo" : f"{total_amount_wo_promo:,.2f}",
-                "pretty_total_amount" : f"{total_amount:,.2f}"
+                "pretty_total_amount" : f"{total_amount:,.2f}",
+                "eta_pickup_to_dropoff_minutes" : eta_pickup_to_dropoff,
+                "pretty_eta_pickup_to_dropoff" : format_eta_minutes(eta_pickup_to_dropoff)
             }
 
             return AppResponse.send_success(data=response, message="Success")
@@ -413,7 +462,6 @@ class BookingViewSet(viewsets.ViewSet):
             #             "lat": loc.latitude,
             #             "long": loc.longitude
             #         })
-
 
             api_key = os.getenv('SEARCH_MAP_API_KEY', 'AIzaSyAlpSoXuJzvo8uR1qbdtbbbk1sx4MHKIQk')
             url = os.getenv('SEARCH_MAP_URL', 'https://maps.googleapis.com/maps/api/place/autocomplete/json')
