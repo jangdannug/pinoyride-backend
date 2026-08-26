@@ -75,28 +75,24 @@ class MessageViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
+        methods=["post"],
         url_path="conversation"
     )
     @extend_schema(
         summary="Get conversation history",
         description="Get conversation history for a booking with pagination",
-        parameters=[
-            OpenApiParameter(name="booking_id", type=int, required=True, description="Booking ID"),
-            OpenApiParameter(name="user_id", type=int, required=True, description="User ID (to determine is_sent_by_me)"),
-            OpenApiParameter(name="user_type", type=str, required=True, description="User type (customer/rider)"),
-            OpenApiParameter(name="page", type=int, required=False, description="Page number (default: 1)"),
-            OpenApiParameter(name="perpage", type=int, required=False, description="Items per page (default: 50)"),
-            OpenApiParameter(name="last_seen_id", type=int, required=False, description="Get messages after this ID"),
-        ],
+        request=SendMessageSerializer,  # Basic serializer for request body
         responses={200: OpenApiResponse(description="Conversation retrieved successfully")},
         tags=["Messages"]
     )
     def get_conversation(self, request):
         """Get conversation history for a booking"""
-        booking_id = request.query_params.get("booking_id", "")
-        user_id = request.query_params.get("user_id", "")
-        user_type = request.query_params.get("user_type", "")
+        booking_id = request.data.get("booking_id", "")
+        user_id = request.data.get("user_id", "")
+        user_type = request.data.get("user_type", "")
+        page = request.data.get("page", 1)
+        perpage = request.data.get("perpage", 50)
+        last_seen_id = request.data.get("last_seen_id", None)
 
         if not booking_id:
             return AppResponse.send_error(message="Booking ID is required", code=400)
@@ -106,9 +102,8 @@ class MessageViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message="User type is required", code=400)
 
         try:
-            page = int(request.query_params.get("page", 1))
-            perpage = int(request.query_params.get("perpage", 50))
-            last_seen_id = request.query_params.get("last_seen_id", None)
+            page = int(page)
+            perpage = int(perpage)
 
             if last_seen_id:
                 last_seen_id = int(last_seen_id)
@@ -142,7 +137,7 @@ class MessageViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=["put"],
+        methods=["post"],
         url_path="mark-read"
     )
     @extend_schema(
@@ -190,25 +185,21 @@ class MessageViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
+        methods=["post"],
         url_path="unread-count"
     )
     @extend_schema(
         summary="Get unread message count",
         description="Get count of unread messages for a booking",
-        parameters=[
-            OpenApiParameter(name="booking_id", type=int, required=True, description="Booking ID"),
-            OpenApiParameter(name="user_id", type=int, required=True, description="User ID"),
-            OpenApiParameter(name="user_type", type=str, required=False, description="User type (customer/rider)"),
-        ],
+        request=SendMessageSerializer,  # Basic serializer for request body
         responses={200: OpenApiResponse(description="Unread count retrieved successfully")},
         tags=["Messages"]
     )
     def get_unread_count(self, request):
         """Get count of unread messages for a user"""
-        booking_id = request.query_params.get("booking_id", "")
-        user_id = request.query_params.get("user_id", "")
-        user_type = request.query_params.get("user_type", "")
+        booking_id = request.data.get("booking_id", "")
+        user_id = request.data.get("user_id", "")
+        user_type = request.data.get("user_type", "")
 
         if not booking_id:
             return AppResponse.send_error(message="Booking ID is required", code=400)
