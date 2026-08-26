@@ -259,6 +259,7 @@ class BookingViewSet(viewsets.ViewSet):
                 "pesos_per_km2" : pesos_per_km2,
                 "base_amount" : round(base_amount,2),
                 "booking_fee" : booking_fee,
+                "promo_discount_percentage" : promo_discount_percentage,
                 "promo_discount" : promo_discount,
                 "commission" : commision,
                 "rider_net_amount" : rider_net_amount,
