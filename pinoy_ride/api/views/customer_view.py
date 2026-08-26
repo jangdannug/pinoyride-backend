@@ -392,3 +392,14 @@ class CustomerViewSet(viewsets.ViewSet):
         except Exception as e:
 
             return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='app-version-check')
+    def app_version_check(self, request):
+        """Check app version compatibility"""
+
+        try:
+            return AppResponse.send_success(data=[], message="Version check completed successfully")
+
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
