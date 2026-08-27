@@ -107,11 +107,7 @@ class CustomerViewSet(viewsets.ViewSet):
                 return AppResponse.send_error(message="Mobile number is required", code=400)
 
             response_data = []
-
-            # Check if mobile number is already logged in as rider
-            if self.service.check_rider_logged_in_by_mobile(mobile_no=mobile_no):
-                return AppResponse.send_error(message="This mobile number is currently logged in as a rider. Please log out from the rider account first.", code=400)
-
+            
             with transaction.atomic():
                 customer = self.service.login_mobile_no(request.data)
                 # Check if rider is already logged in
@@ -132,6 +128,11 @@ class CustomerViewSet(viewsets.ViewSet):
                 # Update firebase_token if provided
                 if firebase_token:
                     self.service.update_firebase_token(customer_instance=customer, firebase_token=firebase_token)
+
+
+                # Check if mobile number is already logged in as rider
+                if self.service.check_rider_logged_in_by_mobile(mobile_no=mobile_no):
+                    return AppResponse.send_error(message="This mobile number is currently logged in as a rider. Please log out from the rider account first.", code=400)
 
                 # Update login status to 1 (logged in)
                 self.service.update_login_status(customer_instance=customer, status=1)
