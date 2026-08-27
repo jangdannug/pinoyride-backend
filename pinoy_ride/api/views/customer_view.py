@@ -102,6 +102,7 @@ class CustomerViewSet(viewsets.ViewSet):
             mobile_no = request.data.get("mobile_no", "")
             otp_code = request.data.get("otp_code", "")
             firebase_token = request.data.get("firebase_token", None)
+            app_version = request.data.get("app_version", "")
 
             if not mobile_no:
                 return AppResponse.send_error(message="Mobile number is required", code=400)
@@ -134,8 +135,10 @@ class CustomerViewSet(viewsets.ViewSet):
                 if self.service.check_rider_logged_in_by_mobile(mobile_no=mobile_no):
                     return AppResponse.send_error(message="This mobile number is currently logged in as a rider. Please log out from the rider account first.", code=400)
 
-                # Update login status to 1 (logged in)
-                self.service.update_login_status(customer_instance=customer, status=1)
+                 # Return TRUE if current version is less than minimum
+                if self.compare_versions(app_version, '1.0.23'):
+                    # Update login status to 1 (logged in)
+                    self.service.update_login_status(customer_instance=customer, status=1)
 
             serializer = CustomerSerializer(customer)
             response_data = serializer.data
@@ -404,3 +407,27 @@ class CustomerViewSet(viewsets.ViewSet):
 
         except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
+        
+
+    def compare_versions(self, current_version, min_version):
+        """Compare two version strings (e.g., '1.0.0' < '1.2.3' returns True)"""
+        try:
+            current_parts = list(map(int, current_version.split('.')))
+            min_parts = list(map(int, min_version.split('.')))
+
+            # Pad shorter version with zeros
+            max_length = max(len(current_parts), len(min_parts))
+            current_parts += [0] * (max_length - len(current_parts))
+            min_parts += [0] * (max_length - len(min_parts))
+
+            # Compare each part
+            for c, m in zip(current_parts, min_parts):
+                if c < m:
+                    return True  # Current version is less than minimum
+                elif c > m:
+                    return False  # Current version is greater than minimum
+
+            return False  # Versions are equal
+        except (ValueError, AttributeError):
+            # If version parsing fails, return False (allow request)
+            return False

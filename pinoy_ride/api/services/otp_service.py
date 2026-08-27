@@ -138,6 +138,27 @@ class OtpService:
 
         if otp_record.is_expired():
             raise ValidationError("OTP expired")
+        
+
+        app_version = otp_data.get("app_version", "")
+
+        if user_type == 'rider':
+            # Return FALSE if current version greater or equal than minimum
+            if not self.compare_versions(app_version, '1.0.22'):
+                # Update login status to 1 (logged in)
+                self.rider.update_login_status(
+                    rider_instance=rider,
+                    status=1
+                )
+
+        elif user_type == 'customer':
+            # Return FALSE if current version greater or equal than minimum
+            if not self.compare_versions(app_version, '1.0.23'):
+                # Update login status to 1 (logged in)
+                self.customer.update_login_status(
+                    customer_instance=customer,
+                    status=1
+                )
 
         return otp_record
 
@@ -161,3 +182,27 @@ class OtpService:
         api_response = self.api_service.post_itext_mo(mobile_no=mobile_no, url = url, payload = payload, headers=headers)
 
         return api_response
+    
+
+    def compare_versions(self, current_version, min_version):
+        """Compare two version strings (e.g., '1.0.0' < '1.2.3' returns True)"""
+        try:
+            current_parts = list(map(int, current_version.split('.')))
+            min_parts = list(map(int, min_version.split('.')))
+
+            # Pad shorter version with zeros
+            max_length = max(len(current_parts), len(min_parts))
+            current_parts += [0] * (max_length - len(current_parts))
+            min_parts += [0] * (max_length - len(min_parts))
+
+            # Compare each part
+            for c, m in zip(current_parts, min_parts):
+                if c < m:
+                    return True  # Current version is less than minimum
+                elif c > m:
+                    return False  # Current version is greater than minimum
+
+            return False  # Versions are equal
+        except (ValueError, AttributeError):
+            # If version parsing fails, return False (allow request)
+            return False
