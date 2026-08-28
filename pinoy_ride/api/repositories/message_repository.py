@@ -7,6 +7,7 @@ from api.models.message_model import Message
 from api.models.booking_model import Booking
 from django.db import transaction
 from django.utils.timezone import now
+import os
 import logging
 
 logger = logging.getLogger('myapp')
@@ -16,7 +17,7 @@ class MessageRepository:
 
     @staticmethod
     @transaction.atomic
-    def create_message(booking_id, sender_id, sender_type, message_text):
+    def create_message(booking_id, sender_id, sender_type, message_text, image_msg=None):
         """Create a new message"""
         try:
             booking = Booking.objects.get(id=booking_id)
@@ -29,6 +30,7 @@ class MessageRepository:
             sender=sender_id,
             sender_type=sender_type,
             message_text=message_text,
+            image_msg=image_msg,
             is_read=0
         )
 
@@ -50,12 +52,24 @@ class MessageRepository:
         # Build response data
         messages_data = []
         for message in messages:
+            # Format image URL (mirrors MessageSerializer.get_image_msg_pretty logic)
+            image_url = ''
+            if message.image_msg and hasattr(message.image_msg, 'name'):
+                img_name = str(message.image_msg.name)
+                if img_name.startswith('http://') or img_name.startswith('https://'):
+                    image_url = img_name
+                else:
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    image_url = f"{base_url}/{img_name}"
+
             messages_data.append({
                 'id': message.id,
                 'booking_id': message.booking_id,
                 'sender': message.sender,
                 'sender_type': message.sender_type,
                 'message_text': message.message_text,
+                'image_msg': str(message.image_msg.name) if message.image_msg else None,
+                'image_msg_pretty': image_url,
                 'is_read': message.is_read,
                 'created_at': message.created_at.isoformat() if message.created_at else None,
             })

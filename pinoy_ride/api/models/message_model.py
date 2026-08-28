@@ -1,6 +1,14 @@
 from django.db import models
 from .soft_delete_model import SoftDeleteModel
 from .booking_model import Booking
+from uuid import uuid4
+
+
+def upload_to_message_img(instance, filename):
+    """Save message images under uploads/messages/{booking_id}/ with a uuid filename"""
+    ext = filename.split('.')[-1]
+    filename = f"{uuid4().hex}.{ext}"
+    return f"uploads/messages/{instance.booking_id}/{filename}"
 
 
 class Message(SoftDeleteModel):
@@ -10,6 +18,7 @@ class Message(SoftDeleteModel):
     sender = models.IntegerField(help_text="User ID of the sender (rider or customer)")
     sender_type = models.CharField(max_length=20, help_text="Type of sender: 'rider' or 'customer'")
     message_text = models.TextField()
+    image_msg = models.FileField(upload_to=upload_to_message_img, null=True, blank=True)
     is_read = models.IntegerField(default=0, help_text="0 = unread, 1 = read")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

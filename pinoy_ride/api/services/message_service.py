@@ -35,16 +35,18 @@ class MessageService:
 
         return details
 
-    def send_message(self, booking_id, sender_id, sender_type, message_text):
-        """Send a message to a booking conversation"""
+    def send_message(self, booking_id, sender_id, sender_type, message_text='', image_msg=None):
+        """Send a message (text and/or image) to a booking conversation"""
         if not booking_id:
             raise ValidationError("Booking ID is required")
         if not sender_id:
             raise ValidationError("Sender ID is required")
         if not sender_type:
             raise ValidationError("Sender type is required")
-        if not message_text or message_text.strip() == "":
-            raise ValidationError("Message text is required")
+
+        # At least one of message_text or image_msg must be provided
+        if (message_text is None or message_text.strip() == '') and image_msg is None:
+            raise ValidationError("Message text or image is required")
 
         # Validate sender_type
         if sender_type not in ['rider', 'customer']:
@@ -60,7 +62,8 @@ class MessageService:
             booking_id=booking_id,
             sender_id=sender_id,
             sender_type=sender_type,
-            message_text=message_text.strip()
+            message_text=message_text.strip() if message_text else '',
+            image_msg=image_msg
         )
 
         return new_message
