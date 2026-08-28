@@ -185,7 +185,7 @@ class BookingRepository:
         rider_long = float(rider_long)
         rider_current_latlong = (rider_lat, rider_long)
 
-        radius_km = 1.5  # 1.5 km search radius
+        radius_km = 10  # 10 km search radius
 
         lat_delta = radius_km / 111  # in degrees
         lng_delta = radius_km / (111 * math.cos(math.radians(rider_lat)))
