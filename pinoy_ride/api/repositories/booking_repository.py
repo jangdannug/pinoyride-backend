@@ -76,7 +76,7 @@ class BookingRepository:
         rider_lat = float(rider_lat)
         rider_long = float(rider_long)
         rider_current_latlong = (rider_lat, rider_long)
-        radius_km =  os.getenv('RIDER_RADIUS_KM', 1.5) #0.5 -> 500 meters #3 -> 3000 meters radius
+        radius_km = float(os.getenv('RIDER_RADIUS_KM', 1.5)) #0.5 -> 500 meters #3 -> 3000 meters radius
 
         lat_delta = radius_km / 111  # in degrees
         lng_delta = radius_km / (111 * math.cos(math.radians(rider_lat)))
