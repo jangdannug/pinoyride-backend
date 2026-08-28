@@ -31,17 +31,18 @@ class MessageViewSet(viewsets.ViewSet):
     )
     @extend_schema(
         summary="Send a message",
-        description="Send a message to a booking conversation",
+        description="Send a text message and/or image to a booking conversation (JSON or multipart/form-data)",
         request=SendMessageSerializer,
         responses={200: OpenApiResponse(description="Message sent successfully")},
         tags=["Messages"]
     )
     def send_message(self, request):
-        """Send a message to a booking conversation"""
+        """Send a message (text and/or image) to a booking conversation"""
         booking_id = request.data.get("booking_id")
         sender_id = request.data.get("sender_id")
         sender_type = request.data.get("sender_type", "customer")
-        message_text = request.data.get("message_text")
+        message_text = request.data.get("message_text", "")
+        image_msg = request.FILES.get("image_msg")
 
         if not sender_id:
             return AppResponse.send_error(message="sender_id is required", code=400)
@@ -52,7 +53,8 @@ class MessageViewSet(viewsets.ViewSet):
                     booking_id=booking_id,
                     sender_id=sender_id,
                     sender_type=sender_type,
-                    message_text=message_text
+                    message_text=message_text,
+                    image_msg=image_msg
                 )
 
                 serializer = MessageSerializer(new_message, context={'current_user_id': sender_id})
