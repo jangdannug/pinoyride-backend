@@ -102,6 +102,20 @@ class ApiKeyAuthenticationMiddleware:
                  '/api/qrph/callback/'
             )
 
+            # Routes that bypass the app version check
+            excluded_version_check_routes = (
+                '/api/booking/accept_booking/',
+                '/api/booking/update_status_for_rider/',
+                '/api/riders/update_current_location/',
+                '/api/customers/get_rider_location/',
+                '/api/booking/rate/',
+                '/api/booking/update_status_for_customer/',
+                '/api/booking/get_history/',
+                '/api/booking/get_details/',
+                '/api/booking/report_issue/',
+                '/api/booking/add_tip/',
+            )
+
             # Check callback routes (api-key)
             if request.path.startswith(callback_routes):
                if api_key_callback != settings.CALLBACK_API_KEY:
@@ -153,6 +167,11 @@ class ApiKeyAuthenticationMiddleware:
 
                 min_version = self.get_min_app_version(user_type)
                 download_link = self.get_download_link(user_type)
+
+                # Skip version check for excluded routes
+                if request.path.startswith(excluded_version_check_routes):
+                    response = self.get_response(request)
+                    return response
 
                 if app_version and self.compare_versions(app_version, min_version):
                     response_data = {

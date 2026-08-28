@@ -112,12 +112,14 @@ class MessageViewSet(viewsets.ViewSet):
                 booking_id=int(booking_id),
                 page_number=page,
                 page_size=perpage,
-                last_seen_id=last_seen_id
+                last_seen_id=last_seen_id,
+                user_id=int(user_id),
+                user_type=user_type
             )
 
             # Add is_sent_by_me to each message
             # Must check BOTH sender_id AND sender_type to avoid conflicts
-            for msg in messages['data']:
+            for msg in messages['conversation']:
                 msg['is_sent_by_me'] = (msg['sender'] == int(user_id) and msg['sender_type'] == user_type)
 
             return AppResponse.send_success(

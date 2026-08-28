@@ -36,20 +36,20 @@ class MessageRepository:
 
     @staticmethod
     def get_messages_by_booking(booking_id, page_number=1, page_size=50, last_seen_id=None):
-        """Get messages for a booking with pagination"""
+        """Get messages for a booking"""
         messages = Message.objects.filter(booking_id=booking_id).order_by('created_at')
 
         # If last_seen_id is provided, get only newer messages
         if last_seen_id:
             messages = messages.filter(id__gt=last_seen_id)
 
-        # Paginate
-        paginator = Paginator(messages, page_size)
-        page_obj = paginator.get_page(page_number)
+        # # Paginate
+        # paginator = Paginator(messages, page_size)
+        # page_obj = paginator.get_page(page_number)
 
         # Build response data
         messages_data = []
-        for message in page_obj:
+        for message in messages:
             messages_data.append({
                 'id': message.id,
                 'booking_id': message.booking_id,
@@ -61,16 +61,17 @@ class MessageRepository:
             })
 
         return {
-            'data': messages_data,
-            'pagination': {
-                'current_page': page_obj.number,
-                'total_pages': paginator.num_pages,
-                'total_items': paginator.count,
-                'items_per_page': page_size,
-                'has_next': page_obj.has_next(),
-                'has_previous': page_obj.has_previous(),
-                'last_message_id': messages_data[-1]['id'] if messages_data else None
-            }
+            'conversation': messages_data,
+            # 'pagination': {
+            #     'current_page': page_obj.number,
+            #     'total_pages': paginator.num_pages,
+            #     'total_items': paginator.count,
+            #     'items_per_page': page_size,
+            #     'has_next': page_obj.has_next(),
+            #     'has_previous': page_obj.has_previous(),
+            #     'last_message_id': messages_data[-1]['id'] if messages_data else None
+            # }
+            'last_message_id': messages_data[-1]['id'] if messages_data else None
         }
 
     @staticmethod

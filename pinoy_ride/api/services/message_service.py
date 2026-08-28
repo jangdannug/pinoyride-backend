@@ -2,6 +2,7 @@ from django.db import transaction
 from api.repositories import MessageRepository
 from api.repositories import BookingRepository
 from api.utils.custom_error import NotFoundError, ValidationError
+from api.serializers import RiderSerializer, CustomerSerializer
 
 
 class MessageService:
@@ -9,6 +10,30 @@ class MessageService:
     def __init__(self):
         self.message = MessageRepository()
         self.booking = BookingRepository()
+
+    def _get_conversation_details(self, booking):
+        """Get rider and customer details for the conversation, based on each serializer's ekyc_details"""
+        details = {
+            'rider': {},
+            'customer': {}
+        }
+
+        # Fields to display, sourced from ekyc_details (falls back to profile via serializer)
+        display_fields = ['first_name', 'middle_name', 'last_name', 'mobile_no', 'selfie']
+
+        # Rider details - pick fields from RiderSerializer's ekyc_details
+        if booking.rider:
+            rider_data = RiderSerializer(booking.rider).data
+            rider_ekyc = rider_data.get('ekyc_details', {}) or {}
+            details['rider'] = {field: rider_ekyc.get(field, '') for field in display_fields}
+
+        # Customer details - pick fields from CustomerSerializer's ekyc_details
+        if booking.customer:
+            customer_data = CustomerSerializer(booking.customer).data
+            customer_ekyc = customer_data.get('ekyc_details', {}) or {}
+            details['customer'] = {field: customer_ekyc.get(field, '') for field in display_fields}
+
+        return details
 
     def send_message(self, booking_id, sender_id, sender_type, message_text):
         """Send a message to a booking conversation"""
@@ -40,8 +65,8 @@ class MessageService:
 
         return new_message
 
-    def get_conversation(self, booking_id, page_number=1, page_size=50, last_seen_id=None):
-        """Get conversation history for a booking"""
+    def get_conversation(self, booking_id, page_number=1, page_size=50, last_seen_id=None, user_id=None, user_type=None):
+        """Get conversation history for a booking with rider/customer details and unread count"""
         if not booking_id:
             raise ValidationError("Booking ID is required")
 
@@ -57,6 +82,19 @@ class MessageService:
             page_size=page_size,
             last_seen_id=last_seen_id
         )
+
+        # Add rider and customer details
+        messages['details'] = self._get_conversation_details(booking)
+
+        # Add unread count based on user_id and user_type
+        unread_count = 0
+        if user_id and user_type:
+            unread_count = self.message.get_unread_count(
+                booking_id=booking_id,
+                user_id=user_id,
+                user_type=user_type
+            )
+        messages['unread_count'] = unread_count
 
         return messages
 
