@@ -518,9 +518,9 @@ class RiderViewSet(viewsets.ViewSet):
         except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
 
-    @action(detail=False, methods=['post'], url_path='deactivate_vehicle')
-    def deactivate_vehicle(self, request):
-        """Mark a vehicle inactive when it cannot be deleted"""
+    @action(detail=False, methods=['post'], url_path='set_current_vehicle')
+    def set_current_vehicle(self, request):
+        """Mark one vehicle as the rider's current vehicle for bookings"""
         try:
             rider_id = request.data.get("rider_id", "")
             vehicle_id = request.data.get("vehicle_id", "")
@@ -531,13 +531,13 @@ class RiderViewSet(viewsets.ViewSet):
                 )
 
             with transaction.atomic():
-                vehicle = self.rider_vehicle_service.deactivate_vehicle(
+                vehicle = self.rider_vehicle_service.set_current_vehicle(
                     rider_id=rider_id, vehicle_id=vehicle_id
                 )
                 data = RiderVehicleDetailsSerializer(vehicle).data
 
             return AppResponse.send_success(
-                data=data, message="Vehicle marked inactive successfully"
+                data=data, message="Current vehicle updated successfully"
             )
 
         except NotFoundError as e:
@@ -546,36 +546,6 @@ class RiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=400)
         except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
-
-    @action(detail=False, methods=['post'], url_path='activate_vehicle')
-    def activate_vehicle(self, request):
-        """Mark a vehicle active again"""
-        try:
-            rider_id = request.data.get("rider_id", "")
-            vehicle_id = request.data.get("vehicle_id", "")
-
-            if not rider_id or not vehicle_id:
-                return AppResponse.send_error(
-                    message="Rider ID and vehicle ID are required", code=400
-                )
-
-            with transaction.atomic():
-                vehicle = self.rider_vehicle_service.activate_vehicle(
-                    rider_id=rider_id, vehicle_id=vehicle_id
-                )
-                data = RiderVehicleDetailsSerializer(vehicle).data
-
-            return AppResponse.send_success(
-                data=data, message="Vehicle marked active successfully"
-            )
-
-        except NotFoundError as e:
-            return AppResponse.send_error(message=str(e), code=404)
-        except ValidationError as e:
-            return AppResponse.send_error(message=str(e), code=400)
-        except Exception as e:
-            return AppResponse.send_error(message=str(e), code=500)
-
 
     @action(detail=False, methods=['post'], url_path='top_up')
     def top_up(self, request):

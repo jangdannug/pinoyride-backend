@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import models as dj_models
 from api.models import RiderVehicleDetails, Booking
 from api.utils.vehicle_plate_utils import (
     ALLOWED_VEHICLE_TYPES,
@@ -7,6 +8,15 @@ from api.utils.vehicle_plate_utils import (
     plate_compare_key,
 )
 import os
+
+
+class RiderVehicleDetailsListSerializer(serializers.ListSerializer):
+    """Always return a rider's vehicles newest first (created_at desc, id desc as tiebreaker)."""
+
+    def to_representation(self, data):
+        iterable = data.all() if isinstance(data, dj_models.manager.BaseManager) else data
+        ordered = sorted(iterable, key=lambda v: (v.created_at, v.id), reverse=True)
+        return super().to_representation(ordered)
 
 
 class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
@@ -25,6 +35,7 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RiderVehicleDetails
+        list_serializer_class = RiderVehicleDetailsListSerializer
         fields = [
             "id",
             "rider_id",
@@ -34,6 +45,7 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
             "color",
             "plate_number",
             "status",
+            "is_current",
             "or_cr_img",
             "vehicle_img",
             "or_cr_img_pretty",

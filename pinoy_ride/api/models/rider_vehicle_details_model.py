@@ -1,5 +1,6 @@
 import string
 from django.db import models
+from django.db.models import Q
 from django.utils.crypto import get_random_string
 from .soft_delete_model import SoftDeleteModel
 from django.db import transaction
@@ -37,6 +38,7 @@ class RiderVehicleDetails(SoftDeleteModel):
     v_or_cr_img = models.FileField(upload_to=upload_to_or_cr, null=True, blank=True)
     v_vehicle_img = models.FileField(upload_to=upload_to_vehicle, null=True, blank=True)
     status = models.IntegerField(default=0)
+    is_current = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -51,6 +53,13 @@ class RiderVehicleDetails(SoftDeleteModel):
             models.Index(fields=['deleted_at'])
         ]
         db_table = "rider_vehicle_details"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["rider"],
+                condition=Q(is_current=True, deleted_at__isnull=True),
+                name="one_current_vehicle_per_rider",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.id} - {self.rider} {self.v_plate_number}"

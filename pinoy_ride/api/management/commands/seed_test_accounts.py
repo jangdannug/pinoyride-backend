@@ -12,7 +12,7 @@ Seeds everything the rider app's Vehicles screens read:
     (shown in the Vehicles header)
   - one vehicle per service type (1 Motorcycle, 2 Car 4 Seaters,
     3 Car 6 Seaters) with brand, model, color and a normalized unique plate;
-    the type-3 vehicle is seeded Inactive (status 0) to cover that UI state.
+    one vehicle per type with brand, model, color and a normalized unique plate.
 
 Idempotent: re-running updates the same rider/customer/vehicles in place
 (vehicles are matched by plate, ignoring spaces/dashes/case) and resets them
@@ -47,7 +47,7 @@ SEED_VEHICLES = [
     {"type": "2", "brand": "Toyota", "model": "Vios", "color": "White",
      "plate_suffix": "2002", "status": 1},
     {"type": "3", "brand": "Toyota", "model": "Innova", "color": "Gray",
-     "plate_suffix": "3003", "status": 0},
+     "plate_suffix": "3003", "status": 1},
 ]
 
 
@@ -198,12 +198,11 @@ class Command(BaseCommand):
                 existing[plate_compare_key(plate)] = vehicle
                 action = "Created"
 
-            state = "Active" if vehicle.status == 1 else "Inactive"
             self.stdout.write(
                 self.style.SUCCESS(
                     f"  {action} vehicle id={vehicle.id} type={vehicle.v_type} "
                     f"{vehicle.v_brand} {vehicle.v_model} {vehicle.v_color} "
-                    f"plate={vehicle.v_plate_number} ({state})"
+                    f"plate={vehicle.v_plate_number}"
                 )
             )
 

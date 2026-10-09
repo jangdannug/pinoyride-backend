@@ -1,6 +1,6 @@
 from django.db import transaction
 from api.repositories import RiderVehicleDetailsRepository, RiderRepository
-from api.models import Booking
+from api.models import Booking, RiderVehicleDetails
 from api.utils.custom_error import NotFoundError, ValidationError
 class RiderVehicleDetailsService:
     
@@ -87,30 +87,24 @@ class RiderVehicleDetailsService:
             raise NotFoundError("Vehicle not found")
         if self.vehicle_used_in_completed_transactions(vehicle):
             raise ValidationError(
-                "This vehicle cannot be deleted because it was used in completed trips. "
-                "You can make it inactive instead."
+                "This vehicle cannot be deleted because it was used in completed trips."
             )
+        if vehicle.is_current:
+            vehicle.is_current = False
+            vehicle.save(update_fields=["is_current", "updated_at"])
         vehicle.delete()
         return True
 
     @transaction.atomic
-    def deactivate_vehicle(self, rider_id, vehicle_id):
+    def set_current_vehicle(self, rider_id, vehicle_id):
         vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
             vehicle_id=vehicle_id, rider_id=rider_id
         )
         if vehicle is None:
             raise NotFoundError("Vehicle not found")
-        vehicle.status = 0
-        vehicle.save(update_fields=["status", "updated_at"])
-        return vehicle
-
-    @transaction.atomic
-    def activate_vehicle(self, rider_id, vehicle_id):
-        vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
-            vehicle_id=vehicle_id, rider_id=rider_id
-        )
-        if vehicle is None:
-            raise NotFoundError("Vehicle not found")
-        vehicle.status = 1
-        vehicle.save(update_fields=["status", "updated_at"])
+        RiderVehicleDetails.objects.filter(
+            rider_id=rider_id, is_current=True
+        ).exclude(id=vehicle_id).update(is_current=False)
+        vehicle.is_current = True
+        vehicle.save(update_fields=["is_current", "updated_at"])
         return vehicle
