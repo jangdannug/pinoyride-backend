@@ -126,9 +126,11 @@ class RiderViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 rider = self.service.login_mobile_no(rider_data)
 
-                # Check if rider is already logged in
                 if rider.is_login == 1:
-                    return AppResponse.send_error(message="This account is currently logged in. Please log out before logging in again.", code=400)
+                    return AppResponse.send_error(
+                        message="This account is currently logged in. Please log out before logging in again.",
+                        code=400,
+                    )
 
                 ekyc_request_user_id = rider.ekyc_request_user_id
 
@@ -416,6 +418,162 @@ class RiderViewSet(viewsets.ViewSet):
 
         except Exception as e:
 
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='manage_vehicle')
+    def manage_vehicle(self, request):
+        """Add or update a rider vehicle"""
+        try:
+            rider_id = request.data.get("rider_id", "")
+            vehicle_id = request.data.get("vehicle_id", "")
+            vehicle_details = json.loads(request.data.get("vehicle_details", "{}"))
+
+            vehicle_img = request.data.get("vehicle_img", None)
+            or_cr_img = request.data.get("or_cr_img", None)
+            if vehicle_img:
+                vehicle_details["vehicle_img"] = vehicle_img
+            if or_cr_img:
+                vehicle_details["or_cr_img"] = or_cr_img
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider ID is required", code=400)
+
+            serializer_context = {
+                "vehicle_id": vehicle_id or None,
+                "check_duplicate_plate": True,
+            }
+            rider_vehicle_serializer = RiderVehicleDetailsSerializer(
+                data=vehicle_details,
+                context=serializer_context,
+            )
+            if not rider_vehicle_serializer.is_valid():
+                return AppResponse.send_error(
+                    message=rider_vehicle_serializer.errors, code=400
+                )
+
+            validated = rider_vehicle_serializer.validated_data
+            save_details = {
+                "type": validated.get("v_type"),
+                "brand": validated.get("v_brand"),
+                "model": validated.get("v_model"),
+                "color": validated.get("v_color"),
+                "plate_number": validated.get("v_plate_number"),
+            }
+            if validated.get("v_vehicle_img"):
+                save_details["vehicle_img"] = validated["v_vehicle_img"]
+            elif vehicle_details.get("vehicle_img"):
+                save_details["vehicle_img"] = vehicle_details["vehicle_img"]
+            if validated.get("v_or_cr_img"):
+                save_details["or_cr_img"] = validated["v_or_cr_img"]
+            elif vehicle_details.get("or_cr_img"):
+                save_details["or_cr_img"] = vehicle_details["or_cr_img"]
+
+            with transaction.atomic():
+                if vehicle_id:
+                    vehicle = self.rider_vehicle_service.update_vehicle_by_id(
+                        rider_id=rider_id,
+                        vehicle_id=vehicle_id,
+                        rider_vehicle_details=save_details,
+                    )
+                else:
+                    vehicle = self.rider_vehicle_service.add_vehicle(
+                        rider_id=rider_id,
+                        rider_vehicle_details=save_details,
+                    )
+
+                data = RiderVehicleDetailsSerializer(vehicle).data
+
+            return AppResponse.send_success(data=data, message="Vehicle saved successfully")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='delete_vehicle')
+    def delete_vehicle(self, request):
+        """Delete a vehicle when it has no completed trips"""
+        try:
+            rider_id = request.data.get("rider_id", "")
+            vehicle_id = request.data.get("vehicle_id", "")
+
+            if not rider_id or not vehicle_id:
+                return AppResponse.send_error(
+                    message="Rider ID and vehicle ID are required", code=400
+                )
+
+            with transaction.atomic():
+                self.rider_vehicle_service.delete_vehicle(
+                    rider_id=rider_id, vehicle_id=vehicle_id
+                )
+
+            return AppResponse.send_success(data={}, message="Vehicle deleted successfully")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='deactivate_vehicle')
+    def deactivate_vehicle(self, request):
+        """Mark a vehicle inactive when it cannot be deleted"""
+        try:
+            rider_id = request.data.get("rider_id", "")
+            vehicle_id = request.data.get("vehicle_id", "")
+
+            if not rider_id or not vehicle_id:
+                return AppResponse.send_error(
+                    message="Rider ID and vehicle ID are required", code=400
+                )
+
+            with transaction.atomic():
+                vehicle = self.rider_vehicle_service.deactivate_vehicle(
+                    rider_id=rider_id, vehicle_id=vehicle_id
+                )
+                data = RiderVehicleDetailsSerializer(vehicle).data
+
+            return AppResponse.send_success(
+                data=data, message="Vehicle marked inactive successfully"
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+    @action(detail=False, methods=['post'], url_path='activate_vehicle')
+    def activate_vehicle(self, request):
+        """Mark a vehicle active again"""
+        try:
+            rider_id = request.data.get("rider_id", "")
+            vehicle_id = request.data.get("vehicle_id", "")
+
+            if not rider_id or not vehicle_id:
+                return AppResponse.send_error(
+                    message="Rider ID and vehicle ID are required", code=400
+                )
+
+            with transaction.atomic():
+                vehicle = self.rider_vehicle_service.activate_vehicle(
+                    rider_id=rider_id, vehicle_id=vehicle_id
+                )
+                data = RiderVehicleDetailsSerializer(vehicle).data
+
+            return AppResponse.send_success(
+                data=data, message="Vehicle marked active successfully"
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+        except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
 
 

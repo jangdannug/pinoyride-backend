@@ -1,9 +1,7 @@
 from django.db import transaction
 from api.repositories import RiderVehicleDetailsRepository, RiderRepository
-from api.utils.custom_error import NotFoundError,ValidationError
-from api.utils.auth import get_authenticated_user
-from api.utils.sha_generator import generate_sha512
-import base64
+from api.models import Booking
+from api.utils.custom_error import NotFoundError, ValidationError
 class RiderVehicleDetailsService:
     
     def __init__(self):
@@ -48,3 +46,71 @@ class RiderVehicleDetailsService:
         if rider is None:
             raise NotFoundError("Rider "+ str(rider_id) + " not found")
         return rider
+
+    def vehicle_used_in_completed_transactions(self, vehicle):
+        if not vehicle or not vehicle.rider_id or not vehicle.v_type:
+            return False
+        return Booking.objects.filter(
+            rider_id=vehicle.rider_id,
+            status=3,
+            deleted_at__isnull=True,
+            booking_type=str(vehicle.v_type),
+        ).exists()
+
+    @transaction.atomic
+    def add_vehicle(self, rider_id, rider_vehicle_details):
+        rider_instance = self.get_rider_by_id(rider_id=rider_id)
+        rider_vehicle_details = {**rider_vehicle_details, "status": 1}
+        return self.rider_vehicle_details_repository.create(
+            rider_instance=rider_instance,
+            rider_vehicle_details=rider_vehicle_details,
+        )
+
+    @transaction.atomic
+    def update_vehicle_by_id(self, rider_id, vehicle_id, rider_vehicle_details):
+        vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
+            vehicle_id=vehicle_id, rider_id=rider_id
+        )
+        if vehicle is None:
+            raise NotFoundError("Vehicle not found")
+        return self.rider_vehicle_details_repository.update(
+            rider_vehicle_instance=vehicle,
+            rider_vehicle_details=rider_vehicle_details,
+        )
+
+    @transaction.atomic
+    def delete_vehicle(self, rider_id, vehicle_id):
+        vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
+            vehicle_id=vehicle_id, rider_id=rider_id
+        )
+        if vehicle is None:
+            raise NotFoundError("Vehicle not found")
+        if self.vehicle_used_in_completed_transactions(vehicle):
+            raise ValidationError(
+                "This vehicle cannot be deleted because it was used in completed trips. "
+                "You can make it inactive instead."
+            )
+        vehicle.delete()
+        return True
+
+    @transaction.atomic
+    def deactivate_vehicle(self, rider_id, vehicle_id):
+        vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
+            vehicle_id=vehicle_id, rider_id=rider_id
+        )
+        if vehicle is None:
+            raise NotFoundError("Vehicle not found")
+        vehicle.status = 0
+        vehicle.save(update_fields=["status", "updated_at"])
+        return vehicle
+
+    @transaction.atomic
+    def activate_vehicle(self, rider_id, vehicle_id):
+        vehicle = self.rider_vehicle_details_repository.get_by_id_for_rider(
+            vehicle_id=vehicle_id, rider_id=rider_id
+        )
+        if vehicle is None:
+            raise NotFoundError("Vehicle not found")
+        vehicle.status = 1
+        vehicle.save(update_fields=["status", "updated_at"])
+        return vehicle

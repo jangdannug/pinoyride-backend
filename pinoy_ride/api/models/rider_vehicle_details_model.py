@@ -53,4 +53,4 @@ class RiderVehicleDetails(SoftDeleteModel):
         db_table = "rider_vehicle_details"
 
     def __str__(self):
-        return f"{self.id} - {self.rider} {self.plate_number}"
+        return f"{self.id} - {self.rider} {self.v_plate_number}"

@@ -25,7 +25,8 @@ class RiderVehicleDetailsRepository:
             v_brand=brand,
             v_model=model,
             v_color=color,
-            v_plate_number=rider_vehicle_details.get("plate_number", "")
+            v_plate_number=rider_vehicle_details.get("plate_number", ""),
+            status=rider_vehicle_details.get("status", 1),
         )
 
         rider_vehicle.v_or_cr_img = rider_vehicle_details.get("or_cr_img", "")
@@ -44,9 +45,12 @@ class RiderVehicleDetailsRepository:
         rider_vehicle_instance.v_color = rider_vehicle_details.get("color", "")
         rider_vehicle_instance.v_plate_number = rider_vehicle_details.get("plate_number", "")
 
-        rider_vehicle_instance.v_or_cr_img = rider_vehicle_details.get("or_cr_img", "")
-        rider_vehicle_instance.v_vehicle_img = rider_vehicle_details.get("vehicle_img", "")
-        
+        or_cr_img = rider_vehicle_details.get("or_cr_img")
+        vehicle_img = rider_vehicle_details.get("vehicle_img")
+        if or_cr_img:
+            rider_vehicle_instance.v_or_cr_img = or_cr_img
+        if vehicle_img:
+            rider_vehicle_instance.v_vehicle_img = vehicle_img
 
         rider_vehicle_instance.save()
         return rider_vehicle_instance
@@ -65,5 +69,16 @@ class RiderVehicleDetailsRepository:
         """Get rider vehicle details by rider id and vehicle type"""
         try:
             return RiderVehicleDetails.objects.get(rider_id=rider_id, v_type = vehicle_type)
+        except RiderVehicleDetails.DoesNotExist:
+            return None
+
+    @staticmethod
+    def list_for_rider(rider_id):
+        return RiderVehicleDetails.objects.filter(rider_id=rider_id).order_by('id')
+
+    @staticmethod
+    def get_by_id_for_rider(vehicle_id, rider_id):
+        try:
+            return RiderVehicleDetails.objects.get(id=vehicle_id, rider_id=rider_id)
         except RiderVehicleDetails.DoesNotExist:
             return None
