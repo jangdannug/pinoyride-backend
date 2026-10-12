@@ -178,7 +178,19 @@ class BookingRepository:
 
 
     @staticmethod
-    def random_pending(rider_lat, rider_long):
+    def open_bookings_for_vehicle(vehicle_id):
+        return Booking.objects.filter(
+            rider_vehicle_id=vehicle_id,
+            status__in=[1, 2, 5],
+            deleted_at__isnull=True,
+        )
+
+    @staticmethod
+    def vehicle_has_open_booking(vehicle_id):
+        return BookingRepository.open_bookings_for_vehicle(vehicle_id).exists()
+
+    @staticmethod
+    def random_pending(rider_lat, rider_long, booking_type):
         """Retrieve random pending booking"""
 
         rider_lat = float(rider_lat)
@@ -195,7 +207,12 @@ class BookingRepository:
         # Narrow down candidates from DB
         bookings = (
             Booking.objects
-            .filter(status=0, pickup_lat__range=lat_range, pickup_long__range=lng_range)
+            .filter(
+                status=0,
+                pickup_lat__range=lat_range,
+                pickup_long__range=lng_range,
+                booking_type=booking_type,
+            )
             .order_by("-id")[:50]  # limit to 50 candidates
         )
 
@@ -391,7 +408,10 @@ class BookingRepository:
     @staticmethod
     @transaction.atomic
     def accept_booking(booking_instance, rider_instance):
-        
+        from api.repositories.rider_vehicle_details_repository import (
+            RiderVehicleDetailsRepository,
+        )
+
         try:
             # Lock the row so no one else can update until commit
             booking = Booking.objects.select_for_update().get(
@@ -401,6 +421,18 @@ class BookingRepository:
             )
         except Booking.DoesNotExist:
             return None  # already assigned
+
+        vehicle = RiderVehicleDetailsRepository.require_booking_vehicle(
+            rider_id=rider_instance.id,
+            booking_type=booking.booking_type,
+            lock=True,
+        )
+        RiderVehicleDetailsRepository.ensure_vehicle_matches_booking_type(
+            vehicle, booking.booking_type
+        )
+        RiderVehicleDetailsRepository.apply_vehicle_snapshot_to_booking(
+            booking, vehicle
+        )
 
         booking.status = 1
         booking.updated_by = rider_instance.id

@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Max
 from .customer_model import Customer
 from .rider_model import Rider
+from .rider_vehicle_details_model import RiderVehicleDetails
 
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -15,6 +16,18 @@ class Booking(SoftDeleteModel):
     ref_code = models.CharField(max_length=255, unique=True)
     customer = models.ForeignKey(Customer, related_name='customer_booking', on_delete=models.CASCADE, default=None, null=True, blank=True)
     rider = models.ForeignKey(Rider, related_name='rider_booking', on_delete=models.CASCADE, default=None, null=True, blank=True)
+    rider_vehicle = models.ForeignKey(
+        RiderVehicleDetails,
+        related_name='bookings',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    vehicle_plate_number = models.CharField(max_length=255, null=True, blank=True)
+    vehicle_brand = models.CharField(max_length=255, null=True, blank=True)
+    vehicle_model = models.CharField(max_length=255, null=True, blank=True)
+    vehicle_color = models.CharField(max_length=255, null=True, blank=True)
+    vehicle_type = models.CharField(max_length=255, null=True, blank=True)
     booking_type = models.CharField(max_length=255, null=True)
     pickup_location = models.CharField(max_length=255, null=True)
     dropoff_location = models.CharField(max_length=255, null=True)

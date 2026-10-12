@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from api.models import Booking, Customer
+from api.utils.vehicle_plate_utils import pretty_vehicle_type
 from .partial_customer_serializer import PartialCustomerSerializer
 from .booking_payment_serializer import BookingPaymentSerializer
 from .partial_rider_serializer import PartialRiderSerializer
@@ -24,6 +25,7 @@ class BookingSerializer(serializers.ModelSerializer):
     payment_details = serializers.SerializerMethodField()
     booking_ratings = serializers.SerializerMethodField()
     pretty_status = serializers.SerializerMethodField()
+    vehicle = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
     customer_id = serializers.PrimaryKeyRelatedField(
@@ -58,6 +60,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "payment_details",
             "rider_details",
             "booking_ratings",
+            "vehicle",
         ]
 
     def get_payment_details(self, obj):
@@ -92,6 +95,27 @@ class BookingSerializer(serializers.ModelSerializer):
             status = "Cancelled"
 
         return status
+
+    def get_vehicle(self, obj):
+        snapshot_fields = (
+            obj.vehicle_plate_number,
+            obj.vehicle_brand,
+            obj.vehicle_model,
+            obj.vehicle_color,
+            obj.vehicle_type,
+        )
+        if all(value is None or value == "" for value in snapshot_fields):
+            return None
+        vehicle_type = obj.vehicle_type
+        return {
+            "id": obj.rider_vehicle_id,
+            "plate_number": obj.vehicle_plate_number,
+            "brand": obj.vehicle_brand,
+            "model": obj.vehicle_model,
+            "color": obj.vehicle_color,
+            "type": vehicle_type,
+            "pretty_type": pretty_vehicle_type(vehicle_type),
+        }
     
 
     def validate(self, attrs):

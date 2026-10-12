@@ -7,6 +7,9 @@ import json
 from api.serializers import BookingSerializer, PromoSerializer
 from api.utils.custom_error import CustomError, NotFoundError, ValidationError
 from django.db import transaction
+from api.repositories.rider_vehicle_details_repository import (
+    RiderVehicleDetailsRepository,
+)
 from api.services import (
     BookingService,
     CustomerService,
@@ -541,7 +544,17 @@ class BookingViewSet(viewsets.ViewSet):
 
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
-                booking_details = self.service.get_pending(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type, rider_id=rider_id)
+                vehicle = RiderVehicleDetailsRepository.require_booking_vehicle(
+                    rider_id=rider_details.id, booking_type=booking_type
+                )
+                resolved_type = str(vehicle.v_type)
+
+                booking_details = self.service.get_pending(
+                    rider_lat=rider_lat,
+                    rider_long=rider_long,
+                    booking_type=resolved_type,
+                    rider_id=rider_id,
+                )
            
             return AppResponse.send_success(data=booking_details, message="Bookings fetched successfully")
 
@@ -667,6 +680,15 @@ class BookingViewSet(viewsets.ViewSet):
                 booking_details = self.service.get_booking_by_id(booking_id=booking_id)
                 # rider_details = self.rider_service.get_available_rider(rider_id=rider_id)
                 rider_details = self.rider_service.get_rider_by_id(rider_id=rider_id)
+
+                vehicle = RiderVehicleDetailsRepository.require_booking_vehicle(
+                    rider_id=rider_details.id,
+                    booking_type=booking_details.booking_type,
+                    lock=True,
+                )
+                RiderVehicleDetailsRepository.ensure_vehicle_matches_booking_type(
+                    vehicle, booking_details.booking_type
+                )
                 
                 if booking_details.payment_type == 'cash': #Check balance of rider if payment type == cash and must be enough for deducting of commission
                     booking_payment_details = self.booking_payment_service.get_record_by_booking_id(booking_id=booking_details.id)
@@ -993,8 +1015,18 @@ class BookingViewSet(viewsets.ViewSet):
 
                 self.rider_service.update_rider_coordinates(rider_instance=rider_details, rider_lat=rider_lat, rider_long=rider_long)
 
+                vehicle = RiderVehicleDetailsRepository.require_booking_vehicle(
+                    rider_id=rider_details.id,
+                    booking_type=request.data.get("booking_type"),
+                )
+                resolved_type = str(vehicle.v_type)
+
                 # get random pending booking
-                pending_booking = self.service.get_random_pending(rider_lat=rider_lat, rider_long=rider_long)
+                pending_booking = self.service.get_random_pending(
+                    rider_lat=rider_lat,
+                    rider_long=rider_long,
+                    booking_type=resolved_type,
+                )
 
                 response = {}
                 if pending_booking:

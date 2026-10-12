@@ -531,10 +531,11 @@ class RiderViewSet(viewsets.ViewSet):
                 )
 
             with transaction.atomic():
-                vehicle = self.rider_vehicle_service.set_current_vehicle(
+                vehicle, warnings = self.rider_vehicle_service.set_current_vehicle(
                     rider_id=rider_id, vehicle_id=vehicle_id
                 )
                 data = RiderVehicleDetailsSerializer(vehicle).data
+                data["warnings"] = warnings
 
             return AppResponse.send_success(
                 data=data, message="Current vehicle updated successfully"

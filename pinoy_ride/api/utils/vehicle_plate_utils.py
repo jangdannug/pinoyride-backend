@@ -2,6 +2,18 @@ import re
 
 ALLOWED_VEHICLE_TYPES = frozenset({"1", "2", "3"})
 
+VEHICLE_PRETTY_TYPES = {
+    "1": "Motorcycle",
+    "2": "Car 4 Seaters",
+    "3": "Car 6 Seaters",
+}
+
+
+def pretty_vehicle_type(vehicle_type):
+    if vehicle_type is None:
+        return ""
+    return VEHICLE_PRETTY_TYPES.get(str(vehicle_type).strip(), str(vehicle_type))
+
 DUPLICATE_PLATE_MESSAGE = "This plate number is already registered."
 
 

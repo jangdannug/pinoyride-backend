@@ -32,6 +32,7 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
     vehicle_img_pretty = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
     used_in_completed_transactions = serializers.SerializerMethodField()
+    open_booking_count = serializers.SerializerMethodField()
 
     class Meta:
         model = RiderVehicleDetails
@@ -52,6 +53,7 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
             "vehicle_img_pretty",
             "can_delete",
             "used_in_completed_transactions",
+            "open_booking_count",
         ]
 
     def validate_type(self, value):
@@ -114,8 +116,15 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
     def get_used_in_completed_transactions(self, obj):
         return self._has_completed_trips(obj)
 
+    def get_open_booking_count(self, obj):
+        return Booking.objects.filter(
+            rider_vehicle_id=obj.id,
+            status__in=[1, 2, 5],
+            deleted_at__isnull=True,
+        ).count()
+
     def get_can_delete(self, obj):
-        return not self._has_completed_trips(obj)
+        return self.get_open_booking_count(obj) == 0
 
     def get_or_cr_img_pretty(self, obj):
         """Return full URL for OR/CR image"""
