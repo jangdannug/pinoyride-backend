@@ -35,6 +35,7 @@ class Rider(SoftDeleteModel):
     current_location = models.TextField(null=True)
     current_lat = models.CharField(max_length=255, null=True)
     current_long = models.CharField(max_length=255, null=True)
+    current_location_updated_at = models.DateTimeField(null=True, blank=True)
     auto_accept = models.IntegerField(default=0)
     is_available = models.IntegerField(default=1)
     is_online = models.IntegerField(default=0)

@@ -1,3 +1,4 @@
+from api.utils.customer_utils import CustomUtils
 from rest_framework import serializers
 from api.models import Rider, TopPhEkycDetails
 from .rider_vehicle_details_serializer import RiderVehicleDetailsSerializer
@@ -86,7 +87,8 @@ class PartialRiderSerializer(serializers.ModelSerializer):
                 'id_back': '',
                 'selfie': selfie_url,
                 'status': 0,
-                'pretty_mobile_no': '',
+                # Fallback so passengers can still call the rider (63XXXXXXXXXX, same format as eKYC)
+                'pretty_mobile_no': CustomUtils.convert_mobile_no(rider_obj.mobile_no) if rider_obj.mobile_no else '',
                 'permanent_address': '',
                 'permanent_country': '',
                 'create_date': '',

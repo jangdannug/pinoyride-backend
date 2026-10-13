@@ -25,3 +25,4 @@ from api.services.ekyc_api_service import EkycApiService
 from api.services.cash_out_api_service import CashOutApiService
 from api.services.price_config_service import PriceConfigService
 from api.services.google_maps_service import GoogleMapsService
+from api.services.advance_booking_service import AdvanceBookingService

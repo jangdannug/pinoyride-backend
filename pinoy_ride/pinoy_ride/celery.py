@@ -15,3 +15,7 @@ app.config_from_object('pinoy_ride.settings', namespace='CELERY')
 
 app.autodiscover_tasks()
 
+app.conf.beat_schedule = {
+    **(app.conf.beat_schedule or {}),
+    "remind-advance-bookings": {"task": "api.tasks.remind_advance", "schedule": 60.0},
+}

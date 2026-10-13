@@ -26,6 +26,18 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_ratings = serializers.SerializerMethodField()
     pretty_status = serializers.SerializerMethodField()
     vehicle = serializers.SerializerMethodField()
+    is_advance = serializers.BooleanField(read_only=True)
+    scheduled_pickup_at = serializers.SerializerMethodField()
+    rider_arrived_at = serializers.SerializerMethodField()
+    arrived = serializers.SerializerMethodField()
+    booking_label = serializers.SerializerMethodField()
+    vehicle_type_label = serializers.SerializerMethodField()
+    cancelled_by = serializers.CharField(read_only=True)
+    penalty_amount = serializers.SerializerMethodField()
+    # When the booking last entered the pending pool (created_at; retry resets it)
+    pooled_at = serializers.SerializerMethodField()
+    # True once a rider holds the booking (status 1/2, or an accepted advance booking still at 5)
+    rider_assigned = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
     customer_id = serializers.PrimaryKeyRelatedField(
@@ -61,6 +73,16 @@ class BookingSerializer(serializers.ModelSerializer):
             "rider_details",
             "booking_ratings",
             "vehicle",
+            "is_advance",
+            "scheduled_pickup_at",
+            "rider_arrived_at",
+            "arrived",
+            "booking_label",
+            "vehicle_type_label",
+            "cancelled_by",
+            "penalty_amount",
+            "pooled_at",
+            "rider_assigned",
         ]
 
     def get_payment_details(self, obj):
@@ -80,7 +102,16 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_rider_details(self, obj):
         # get the related table rider
         if obj.rider:
-            return PartialRiderSerializer(obj.rider).data
+            data = PartialRiderSerializer(obj.rider).data
+            # Apps read vehicle_details[0]; put the vehicle used on this booking first
+            # (snapshot vehicle, else the rider's current one) for instant and advance alike.
+            vehicles = list(data.get("vehicle_details") or [])
+            target = obj.rider_vehicle_id
+            vehicles.sort(key=lambda v: (
+                0 if (target and v.get("id") == target) else (1 if (not target and v.get("is_current")) else 2)
+            ))
+            data["vehicle_details"] = vehicles
+            return data
         return {}
 
     def get_pretty_status(self, obj):
@@ -93,8 +124,46 @@ class BookingSerializer(serializers.ModelSerializer):
             status = "Completed"
         elif obj.status == 4:
             status = "Cancelled"
+        elif obj.status == 5:
+            status = "Scheduled"
 
         return status
+
+    @staticmethod
+    def _local_iso(dt):
+        from django.utils import timezone
+        return timezone.localtime(dt).isoformat() if dt else None
+
+    def get_scheduled_pickup_at(self, obj):
+        return self._local_iso(obj.scheduled_pickup_at)
+
+    def get_rider_arrived_at(self, obj):
+        return self._local_iso(obj.rider_arrived_at)
+
+    def get_rider_assigned(self, obj):
+        return obj.rider_id is not None and obj.status in (1, 2, 5)
+
+    def get_pooled_at(self, obj):
+        return self._local_iso(obj.created_at)
+
+    def get_arrived(self, obj):
+        return obj.rider_arrived_at is not None
+
+    def get_booking_label(self, obj):
+        return "Advance Booking" if obj.is_advance else None
+
+    def get_vehicle_type_label(self, obj):
+        return pretty_vehicle_type(obj.booking_type) if obj.booking_type else None
+
+    def get_penalty_amount(self, obj):
+        if obj.status != 4 or not obj.cancelled_by:
+            return 0.0
+        from api.models.wallet_history_model import WalletHistory
+        rows = WalletHistory.objects.filter(
+            booking_id=str(obj.id), tran_type="cancel_penalty", type="debit",
+            wallet__user_type=obj.cancelled_by,
+        )
+        return round(sum(float(r.debit_amount or 0) for r in rows), 2)
 
     def get_vehicle(self, obj):
         snapshot_fields = (

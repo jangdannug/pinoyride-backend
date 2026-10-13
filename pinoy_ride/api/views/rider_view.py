@@ -494,7 +494,7 @@ class RiderViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'], url_path='delete_vehicle')
     def delete_vehicle(self, request):
-        """Delete a vehicle when it has no completed trips"""
+        """Delete a vehicle unless it is on an open (active or upcoming) booking"""
         try:
             rider_id = request.data.get("rider_id", "")
             vehicle_id = request.data.get("vehicle_id", "")

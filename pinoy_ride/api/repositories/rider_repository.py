@@ -397,6 +397,7 @@ class RiderRepository:
 
         rider_instance.current_lat = rider_lat
         rider_instance.current_long = rider_long
+        rider_instance.current_location_updated_at = timezone.now()
         if current_location:
             rider_instance.current_location = current_location
         rider_instance.save()

@@ -61,7 +61,11 @@ from api.utils.app_logger import app_logger
 
 logger = logging.getLogger('myapp')
 
-class BookingViewSet(viewsets.ViewSet):
+from api.views.advance_booking_view import AdvanceBookingMixin
+from api.services.advance_booking_service import AdvanceBookingService
+
+
+class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
     """Booking Controller"""
 
     def __init__(self, *args, **kwargs):
@@ -134,6 +138,9 @@ class BookingViewSet(viewsets.ViewSet):
                     return AppResponse.send_error(message="Customer id is required", code=400)
 
             self.customer_service.get_customer_by_id(customer_id=customer_id)
+
+            if request.data.get("scheduled_pickup_at"):
+                AdvanceBookingService.parse_scheduled_pickup(request.data.get("scheduled_pickup_at"))
 
             pickup_lat = request.data.get("pickup_lat", "")
             pickup_long = request.data.get("pickup_long", "")
@@ -315,6 +322,11 @@ class BookingViewSet(viewsets.ViewSet):
             payment_total_amount = payment_details.get("total_amount", 0)
             total_amount_wo_promo = payment_details.get("total_amount_wo_promo", 0)
             promo_id = request.data.get("promo_id", "")
+            is_advance = str(request.data.get("is_advance", "")).lower() in ("1", "true", "yes")
+            scheduled_pickup_at = None
+            if is_advance:
+                scheduled_pickup_at = AdvanceBookingService.parse_scheduled_pickup(request.data.get("scheduled_pickup_at"))
+                AdvanceBookingService.check_customer_can_book_advance(customer_id)
 
             # Validate coordinates are within service area
             validation_error = self._validate_coordinates_in_service_area(
@@ -369,6 +381,8 @@ class BookingViewSet(viewsets.ViewSet):
 
                 # save booking
                 booking_details = self.service.save_booking(customer_instance = customer_details, booking_details=booking_details)
+                if is_advance:
+                    AdvanceBookingService.mark_as_advance(booking_details, scheduled_pickup_at)
 
                 # Add all_payment_details to payment_details
                 payment_details['all_payment_details'] = all_payment_details

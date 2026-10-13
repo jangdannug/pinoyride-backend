@@ -62,3 +62,10 @@ def send_notifications(batch_id, beneficiary_ids, notification_type=None):
 
 
 
+
+
+@shared_task
+def remind_advance():
+    """Every minute: remind assigned riders ADVANCE_REMINDER_MINUTES before an advance pickup (sent once)."""
+    from api.services.advance_booking_service import AdvanceBookingService
+    return f"Advance reminders sent: {AdvanceBookingService.send_due_reminders()}"

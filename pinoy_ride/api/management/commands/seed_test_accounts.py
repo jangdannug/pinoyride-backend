@@ -27,6 +27,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from api.models.customer_model import Customer
+from api.models.pinoy_ride_wallet_model import PinoyRideWallet
 from api.models.rider_model import Rider
 from api.models.rider_vehicle_details_model import RiderVehicleDetails
 from api.services.wallet_service import WalletService
@@ -81,9 +82,10 @@ class Command(BaseCommand):
             return
 
         rider_mobile = self._normalize_mobile(options["rider_mobile"])
-        customer_mobile = self._app_mobile(options["customer_mobile"])
+        # Stored with the 63 prefix, like real sign-ups (login looks up 63XXXXXXXXXX).
+        customer_mobile = self._normalize_mobile(options["customer_mobile"])
 
-        if rider_mobile.endswith(customer_mobile):
+        if rider_mobile == customer_mobile:
             self.stderr.write(
                 self.style.ERROR("Rider and customer mobile numbers must be different.")
             )
@@ -98,9 +100,16 @@ class Command(BaseCommand):
             wallet_service.create_rider_wallet(rider_id=rider.id)
             wallet_service.create_customer_wallet(customer_id=customer.id)
 
+            # Platform wallet credited with commission on cash trips
+            # (wallet_service.update_booking_wallets_for_cash looks up user_id=1).
+            PinoyRideWallet.objects.get_or_create(
+                user_id=1, user_type="pinoy_ride", type="pinoy-ride-wallet",
+                defaults={"status": 1},
+            )
+
         self.stdout.write(self.style.SUCCESS("\nTest accounts ready:\n"))
         self._print_account("Rider", self._app_mobile(options["rider_mobile"]), rider.id)
-        self._print_account("Customer", customer_mobile, customer.id)
+        self._print_account("Customer", self._app_mobile(options["customer_mobile"]), customer.id)
         self.stdout.write(
             "\nLogin in the app with the 10-digit numbers above.\n"
             "In development, OTP is returned in the API response / Metro logs.\n"
@@ -207,6 +216,10 @@ class Command(BaseCommand):
             )
 
     def _seed_customer(self, mobile: str) -> Customer:
+        # Upgrade a legacy row saved without the 63 prefix instead of creating a duplicate.
+        legacy = mobile[2:] if mobile.startswith("63") else None
+        if legacy and not Customer.objects.filter(mobile=mobile).exists():
+            Customer.objects.filter(mobile=legacy).update(mobile=mobile)
         customer, created = Customer.objects.update_or_create(
             mobile=mobile,
             defaults={
