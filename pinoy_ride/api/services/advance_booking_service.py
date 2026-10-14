@@ -28,6 +28,7 @@ logger = logging.getLogger("myapp")
 
 STATUS_PENDING, STATUS_ACCEPTED, STATUS_STARTED, STATUS_DONE, STATUS_CANCELLED, STATUS_SCHEDULED = 0, 1, 2, 3, 4, 5
 PENALTY_TRAN_TYPE = "cancel_penalty"
+EXPIRED_REASON = "Expired - no rider accepted"
 
 
 class ConflictError(Exception):
@@ -81,10 +82,25 @@ class AdvanceBookingService:
             raise ValidationError(f"Advance bookings can be at most {cfg('ADVANCE_MAX_DAYS')} days ahead")
 
     @staticmethod
+    def expire_stale(customer_id=None):
+        """Unaccepted advance bookings whose pickup time passed -> cancelled by system (no penalty)."""
+        qs = Booking.objects.filter(is_advance=True, status=STATUS_SCHEDULED, rider__isnull=True,
+                                    scheduled_pickup_at__lt=_now())
+        if customer_id is not None:
+            qs = qs.filter(customer_id=customer_id)
+        n = qs.update(status=STATUS_CANCELLED, cancelled_at=_now(), cancelled_by="system",
+                      cancel_reason=EXPIRED_REASON, updated_by_user="system", updated_at=_now())
+        if n:
+            logger.info("expired %s stale advance bookings (customer=%s)", n, customer_id)
+        return n
+
+    @staticmethod
     def check_customer_can_book_advance(customer_id):
+        from django.db.models import Q
+        AdvanceBookingService.expire_stale(customer_id)
         open_count = Booking.objects.filter(
             customer_id=customer_id, is_advance=True, status__in=[STATUS_SCHEDULED, STATUS_ACCEPTED]
-        ).count()
+        ).exclude(Q(rider__isnull=True) & Q(scheduled_pickup_at__lt=_now())).count()
         if open_count >= cfg("ADVANCE_MAX_OPEN_PER_CUSTOMER"):
             raise ValidationError(
                 f"You can have at most {cfg('ADVANCE_MAX_OPEN_PER_CUSTOMER')} open advance bookings"
@@ -104,6 +120,7 @@ class AdvanceBookingService:
     def get_upcoming(customer_id, page=1, page_size=10):
         from api.serializers import BookingSerializer
         from django.db.models import Case, IntegerField, Q, Value, When
+        AdvanceBookingService.expire_stale(customer_id)
         # Advance bookings still open (5 / 1) plus any in-progress trip (1 / 2, instant or
         # advance) so a passenger reopening the app mid-trip sees it. In-progress first.
         qs = Booking.objects.filter(
@@ -260,6 +277,7 @@ class AdvanceBookingService:
         return vehicle
 
     def advance_pending(self, rider, lat=None, lng=None, page=1, page_size=10):
+        self.expire_stale()
         vehicle = self._current_vehicle(rider.id)
         lat = float(lat if lat not in (None, "") else (rider.current_lat or 0))
         lng = float(lng if lng not in (None, "") else (rider.current_long or 0))

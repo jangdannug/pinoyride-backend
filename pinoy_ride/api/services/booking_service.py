@@ -21,7 +21,61 @@ class BookingService:
     ## Get pending bookings
     def get_pending(self, rider_lat, rider_long, booking_type, rider_id=None):
         """List all pending bookings, excluding those ignored by the rider"""
-        return self.booking.pending_list(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type, rider_id=rider_id)
+        result = self.booking.pending_list(rider_lat=rider_lat, rider_long=rider_long, booking_type=booking_type, rider_id=rider_id)
+        try:
+            advance = self.get_open_advance(rider_lat, rider_long, booking_type)
+        except Exception:
+            advance = []
+        result["bookings"] = advance + list(result.get("bookings", []))
+        return result
+
+    ## Unassigned advance (Book Later) bookings for the rider Home pending list
+    @staticmethod
+    def get_open_advance(rider_lat, rider_long, booking_type):
+        """Status-5 advance bookings with no rider yet, same vehicle type, pickup
+        still in the future (and within ADVANCE_MAX_DAYS), inside ADVANCE_RIDER_RADIUS_KM.
+        Soonest pickup first. Go-to-pickup still unlocks ADVANCE_START_WINDOW_MINUTES
+        before pickup, after acceptance (unchanged)."""
+        from datetime import timedelta
+        from django.utils import timezone
+        from geopy.distance import geodesic
+        from api.models.booking_model import Booking
+        from api.serializers.booking_serializer import BookingSerializer
+        from api.utils.advance_settings import cfg
+
+        from api.services.advance_booking_service import AdvanceBookingService
+        AdvanceBookingService.expire_stale()
+        lat, lng = float(rider_lat), float(rider_long)
+        radius = float(cfg("ADVANCE_RIDER_RADIUS_KM"))
+        now = timezone.now()
+        qs = Booking.objects.filter(
+            status=5, is_advance=True, rider__isnull=True, deleted_at__isnull=True,
+            booking_type=str(booking_type),
+            scheduled_pickup_at__gt=now,
+            scheduled_pickup_at__lte=now + timedelta(days=int(cfg("ADVANCE_MAX_DAYS"))),
+        ).order_by("scheduled_pickup_at")[:50]
+        out = []
+        for b in qs:
+            try:
+                d = geodesic((lat, lng), (float(b.pickup_lat), float(b.pickup_long))).kilometers
+            except (TypeError, ValueError):
+                continue
+            if d > radius:
+                continue
+            data = BookingSerializer(b).data
+            local = timezone.localtime(b.scheduled_pickup_at)
+            data["is_advance"] = True
+            data["booking_label"] = "Advance Booking"
+            data["pickup_date"] = local.strftime("%d %b %Y")
+            data["pickup_time"] = local.strftime("%I:%M %p")
+            data["distance_from_rider_km"] = round(d, 2)
+            c = b.customer
+            ek = getattr(c, "ekyc_details", None) if c else None
+            first = (getattr(ek, "first_name", None) or getattr(c, "fname", "") or "") if c else ""
+            last = (getattr(ek, "last_name", None) or getattr(c, "lname", "") or "") if c else ""
+            data["passenger_name"] = f"{first} {last}".strip() or None
+            out.append(data)
+        return out
     
     ## Get random pending booking
     def get_random_pending(self, rider_lat, rider_long, booking_type):
