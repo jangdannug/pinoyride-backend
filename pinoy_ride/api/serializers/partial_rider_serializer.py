@@ -61,7 +61,7 @@ class PartialRiderSerializer(serializers.ModelSerializer):
                 if img_name.startswith('http://') or img_name.startswith('https://'):
                     selfie_url = img_name
                 else:
-                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
                     selfie_url = f"{base_url}/{img_name}"
 
             return {
@@ -108,3 +108,14 @@ class PartialRiderSerializer(serializers.ModelSerializer):
         except TopPhEkycDetails.DoesNotExist:
             # Fallback to rider's own details if EKYC record not found
             return get_rider_profile_ekyc(obj)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context.get("omit_contact_phone"):
+            data.pop("mobile_no", None)
+            data.pop("email_address", None)
+            ekyc = data.get("ekyc_details")
+            if isinstance(ekyc, dict):
+                for key in ("mobile_no", "pretty_mobile_no", "email_address"):
+                    ekyc.pop(key, None)
+        return data

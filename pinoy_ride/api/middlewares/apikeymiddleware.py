@@ -112,6 +112,7 @@ class ApiKeyAuthenticationMiddleware:
                 '/api/booking/update_status_for_customer/',
                 '/api/booking/get_history/',
                 '/api/booking/get_details/',
+                '/api/booking/get_contact/',
                 '/api/booking/report_issue/',
                 '/api/booking/add_tip/',
             )

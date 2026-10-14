@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Value, Exists, OuterRef
 from django.db.models.functions import Concat
 from api.models.booking_model import Booking
+from api.models.wallet_history_model import WalletHistory
 from api.models.ignored_booking_model import IgnoredBooking
 from django.db import transaction
 from api.serializers import (
@@ -289,8 +290,27 @@ class BookingRepository:
     @staticmethod
     def get_rider_booking_history(rider_id, page_number=1, page_size=10, search_query=None, filters={}, sort_by="-updated_at"):
         """Retrieve rider booking history"""
-    
-        bookings = Booking.objects.filter(rider_id=rider_id).order_by(sort_by)
+        from api.models.advance_booking_rider_release_model import AdvanceBookingRiderRelease
+
+        released_ids = set(
+            AdvanceBookingRiderRelease.objects.filter(rider_id=rider_id).values_list(
+                "booking_id", flat=True
+            )
+        )
+        for bid in WalletHistory.objects.filter(
+            tran_type="cancel_penalty",
+            type="debit",
+            wallet__user_type="rider",
+            wallet__user_id=rider_id,
+        ).values_list("booking_id", flat=True):
+            try:
+                released_ids.add(int(bid))
+            except (TypeError, ValueError):
+                continue
+
+        bookings = Booking.objects.filter(
+            Q(rider_id=rider_id) | Q(id__in=released_ids)
+        ).distinct().order_by(sort_by)
       
         if search_query:
             search_terms = search_query.split()
@@ -309,7 +329,9 @@ class BookingRepository:
         page = paginator.get_page(page_number)
 
         serialized_bookings = BookingSerializer(
-            page.object_list, many=True
+            page.object_list,
+            many=True,
+            context={"history_rider_id": rider_id, "omit_contact_phone": True},
         ).data
 
         return {
@@ -348,7 +370,9 @@ class BookingRepository:
         page = paginator.get_page(page_number)
 
         serialized_bookings = BookingSerializer(
-            page.object_list, many=True
+            page.object_list,
+            many=True,
+            context={"omit_contact_phone": True},
         ).data
 
         return {
@@ -444,11 +468,14 @@ class BookingRepository:
     @staticmethod
     @transaction.atomic
     def update_booking_status_for_rider(booking_instance, booking_status, rider_instance):
-        
+        from django.utils import timezone
+
         booking_instance.status = booking_status
         booking_instance.updated_by = rider_instance.id
         booking_instance.rider_id = rider_instance
         booking_instance.updated_by_user = 'rider'
+        if int(booking_status) == 3 and not booking_instance.completed_at:
+            booking_instance.completed_at = timezone.now()
         booking_instance.save()
         
         return booking_instance

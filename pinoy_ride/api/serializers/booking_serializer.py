@@ -34,6 +34,7 @@ class BookingSerializer(serializers.ModelSerializer):
     vehicle_type_label = serializers.SerializerMethodField()
     cancelled_by = serializers.CharField(read_only=True)
     penalty_amount = serializers.SerializerMethodField()
+    returned_to_pool_at = serializers.SerializerMethodField()
     # When the booking last entered the pending pool (created_at; retry resets it)
     pooled_at = serializers.SerializerMethodField()
     # True once a rider holds the booking (status 1/2, or an accepted advance booking still at 5)
@@ -81,6 +82,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "vehicle_type_label",
             "cancelled_by",
             "penalty_amount",
+            "returned_to_pool_at",
             "pooled_at",
             "rider_assigned",
         ]
@@ -102,7 +104,7 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_rider_details(self, obj):
         # get the related table rider
         if obj.rider:
-            data = PartialRiderSerializer(obj.rider).data
+            data = PartialRiderSerializer(obj.rider, context=self.context).data
             # Apps read vehicle_details[0]; put the vehicle used on this booking first
             # (snapshot vehicle, else the rider's current one) for instant and advance alike.
             vehicles = list(data.get("vehicle_details") or [])
@@ -114,7 +116,34 @@ class BookingSerializer(serializers.ModelSerializer):
             return data
         return {}
 
+    @staticmethod
+    def _rider_cancel_penalty_amount(rider_id, booking_id):
+        if not rider_id:
+            return 0.0
+        from api.models.wallet_history_model import WalletHistory
+        rows = WalletHistory.objects.filter(
+            booking_id__in=(str(booking_id), booking_id),
+            tran_type="cancel_penalty",
+            type="debit",
+            wallet__user_type="rider",
+            wallet__user_id=rider_id,
+        )
+        return round(sum(float(r.debit_amount or 0) for r in rows), 2)
+
+    def _rider_released_in_history(self, obj):
+        rider_id = self.context.get("history_rider_id")
+        if not rider_id or obj.rider_id == rider_id:
+            return False
+        from api.models.advance_booking_rider_release_model import AdvanceBookingRiderRelease
+        if AdvanceBookingRiderRelease.objects.filter(
+            booking_id=obj.id, rider_id=rider_id
+        ).exists():
+            return True
+        return self._rider_cancel_penalty_amount(rider_id, obj.id) > 0
+
     def get_pretty_status(self, obj):
+        if self._rider_released_in_history(obj):
+            return "Cancelled"
         status = 'Pending'
         if obj.status == 1:
             status = 'Accepted'
@@ -125,7 +154,10 @@ class BookingSerializer(serializers.ModelSerializer):
         elif obj.status == 4:
             status = "Cancelled"
         elif obj.status == 5:
-            status = "Scheduled"
+            if obj.is_advance and obj.returned_to_pool_at and not obj.rider_id:
+                status = "Returned to pool"
+            else:
+                status = "Scheduled"
 
         return status
 
@@ -155,12 +187,22 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_vehicle_type_label(self, obj):
         return pretty_vehicle_type(obj.booking_type) if obj.booking_type else None
 
+    def get_returned_to_pool_at(self, obj):
+        return self._local_iso(obj.returned_to_pool_at)
+
     def get_penalty_amount(self, obj):
+        history_rider_id = self.context.get("history_rider_id")
+        if history_rider_id:
+            amount = self._rider_cancel_penalty_amount(history_rider_id, obj.id)
+            if amount > 0:
+                return amount
         if obj.status != 4 or not obj.cancelled_by:
             return 0.0
         from api.models.wallet_history_model import WalletHistory
         rows = WalletHistory.objects.filter(
-            booking_id=str(obj.id), tran_type="cancel_penalty", type="debit",
+            booking_id__in=(str(obj.id), obj.id),
+            tran_type="cancel_penalty",
+            type="debit",
             wallet__user_type=obj.cancelled_by,
         )
         return round(sum(float(r.debit_amount or 0) for r in rows), 2)

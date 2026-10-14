@@ -202,20 +202,72 @@ class CancelTests(Base):
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=90))
         self.assertEqual(self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)["penalty_amount"], 20.0)
 
+    def test_rider_no_penalty_over_2h_before_pickup(self):
+        b = self._booking(hours=3)
+        self.svc.accept(self.rider, b.id)
+        preview = self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire", preview=True)
+        self.assertFalse(preview["penalty_applies"])
+        self.assertEqual(preview["penalty_amount"], 0.0)
+
     def test_rider_cancel_releases_and_flags(self):
         flagged = False
         for i in range(3):
             b = self._booking(hours=3 + i * 2)
+            Booking.objects.filter(id=b.id).update(
+                scheduled_pickup_at=timezone.now() + timedelta(minutes=90),
+            )
             self.svc.accept(self.rider, b.id)
             r = self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
             b.refresh_from_db()
             self.assertEqual(b.status, 5)
             self.assertIsNone(b.rider_id)
             self.assertIsNone(b.vehicle_plate_number)
+            self.assertIsNotNone(b.returned_to_pool_at)
             flagged = r["flagged_for_review"]
         self.assertTrue(flagged)
         self.assertEqual(Rider.objects.get(id=self.rider.id).status, 1)  # no auto-suspend
         self.assertEqual(self.svc.violation_count("rider", self.rider.id), 3)
+
+    def test_rider_cannot_cancel_after_trip_started(self):
+        b = self._booking(hours=3)
+        self.svc.accept(self.rider, b.id)
+        Booking.objects.filter(id=b.id).update(
+            scheduled_pickup_at=timezone.now() + timedelta(minutes=30),
+        )
+        self.svc.start(self.rider, b.id)
+        with self.assertRaises(ValidationError):
+            self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire", preview=True)
+        Booking.objects.filter(id=b.id).update(status=2)
+        with self.assertRaises(ValidationError):
+            self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire", preview=True)
+
+    def test_rider_cancel_shows_in_history_with_penalty(self):
+        b = self._booking(hours=3)
+        Booking.objects.filter(id=b.id).update(
+            scheduled_pickup_at=timezone.now() + timedelta(minutes=90),
+        )
+        self.svc.accept(self.rider, b.id)
+        self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
+        history = BookingRepository.get_rider_booking_history(self.rider.id, page_size=20)
+        ids = [row["id"] for row in history["bookings"]]
+        self.assertIn(b.id, ids)
+        row = next(x for x in history["bookings"] if x["id"] == b.id)
+        self.assertEqual(row["pretty_status"], "Cancelled")
+        self.assertGreater(row["penalty_amount"], 0)
+        b.refresh_from_db()
+        customer_row = BookingSerializer(b).data
+        self.assertEqual(customer_row["pretty_status"], "Returned to pool")
+
+    def test_rider_cancel_shows_cancelled_in_history_without_penalty(self):
+        b = self._booking(hours=3)
+        self.svc.accept(self.rider, b.id)
+        preview = self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire", preview=True)
+        self.assertEqual(preview["penalty_amount"], 0.0)
+        self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
+        history = BookingRepository.get_rider_booking_history(self.rider.id, page_size=20)
+        row = next(x for x in history["bookings"] if x["id"] == b.id)
+        self.assertEqual(row["pretty_status"], "Cancelled")
+        self.assertEqual(row["penalty_amount"], 0)
 
 
 class RetryTests(Base):

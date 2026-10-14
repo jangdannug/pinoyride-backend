@@ -9,6 +9,7 @@ from .promo_model import Promo
 from .price_model import Price
 from .otp_model import Otp
 from .booking_model import Booking
+from .booking_contact_session_model import BookingContactSession
 from .booking_payment_model import BookingPayment
 from .booking_ratings_model import BookingRatings
 from .wallet_model import Wallet

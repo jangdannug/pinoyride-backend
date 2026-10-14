@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from geopy.distance import geodesic
 
+from api.models.advance_booking_rider_release_model import AdvanceBookingRiderRelease
 from api.models.booking_model import Booking
 from api.models.booking_payment_model import BookingPayment
 from api.models.wallet_history_model import WalletHistory
@@ -338,6 +339,7 @@ class AdvanceBookingService:
         RiderVehicleDetailsRepository.apply_vehicle_snapshot_to_booking(booking, vehicle)
         booking.rider = rider
         booking.accepted_at = _now()
+        booking.returned_to_pool_at = None
         booking.updated_by = rider.id
         booking.updated_by_user = "rider"
         booking.save()
@@ -440,7 +442,8 @@ class AdvanceBookingService:
         booking = self._assigned(rider.id, booking_id)
         if not booking.is_advance:
             raise ValidationError("Not an advance booking")
-        if booking.status not in (STATUS_SCHEDULED, STATUS_ACCEPTED):
+        # Only before the rider heads to pickup / trip starts (status 1 or 2).
+        if booking.status != STATUS_SCHEDULED:
             raise ValidationError("This booking can no longer be cancelled")
         if not preview and not reason:
             raise ValidationError("Reason is required")
@@ -458,9 +461,11 @@ class AdvanceBookingService:
                   "accepted_at", "rider_arrived_at", "reminder_sent_at"):
             setattr(booking, f, None)
         booking.cancel_reason = reason
+        booking.returned_to_pool_at = _now()
         booking.updated_by = rider.id
         booking.updated_by_user = "rider"
         booking.save()
+        AdvanceBookingRiderRelease.objects.create(booking_id=booking.id, rider_id=rider.id)
         if was_active:
             from api.models.rider_model import Rider
             Rider.objects.filter(id=rider.id).update(is_available=1)

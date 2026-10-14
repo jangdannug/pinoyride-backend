@@ -23,8 +23,9 @@ pymysql.version_info = (1,4,6, 'final', 0)
 pymysql.install_as_MySQLdb()
 from corsheaders.defaults import default_headers
 
-# Load environment variables from .env file
-load_dotenv()
+# pinoyride-backend/.env (not CWD — manage.py lives in pinoy_ride/)
+_BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv(os.path.join(_BACKEND_ROOT, ".env"))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +41,9 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media") 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+# Public origin for *_pretty image URLs. Must match the runserver host/port locally.
+IMAGE_BASE_URL = os.getenv("IMAGE_BASE_URL", "http://127.0.0.1:8001/media").rstrip("/") 
 
 
 
@@ -329,7 +332,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*', '192.168.100.40:3000',]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-broker_url = 'redis://localhost:6379/0'
+broker_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 result_backend = 'django-db'
 timezone = 'UTC'
 
@@ -402,3 +405,4 @@ ITEXTMO_CONFIG = {
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+TWILIO_PROXY_SERVICE_SID = os.getenv('TWILIO_PROXY_SERVICE_SID')

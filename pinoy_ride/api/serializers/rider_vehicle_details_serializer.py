@@ -129,13 +129,13 @@ class RiderVehicleDetailsSerializer(serializers.ModelSerializer):
     def get_or_cr_img_pretty(self, obj):
         """Return full URL for OR/CR image"""
         if obj.v_or_cr_img and hasattr(obj.v_or_cr_img, 'name'):
-            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
             return f"{base_url}/{obj.v_or_cr_img.name}"
         return None
 
     def get_vehicle_img_pretty(self, obj):
         """Return full URL for vehicle image"""
         if obj.v_vehicle_img and hasattr(obj.v_vehicle_img, 'name'):
-            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
             return f"{base_url}/{obj.v_vehicle_img.name}"
         return None

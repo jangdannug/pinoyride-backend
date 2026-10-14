@@ -59,7 +59,7 @@ class MessageRepository:
                 if img_name.startswith('http://') or img_name.startswith('https://'):
                     image_url = img_name
                 else:
-                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
                     image_url = f"{base_url}/{img_name}"
 
             messages_data.append({

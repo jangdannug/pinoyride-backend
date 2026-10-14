@@ -76,7 +76,7 @@ class RiderSerializer(serializers.ModelSerializer):
     def get_drivers_license_img_pretty(self, obj):
         """Return full URL for driver's license image"""
         if obj.drivers_license_img and hasattr(obj.drivers_license_img, 'name'):
-            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
             return f"{base_url}/{obj.drivers_license_img.name}"
         return None
 
@@ -88,7 +88,7 @@ class RiderSerializer(serializers.ModelSerializer):
             if img_name.startswith('http://') or img_name.startswith('https://'):
                 return img_name
             # Otherwise, concat with base URL
-            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+            base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
             return f"{base_url}/{img_name}"
         return None
 
@@ -120,7 +120,7 @@ class RiderSerializer(serializers.ModelSerializer):
                 if img_name.startswith('http://') or img_name.startswith('https://'):
                     selfie_url = img_name
                 else:
-                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:7966/media')
+                    base_url = os.getenv('IMAGE_BASE_URL', 'http://127.0.0.1:8001/media')
                     selfie_url = f"{base_url}/{img_name}"
 
             return {

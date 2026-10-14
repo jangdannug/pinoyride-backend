@@ -5,7 +5,13 @@ from api.utils.app_response import AppResponse
 from api.models import Test
 import json
 from api.serializers import BookingSerializer, PromoSerializer
-from api.utils.custom_error import CustomError, NotFoundError, ValidationError
+from api.utils.custom_error import (
+    CustomError,
+    ForbiddenError,
+    NotFoundError,
+    ValidationError,
+)
+from api.services.booking_contact_service import BookingContactService
 from django.db import transaction
 from api.repositories.rider_vehicle_details_repository import (
     RiderVehicleDetailsRepository,
@@ -598,7 +604,17 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
 
             booking_details = self.service.get_booking_by_id(booking_id=booking_id)
 
-            serializer = BookingSerializer(booking_details)
+            serializer_context = {
+                "omit_contact_phone": int(booking_details.status) == 3,
+            }
+            rider_id = request.data.get("rider_id")
+            if rider_id:
+                serializer_context["history_rider_id"] = rider_id
+
+            serializer = BookingSerializer(
+                booking_details,
+                context=serializer_context,
+            )
            
             return AppResponse.send_success(data=serializer.data, message="Booking details fetched successfully")
 
@@ -611,6 +627,59 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
 
         except Exception as e:
 
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='get_contact')
+    def get_contact(self, request):
+        """Return masked proxy contact for a completed booking (24h window)."""
+        try:
+            booking_id = request.data.get("booking_id")
+            user_type = request.data.get("user_type", "")
+            customer_id = request.data.get("customer_id")
+            rider_id = request.data.get("rider_id")
+
+            if not booking_id:
+                return AppResponse.send_error(message="Booking id is required", code=400)
+            if user_type not in ("customer", "rider"):
+                return AppResponse.send_error(message="Invalid user type", code=400)
+
+            caller_id = customer_id if user_type == "customer" else rider_id
+            if not caller_id:
+                return AppResponse.send_error(
+                    message=f"{user_type.capitalize()} id is required", code=400
+                )
+
+            app_logger(
+                1,
+                "booking_get_contact",
+                {
+                    "booking_id": booking_id,
+                    "user_type": user_type,
+                    "user_id": caller_id,
+                },
+            )
+
+            payload = BookingContactService().get_contact_payload(
+                booking_id=int(booking_id),
+                user_type=user_type,
+                user_id=int(caller_id),
+            )
+            return AppResponse.send_success(
+                data=payload,
+                message="Contact details fetched successfully",
+            )
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ForbiddenError as e:
+            return AppResponse.send_error(message=str(e), code=403)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
             return AppResponse.send_error(message=str(e), code=500)
 
 

@@ -8,6 +8,7 @@ from api.base import (
     ApiService
 )
 from django.conf import settings
+from api.utils.app_logger import app_logger
 import json
 class OtpService:
 
@@ -166,6 +167,13 @@ class OtpService:
     # @transaction.atomic
     def call_otp_api(self, mobile_no, otp_code):
         """CALL OTP API"""
+
+        if settings.ENV == 'development':
+            app_logger(1, "DEV MODE: Skipping SMS", {
+                "mobile_no": mobile_no,
+                "code": otp_code['code'],
+            })
+            return {"dev": True, "code": otp_code['code']}
 
         url = self.config['ITEXTMO_BASE_URL']
         headers = {

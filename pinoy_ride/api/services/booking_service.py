@@ -160,7 +160,10 @@ class BookingService:
         """Update booking status for rider"""
 
         update_booking = self.booking.update_booking_status_for_rider(booking_instance=booking, booking_status=booking_status, rider_instance=rider)
-    
+        if int(booking_status) == 3:
+            from api.services.booking_contact_service import BookingContactService
+
+            BookingContactService().provision_for_booking(update_booking)
         return update_booking
 
 

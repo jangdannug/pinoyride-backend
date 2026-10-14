@@ -39,3 +39,14 @@ class PartialCustomerSerializer(serializers.ModelSerializer):
             return TopPhEkycDetailsSerializer(record).data
         except TopPhEkycDetails.DoesNotExist:
             return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context.get("omit_contact_phone"):
+            data.pop("mobile", None)
+            data.pop("email", None)
+            ekyc = data.get("ekyc_details")
+            if isinstance(ekyc, dict):
+                for key in ("mobile_no", "pretty_mobile_no", "email_address"):
+                    ekyc.pop(key, None)
+        return data
