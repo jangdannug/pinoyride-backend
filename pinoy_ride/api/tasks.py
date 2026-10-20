@@ -1,6 +1,12 @@
 
-from api.models import Beneficiary, Batch
 from celery import shared_task
+
+# Legacy models from the project template. They no longer exist in api.models, and the hard import
+# made this whole module (and so the remind-advance-bookings Celery task) fail to load.
+try:
+    from api.models import Beneficiary, Batch
+except ImportError:  # pragma: no cover
+    Beneficiary = Batch = None
 
 from django.conf import settings
 from api.utils.mailer import EmailSender

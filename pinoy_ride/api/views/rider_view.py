@@ -196,7 +196,57 @@ class RiderViewSet(viewsets.ViewSet):
                 # Update login status to 0 (logged out)
                 self.service.update_login_status(rider_instance=rider, status=0)
 
+                # Stop pushes to this device once logged out
+                if rider.firebase_token:
+                    self.service.update_firebase_token(rider_instance=rider, firebase_token=None)
+
             return AppResponse.send_success(data=[], message="Logout successful")
+
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='update_firebase_token')
+    def update_firebase_token(self, request):
+        """Register / refresh the rider's FCM device token (app start, login, token refresh)"""
+
+        try:
+
+            rider_id = request.data.get("rider_id", "")
+            firebase_token = (request.data.get("firebase_token", "") or "").strip()
+
+            if not rider_id:
+                return AppResponse.send_error(message="Rider Id is required", code=400)
+            if not firebase_token:
+                return AppResponse.send_error(message="Firebase token is required", code=400)
+            if len(firebase_token) > 4096:
+                return AppResponse.send_error(message="Invalid firebase token", code=400)
+
+            with transaction.atomic():
+                rider = self.service.get_rider_by_id(rider_id=rider_id)
+
+                # Known gap (QA PN-56 / Q14): there is no per-rider auth on riders/* yet, so rider_id is
+                # trusted from the body. At minimum only accept tokens for a logged-in rider.
+                if rider.is_login != 1:
+                    return AppResponse.send_error(message="Rider is not logged in", code=403)
+
+                # One device = one rider: drop this token from any other rider who used the phone before
+                from api.models.rider_model import Rider
+                Rider.objects.filter(firebase_token=firebase_token).exclude(id=rider.id).update(firebase_token=None)
+
+                if rider.firebase_token != firebase_token:
+                    self.service.update_firebase_token(rider_instance=rider, firebase_token=firebase_token)
+
+            return AppResponse.send_success(data={"rider_id": rider.id, "registered": True},
+                                            message="Firebase token updated")
 
         except NotFoundError as e:
             return AppResponse.send_error(message=str(e), code=404)
@@ -438,9 +488,11 @@ class RiderViewSet(viewsets.ViewSet):
             if not rider_id:
                 return AppResponse.send_error(message="Rider ID is required", code=400)
 
+            # Duplicate plates are blocked only when adding a vehicle. Editing
+            # keeps (or changes to) any plate, so old duplicates can still be saved.
             serializer_context = {
                 "vehicle_id": vehicle_id or None,
-                "check_duplicate_plate": True,
+                "check_duplicate_plate": not vehicle_id,
             }
             rider_vehicle_serializer = RiderVehicleDetailsSerializer(
                 data=vehicle_details,

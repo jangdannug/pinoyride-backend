@@ -50,6 +50,8 @@ class Booking(SoftDeleteModel):
     cancel_reason = models.CharField(max_length=255, null=True, blank=True)
     rider_arrived_at = models.DateTimeField(null=True, blank=True)
     reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    # Early rider reminder (ADVANCE_EARLY_REMINDER_MINUTES, default 1 hour before pickup) (0106)
+    early_reminder_sent_at = models.DateTimeField(null=True, blank=True)
     # Set when an assigned rider cancels an advance booking (customer sees re-pool copy)
     returned_to_pool_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True, db_index=True)

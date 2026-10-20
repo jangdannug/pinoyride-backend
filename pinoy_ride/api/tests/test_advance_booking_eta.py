@@ -196,6 +196,18 @@ class CancelTests(Base):
         b.refresh_from_db()
         self.assertEqual(BookingSerializer(b).data["penalty_amount"], 10.0)
 
+    def test_customer_cancel_penalty_not_on_rider_history(self):
+        b = self._booking(hours=3)
+        Booking.objects.filter(id=b.id).update(
+            scheduled_pickup_at=timezone.now() + timedelta(minutes=20),
+        )
+        self.svc.accept(self.rider, b.id)
+        self.svc.cancel_by_customer(self.customer.id, b.id, reason="changed plans")
+        history = BookingRepository.get_rider_booking_history(self.rider.id, page_size=20)
+        row = next(x for x in history["bookings"] if x["id"] == b.id)
+        self.assertEqual(row["pretty_status"], "Cancelled")
+        self.assertEqual(row["penalty_amount"], 0)
+
     @override_settings(CANCEL_PENALTY_PERCENT=20)
     def test_settings_override(self):
         b = self._booking(hours=3)
@@ -314,6 +326,72 @@ class ReminderTests(Base):
                                                        scheduled_pickup_at=timezone.now() + timedelta(minutes=4))
         self.assertEqual(self.svc.send_due_reminders(), 1)
         self.assertEqual(self.svc.send_due_reminders(), 0)
+
+    def _accepted(self, pickup_minutes, accepted_minutes_ago=180):
+        b = self._booking()
+        self.svc.accept(self.rider, b.id)
+        now = timezone.now()
+        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=now + timedelta(minutes=pickup_minutes),
+                                               accepted_at=now - timedelta(minutes=accepted_minutes_ago))
+        return b
+
+    def _pickup_in(self, b, minutes):
+        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=minutes))
+
+    def test_early_then_final_each_once(self):
+        b = self._accepted(61)
+        self.assertEqual(self.svc.send_due_reminders(), 0)  # not yet inside the hour
+        self._pickup_in(b, 59)
+        self.assertEqual(self.svc.send_due_reminders(), 1)  # early (1 hour)
+        b.refresh_from_db()
+        self.assertIsNotNone(b.early_reminder_sent_at)
+        self.assertIsNone(b.reminder_sent_at)
+        self.assertEqual(self.svc.send_due_reminders(), 0)  # early only once
+        self._pickup_in(b, 30)
+        self.assertEqual(self.svc.send_due_reminders(), 0)
+        self._pickup_in(b, 4)
+        self.assertEqual(self.svc.send_due_reminders(), 1)  # final (5 min)
+        b.refresh_from_db()
+        self.assertIsNotNone(b.reminder_sent_at)
+        self.assertEqual(self.svc.send_due_reminders(), 0)  # final only once
+
+    def test_no_early_when_accepted_inside_the_hour(self):
+        b = self._accepted(30, accepted_minutes_ago=0)
+        self.assertEqual(self.svc.send_due_reminders(), 0)
+        b.refresh_from_db()
+        self.assertIsNone(b.early_reminder_sent_at)
+        self._pickup_in(b, 4)
+        self.assertEqual(self.svc.send_due_reminders(), 1)  # still gets the 5-minute one
+        b.refresh_from_db()
+        self.assertIsNone(b.early_reminder_sent_at)
+        self.assertIsNotNone(b.reminder_sent_at)
+
+    def test_no_early_within_5_minutes_of_final(self):
+        b = self._accepted(9)  # early would land 4 min before the final one
+        self.assertEqual(self.svc.send_due_reminders(), 0)
+        b.refresh_from_db()
+        self.assertIsNone(b.early_reminder_sent_at)
+        self._pickup_in(b, 11)  # just outside the gap: early still goes out (e.g. beat was down)
+        self.assertEqual(self.svc.send_due_reminders(), 1)
+
+    def test_no_reminders_when_not_scheduled_or_no_rider(self):
+        b = self._accepted(59)
+        Booking.objects.filter(id=b.id).update(status=4)  # cancelled
+        unassigned = self._booking()
+        self._pickup_in(unassigned, 59)
+        self.assertEqual(self.svc.send_due_reminders(), 0)
+
+    def test_rider_cancel_resets_early_reminder(self):
+        b = self._accepted(59)
+        self.assertEqual(self.svc.send_due_reminders(), 1)
+        self.svc.cancel_by_rider(self.rider, b.id, reason="Emergency")
+        b.refresh_from_db()
+        self.assertIsNone(b.early_reminder_sent_at)
+
+    @override_settings(ADVANCE_EARLY_REMINDER_MINUTES=120)
+    def test_early_minutes_setting_override(self):
+        b = self._accepted(119)
+        self.assertEqual(self.svc.send_due_reminders(), 1)
 
 
 class EtaTests(Base):

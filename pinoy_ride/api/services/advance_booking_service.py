@@ -6,6 +6,7 @@ from datetime import timedelta
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from geopy.distance import geodesic
@@ -21,6 +22,8 @@ from api.repositories import (
     PinoyRideWalletHistoryRepository,
 )
 from api.repositories.rider_vehicle_details_repository import RiderVehicleDetailsRepository
+from api.services import push_service
+from api.services import passenger_push
 from api.utils.advance_settings import cfg
 from api.utils.custom_error import NotFoundError, ValidationError
 from api.utils.vehicle_plate_utils import pretty_vehicle_type
@@ -49,7 +52,7 @@ def _iso(dt):
 
 
 def notify(event, booking, **extra):
-    """Push notifications are pending Firebase/APNs credentials; log only for now."""
+    """Legacy log line kept for traceability; real sends go through api.services.push_service."""
     logger.info("notify %s booking=%s %s", event, getattr(booking, "id", None), extra)
 
 
@@ -89,10 +92,19 @@ class AdvanceBookingService:
                                     scheduled_pickup_at__lt=_now())
         if customer_id is not None:
             qs = qs.filter(customer_id=customer_id)
-        n = qs.update(status=STATUS_CANCELLED, cancelled_at=_now(), cancelled_by="system",
-                      cancel_reason=EXPIRED_REASON, updated_by_user="system", updated_at=_now())
+        ids = list(qs.values_list("id", flat=True)[:200])
+        if not ids:
+            return 0
+        n = Booking.objects.filter(id__in=ids, status=STATUS_SCHEDULED, rider__isnull=True).update(
+            status=STATUS_CANCELLED, cancelled_at=_now(), cancelled_by="system",
+            cancel_reason=EXPIRED_REASON, updated_by_user="system", updated_at=_now())
         if n:
             logger.info("expired %s stale advance bookings (customer=%s)", n, customer_id)
+            for b in Booking.objects.filter(id__in=ids, status=STATUS_CANCELLED, cancelled_by="system"):
+                # Rider side: expired advance bookings never have a rider, so this logs a skip today.
+                push_service.defer(push_service.notify_booking_expired, b)
+                # Passenger: "advance_expired" (status 4, cancelled_by='system')
+                push_service.defer(passenger_push.advance_expired, b)
         return n
 
     @staticmethod
@@ -114,6 +126,8 @@ class AdvanceBookingService:
         booking.status = STATUS_SCHEDULED
         booking.save(update_fields=["is_advance", "scheduled_pickup_at", "status", "updated_at"])
         notify("New Booking Nearby!", booking)
+        # After commit, so the payment row exists for the fare in the message.
+        push_service.defer(push_service.notify_advance_available, booking)
         return booking
 
     # ------------------------------------------------------------- passenger
@@ -149,6 +163,19 @@ class AdvanceBookingService:
         payment = BookingPayment.objects.filter(booking_id=booking.id).first()
         return float(payment.total_amount or 0) if payment else 0.0
 
+    @staticmethod
+    def _penalty_fare_base(booking):
+        """Advance cancel penalties use the fare quoted at booking, not post start_advance actual."""
+        payment = BookingPayment.objects.filter(booking_id=booking.id).first()
+        if not payment:
+            return 0.0
+        details = payment.all_payment_details or {}
+        if booking.is_advance and isinstance(details, dict):
+            estimated = details.get("estimated_total_amount")
+            if estimated is not None:
+                return float(estimated)
+        return float(payment.total_amount or 0)
+
     def customer_penalty(self, booking):
         now = _now()
         grace = cfg("CANCEL_FREE_GRACE_MINUTES")
@@ -157,7 +184,7 @@ class AdvanceBookingService:
         if not booking.scheduled_pickup_at:
             return 0.0, 0
         if booking.scheduled_pickup_at - now < timedelta(minutes=cfg("CANCEL_PENALTY_WINDOW_MINUTES")):
-            amount = round(self._total_amount(booking) * cfg("CANCEL_PENALTY_PERCENT") / 100.0, 2)
+            amount = round(self._penalty_fare_base(booking) * cfg("CANCEL_PENALTY_PERCENT") / 100.0, 2)
             return amount, cfg("CANCEL_VIOLATION_COUNT")
         return 0.0, 0
 
@@ -243,6 +270,8 @@ class AdvanceBookingService:
             from api.models.rider_model import Rider
             Rider.objects.filter(id=booking.rider_id, is_available=2).update(is_available=1)
             notify("Advance Booking Cancelled", booking, rider_id=booking.rider_id)
+        # Assigned rider gets passenger_cancelled; with no rider it logs "nothing to send".
+        push_service.defer(push_service.notify_passenger_cancelled, booking, rider_id=booking.rider_id)
         count, flagged = self._review_flag("customer", customer_id)
         result.update({"status": booking.status, "violation_total": count, "flagged_for_review": flagged})
         return result
@@ -267,6 +296,8 @@ class AdvanceBookingService:
         booking.save()
         Booking.objects.filter(id=booking.id).update(created_at=_now())  # reset search timestamp
         booking.refresh_from_db()
+        push_service.defer(push_service.notify_advance_available if booking.is_advance
+                           else push_service.notify_new_booking, booking)
         return booking
 
     # ----------------------------------------------------------------- rider
@@ -343,6 +374,7 @@ class AdvanceBookingService:
         booking.updated_by = rider.id
         booking.updated_by_user = "rider"
         booking.save()
+        push_service.defer(passenger_push.advance_accepted, booking)
         return booking
 
     def _assigned(self, rider_id, booking_id, lock=True):
@@ -413,6 +445,21 @@ class AdvanceBookingService:
         booking.save()
         from api.models.rider_model import Rider
         Rider.objects.filter(id=rider.id).update(is_available=2)
+        from api.services import AdminPriceService, PriceConfigService, PromoService
+        from api.services.booking_fare_service import BookingFareService
+
+        fare_service = BookingFareService(PriceConfigService(), AdminPriceService(), PromoService())
+        fare_service.recompute_and_update_payment(
+            booking,
+            departure_at=_now(),
+            fare_is_estimate=False,
+        )
+        payment = BookingPayment.objects.filter(booking_id=booking.id).first()
+        if payment and isinstance(payment.all_payment_details, dict):
+            payment.all_payment_details["fare_is_estimate"] = False
+            payment.all_payment_details["fare_recomputed_at"] = _iso(_now())
+            payment.save(update_fields=["all_payment_details"])
+        push_service.defer(passenger_push.rider_heading, booking)
         return booking
 
     @transaction.atomic
@@ -435,6 +482,8 @@ class AdvanceBookingService:
         rider.save(update_fields=["current_lat", "current_long", "current_location_updated_at", "updated_at"])
         cache.delete(f"booking_eta:{booking.id}")
         notify("Passenger notified", booking)
+        # Passenger Dev owns the passenger copy/type; routed through push_service so log mode shows it.
+        push_service.defer(passenger_push.rider_arrived, booking)
         return booking
 
     @transaction.atomic
@@ -458,7 +507,7 @@ class AdvanceBookingService:
         booking.rider = None
         booking.rider_vehicle = None
         for f in ("vehicle_plate_number", "vehicle_brand", "vehicle_model", "vehicle_color", "vehicle_type",
-                  "accepted_at", "rider_arrived_at", "reminder_sent_at"):
+                  "accepted_at", "rider_arrived_at", "reminder_sent_at", "early_reminder_sent_at"):
             setattr(booking, f, None)
         booking.cancel_reason = reason
         booking.returned_to_pool_at = _now()
@@ -472,26 +521,62 @@ class AdvanceBookingService:
         if amount > 0:
             self._apply_penalty("rider", rider.id, booking, amount)
         notify("Rider cancelled - finding you another rider", booking)
+        # Passenger Dev owns the passenger copy/type.
+        push_service.defer(passenger_push.rider_cancelled_reassigning, booking)
+        # Back in the pool: offer it to other eligible riders (not the one who released it).
+        push_service.defer(push_service.notify_advance_available, booking, exclude_rider_ids=[rider.id])
         count, flagged = self._review_flag("rider", rider.id)
         result.update({"status": booking.status, "violation_total": count, "flagged_for_review": flagged})
         return result
 
     # ---------------------------------------------------------------- reminder
+    # The early reminder never goes out within this many minutes of the final one (no back-to-back pushes).
+    EARLY_REMINDER_GAP_MINUTES = 5
+
+    @staticmethod
+    def _claim_and_send(b, field, now, minutes=None):
+        """Claim first so two beat runs can't both send; release the claim if nothing was delivered
+        (fcm mode with no/invalid token, FCM error), so the next run retries until the window closes.
+        Returns 1 if delivered, else 0."""
+        if not Booking.objects.filter(id=b.id, **{f"{field}__isnull": True}).update(**{field: now}):
+            return 0
+        result = (push_service.notify_advance_reminder(b) if minutes is None
+                  else push_service.notify_advance_reminder(b, minutes=minutes))
+        if result.delivered:
+            return 1
+        Booking.objects.filter(id=b.id, **{field: now}).update(**{field: None})
+        logger.info("advance reminder not delivered booking=%s rider=%s field=%s status=%s reason=%s",
+                    b.id, b.rider_id, field, result.get("status"), result.get("reason"))
+        return 0
+
     @staticmethod
     def send_due_reminders():
+        """Assigned-rider reminders for scheduled advance bookings:
+        - early: ADVANCE_EARLY_REMINDER_MINUTES (60) before pickup, tracked by early_reminder_sent_at. Skipped
+          when the rider accepted inside that window, or when it would land within EARLY_REMINDER_GAP_MINUTES
+          of the final reminder.
+        - final: ADVANCE_REMINDER_MINUTES (5) before pickup, tracked by reminder_sent_at (unchanged).
+        Returns the number of reminders delivered this run."""
         now = _now()
+        final_min = cfg("ADVANCE_REMINDER_MINUTES")
+        early_min = cfg("ADVANCE_EARLY_REMINDER_MINUTES")
+        gap = AdvanceBookingService.EARLY_REMINDER_GAP_MINUTES
+        sent = 0
+        if early_min > final_min + gap:
+            early_due = Booking.objects.filter(
+                is_advance=True, status=STATUS_SCHEDULED, rider__isnull=False, early_reminder_sent_at__isnull=True,
+                scheduled_pickup_at__lte=now + timedelta(minutes=early_min),
+                scheduled_pickup_at__gt=now + timedelta(minutes=final_min + gap),
+            ).exclude(accepted_at__gte=F("scheduled_pickup_at") - timedelta(minutes=early_min))
+            for b in early_due:
+                sent += AdvanceBookingService._claim_and_send(b, "early_reminder_sent_at", now, minutes=early_min)
         due = Booking.objects.filter(
             is_advance=True, status=STATUS_SCHEDULED, rider__isnull=False, reminder_sent_at__isnull=True,
-            scheduled_pickup_at__lte=now + timedelta(minutes=cfg("ADVANCE_REMINDER_MINUTES")),
+            scheduled_pickup_at__lte=now + timedelta(minutes=final_min),
             scheduled_pickup_at__gt=now - timedelta(minutes=30),
         )
-        sent = 0
         for b in due:
-            if Booking.objects.filter(id=b.id, reminder_sent_at__isnull=True).update(reminder_sent_at=now):
-                notify("Advance Booking Reminder", b, rider_id=b.rider_id,
-                       body=f"Your scheduled booking will start in {cfg('ADVANCE_REMINDER_MINUTES')} minutes. "
-                            "Please proceed to the pickup location and get ready to pick up your passenger.")
-                sent += 1
+            sent += AdvanceBookingService._claim_and_send(b, "reminder_sent_at", now)
         return sent
 
     # --------------------------------------------------------------------- ETA
