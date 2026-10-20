@@ -1,7 +1,7 @@
 import os
 import requests
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from api.base import ApiService
 from geopy.distance import geodesic
 
@@ -59,7 +59,15 @@ class GoogleMapsService:
         eta_minutes = (distance_km / avg_speed_kmh) * 60
         return round(eta_minutes)
 
-    def get_eta(self, origin_lat: float, origin_lng: float, dest_lat: float, dest_lng: float, mode: str = "driving") -> Dict:
+    def get_eta(
+        self,
+        origin_lat: float,
+        origin_lng: float,
+        dest_lat: float,
+        dest_lng: float,
+        mode: str = "driving",
+        departure_time: Union[str, int, None] = None,
+    ) -> Dict:
         """
         Get ETA from origin to destination using Google Maps Distance Matrix API
         Args:
@@ -81,13 +89,14 @@ class GoogleMapsService:
         origin = f"{origin_lat},{origin_lng}"
         destination = f"{dest_lat},{dest_lng}"
 
+        dep = departure_time if departure_time is not None else "now"
         params = {
             "origins": origin,
             "destinations": destination,
             "mode": mode,
             "key": self.api_key,
             "traffic_model": "best_guess",
-            "departure_time": "now"
+            "departure_time": dep,
         }
 
         try:

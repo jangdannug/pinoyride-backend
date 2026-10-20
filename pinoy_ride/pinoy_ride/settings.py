@@ -309,12 +309,19 @@ LOGGING = {
         #     'propagate': True,
         # },
         'myapp': {  # Custom logger for your application
-            'handlers': ['daily_file'],
+            'handlers': ['daily_file'] + (['console'] if DEBUG else []),
             'level': 'DEBUG',
             'propagate': False,  # Prevent propagation to other loggers
         },
     },
 }
+
+if DEBUG:
+    LOGGING['handlers']['console'] = {
+        'level': 'INFO',
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    }
 
 
 # Static files (CSS, JavaScript, Images)

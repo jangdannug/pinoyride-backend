@@ -177,7 +177,57 @@ class CustomerViewSet(viewsets.ViewSet):
                 # Update login status to 0 (logged out)
                 self.service.update_login_status(customer_instance=customer, status=0)
 
+                # Stop pushes to this device once logged out
+                if customer.firebase_token:
+                    self.service.update_firebase_token(customer_instance=customer, firebase_token=None)
+
             return AppResponse.send_success(data=[], message="Logout successful")
+
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+
+        except Exception as e:
+
+            return AppResponse.send_error(message=str(e), code=500)
+
+
+    @action(detail=False, methods=['post'], url_path='update_firebase_token')
+    def update_firebase_token(self, request):
+        """Register / refresh the customer's FCM device token (after login, app start, token refresh)"""
+
+        try:
+
+            customer_id = request.data.get("customer_id", "")
+            firebase_token = (request.data.get("firebase_token", "") or "").strip()
+
+            if not customer_id:
+                return AppResponse.send_error(message="Customer Id is required", code=400)
+            if not firebase_token:
+                return AppResponse.send_error(message="Firebase token is required", code=400)
+            if len(firebase_token) > 4096:
+                return AppResponse.send_error(message="Invalid firebase token", code=400)
+
+            with transaction.atomic():
+                # NotFoundError (404) if the customer doesn't exist
+                customer = self.service.get_customer_by_id(customer_id=customer_id)
+
+                # No is_login check: customer login only sets is_login for app versions below 1.0.23,
+                # so current builds (1.0.25) would always be rejected. Real caller checks come with token auth.
+                if getattr(customer, "deleted_at", None):
+                    return AppResponse.send_error(message="Customer not found", code=404)
+
+                # One device = one customer: drop this token from anyone who used the phone before
+                from api.models.customer_model import Customer
+                Customer.objects.filter(firebase_token=firebase_token).exclude(id=customer.id).update(firebase_token=None)
+
+                if customer.firebase_token != firebase_token:
+                    self.service.update_firebase_token(customer_instance=customer, firebase_token=firebase_token)
+
+            return AppResponse.send_success(data={"customer_id": customer.id, "registered": True},
+                                            message="Firebase token updated")
 
         except NotFoundError as e:
             return AppResponse.send_error(message=str(e), code=404)
