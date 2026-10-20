@@ -18,4 +18,5 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     **(app.conf.beat_schedule or {}),
     "remind-advance-bookings": {"task": "api.tasks.remind_advance", "schedule": 60.0},
+    "flag-at-risk-advance-bookings": {"task": "api.tasks.flag_at_risk_advance", "schedule": 60.0},
 }

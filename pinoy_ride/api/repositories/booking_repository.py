@@ -118,6 +118,11 @@ class BookingRepository:
         from api.services.google_maps_service import GoogleMapsService
         google_maps_service = GoogleMapsService()
 
+        next_adv = None
+        if rider_id:
+            from api.services.booking_window_service import next_advance_for_rider
+            next_adv = next_advance_for_rider(rider_id)
+
         serialized_bookings = []
         for booking in nearby_bookings:
             booking_data = BookingSerializer(booking).data
@@ -170,6 +175,15 @@ class BookingRepository:
                 eta_pickup_to_dropoff = round((pickup_to_dropoff_distance / 30) * 60)
                 booking_data['eta_pickup_to_dropoff_minutes'] = eta_pickup_to_dropoff
                 booking_data['pretty_eta_pickup_to_dropoff'] = format_eta_minutes(eta_pickup_to_dropoff)
+
+            # Overlap plan section 5: hide rides this rider can't fit before their next advance booking
+            if next_adv is not None:
+                from api.services.booking_window_service import regular_fits
+                try:
+                    if not regular_fits(next_adv, timezone.now(), eta_rider_to_pickup, eta_pickup_to_dropoff, booking):
+                        continue
+                except Exception as e:
+                    app_logger(1, f"Error checking advance fit: {str(e)}", [])
 
             serialized_bookings.append(booking_data)
 
@@ -436,6 +450,10 @@ class BookingRepository:
             RiderVehicleDetailsRepository,
         )
 
+        from api.services import booking_window_service as bws
+        # Lock the rider first so two accepts for the same rider can't both pass the checks
+        rider_locked = bws.lock_rider(rider_instance.id) or rider_instance
+
         try:
             # Lock the row so no one else can update until commit
             booking = Booking.objects.select_for_update().get(
@@ -445,6 +463,9 @@ class BookingRepository:
             )
         except Booking.DoesNotExist:
             return None  # already assigned
+
+        # Overlap plan section 5: not on another ride, and still makes the next advance pickup
+        bws.check_rider_regular(rider_locked, booking)
 
         vehicle = RiderVehicleDetailsRepository.require_booking_vehicle(
             rider_id=rider_instance.id,

@@ -125,10 +125,9 @@ class PoolAcceptTests(Base):
             self.svc.accept(self.rider2, b.id)
         # scheduled accept is not an ongoing booking
         self.assertIsNone(BookingRepository.check_rider_ongoing_booking(self.rider.id))
-        # gap rule
+        # OV-41: the fixed 90-minute gap is gone; 30 min apart fits by windows (same spot, ~1 min ride)
         near = self._booking(hours=3.5)
-        with self.assertRaises(ValidationError):
-            self.svc.accept(self.rider, near.id)
+        self.assertEqual(self.svc.accept(self.rider, near.id).rider_id, self.rider.id)
 
     def test_details_phone_visibility(self):
         b = self._booking()

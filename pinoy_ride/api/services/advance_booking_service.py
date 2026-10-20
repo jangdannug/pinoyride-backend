@@ -289,6 +289,15 @@ class AdvanceBookingService:
             raise ValidationError("A cancelled booking cannot be retried")
         if booking.is_advance:
             self.validate_window(booking.scheduled_pickup_at)
+        # Overlap policy: recompute the window and re-check against the passenger's other bookings.
+        from api.services import booking_window_service as bws
+        bws.lock_customer(customer_id)
+        window = bws.compute_window(
+            booking.pickup_lat, booking.pickup_long, booking.dropoff_lat, booking.dropoff_long,
+            is_advance=booking.is_advance, scheduled_pickup_at=booking.scheduled_pickup_at,
+        )
+        bws.check_passenger(customer_id, window, is_advance=booking.is_advance, exclude_id=booking.id)
+        bws.apply_window(booking, window, save=False)
         now = _local(_now())
         booking.status = STATUS_SCHEDULED if booking.is_advance else STATUS_PENDING
         booking.date_created = now.strftime("%Y-%m-%d")
@@ -350,6 +359,8 @@ class AdvanceBookingService:
     def accept(self, rider, booking_id):
         if rider.is_verified != 1 and rider.status != 1:
             raise ValidationError("Rider account is not verified or active")
+        from api.services.booking_window_service import lock_rider
+        lock_rider(rider.id)  # two accepts for one rider at the same moment run one after the other
         booking = Booking.objects.select_for_update().filter(id=booking_id, is_advance=True).first()
         if booking is None:
             raise NotFoundError("Booking not found")
@@ -359,18 +370,14 @@ class AdvanceBookingService:
             raise ValidationError("Pickup time has passed")
         vehicle = self._current_vehicle(rider.id)
         RiderVehicleDetailsRepository.ensure_vehicle_matches_booking_type(vehicle, booking.booking_type)
-        gap = timedelta(minutes=cfg("ADVANCE_RIDER_MIN_GAP_MINUTES"))
-        clash = Booking.objects.filter(
-            rider_id=rider.id, is_advance=True, status__in=[STATUS_SCHEDULED, STATUS_ACCEPTED],
-            scheduled_pickup_at__gt=booking.scheduled_pickup_at - gap,
-            scheduled_pickup_at__lt=booking.scheduled_pickup_at + gap,
-        ).exclude(id=booking.id).exists()
-        if clash:
-            raise ValidationError("You already have an advance booking close to this pickup time")
+        # Driver availability windows replace the old fixed 90-minute gap (overlap plan section 5).
+        from api.services import booking_window_service as bws
+        bws.check_rider_advance(rider.id, booking)
         RiderVehicleDetailsRepository.apply_vehicle_snapshot_to_booking(booking, vehicle)
         booking.rider = rider
         booking.accepted_at = _now()
         booking.returned_to_pool_at = None
+        booking.at_risk_at = None
         booking.updated_by = rider.id
         booking.updated_by_user = "rider"
         booking.save()

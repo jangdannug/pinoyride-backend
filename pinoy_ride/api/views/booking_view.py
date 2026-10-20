@@ -15,6 +15,7 @@ from api.services.booking_contact_service import BookingContactService
 from api.services import push_service
 from api.services import passenger_push
 from django.db import transaction
+from django.utils import timezone
 from api.repositories.rider_vehicle_details_repository import (
     RiderVehicleDetailsRepository,
 )
@@ -72,6 +73,7 @@ logger = logging.getLogger('myapp')
 from api.views.advance_booking_view import AdvanceBookingMixin
 from api.services.advance_booking_service import AdvanceBookingService
 from api.services.booking_fare_service import BookingFareService
+from api.services import booking_window_service
 
 
 class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
@@ -270,9 +272,25 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
             if not booking_serializer.is_valid():
                 return AppResponse.send_error(message=booking_serializer.errors, code=400)
 
+            # Overlap policy: reservation window (Maps call happens here, outside the lock).
+            new_window = booking_window_service.compute_window(
+                pickup_lat, pickup_long, dropoff_lat, dropoff_long,
+                is_advance=is_advance, scheduled_pickup_at=scheduled_pickup_at,
+            )
+
             with transaction.atomic():
 
+                # Lock the passenger row so two simultaneous creates can't both pass the overlap check.
+                booking_window_service.lock_customer(customer_id)
                 customer_details = self.customer_service.get_customer_by_id(customer_id=customer_id)
+                if is_advance:
+                    # Re-check the open-advance limit under the lock.
+                    AdvanceBookingService.check_customer_can_book_advance(customer_id)
+                if not is_advance:
+                    # Regular window starts when the booking is actually created.
+                    new_window = booking_window_service.build_window(
+                        timezone.now(), new_window.est_duration_minutes, is_advance=False)
+                booking_window_service.check_passenger(customer_id, new_window, is_advance=is_advance)
 
                 # pickup
                 pickup = (pickup_lat, pickup_long)   # (lat, lng)
@@ -289,6 +307,7 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
 
                 # save booking
                 booking_details = self.service.save_booking(customer_instance = customer_details, booking_details=booking_details)
+                booking_window_service.apply_window(booking_details, new_window)
                 if is_advance:
                     AdvanceBookingService.mark_as_advance(booking_details, scheduled_pickup_at)
                 else:

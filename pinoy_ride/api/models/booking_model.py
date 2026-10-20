@@ -55,6 +55,12 @@ class Booking(SoftDeleteModel):
     # Set when an assigned rider cancels an advance booking (customer sees re-pool copy)
     returned_to_pool_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    # Reservation window for the booking overlap policy (0107, booking_window_service)
+    window_start = models.DateTimeField(null=True, blank=True)
+    window_end = models.DateTimeField(null=True, blank=True)
+    est_duration_minutes = models.IntegerField(null=True, blank=True)
+    # Driver at-risk flag (0108): rider on another ride is expected to be late for this advance pickup
+    at_risk_at = models.DateTimeField(null=True, blank=True)
     time_created = models.CharField(max_length=255, null=True)
     date_created = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

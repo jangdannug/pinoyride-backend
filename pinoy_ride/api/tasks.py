@@ -75,3 +75,12 @@ def remind_advance():
     """Every minute: remind assigned riders ADVANCE_REMINDER_MINUTES before an advance pickup (sent once)."""
     from api.services.advance_booking_service import AdvanceBookingService
     return f"Advance reminders sent: {AdvanceBookingService.send_due_reminders()}"
+
+
+@shared_task
+def flag_at_risk_advance():
+    """Every minute: flag advance bookings the rider will be late for and return them to the pool
+    AT_RISK_REASSIGN_MINUTES before pickup (overlap plan section 5). No pushes."""
+    from api.services.booking_window_service import flag_at_risk_and_reassign
+    flagged, returned = flag_at_risk_and_reassign()
+    return f"At-risk flagged: {flagged}, returned to pool: {returned}"
