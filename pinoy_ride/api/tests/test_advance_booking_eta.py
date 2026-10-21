@@ -182,6 +182,7 @@ class CancelTests(Base):
     def test_customer_penalty_and_preview(self):
         b = self._booking(hours=3)
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=20))
+        self.svc.accept(self.rider, b.id)  # penalty only applies once a rider has accepted
         p = self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)
         self.assertEqual(p["penalty_amount"], 10.0)
         b.refresh_from_db()
@@ -211,6 +212,7 @@ class CancelTests(Base):
     def test_settings_override(self):
         b = self._booking(hours=3)
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=90))
+        self.svc.accept(self.rider, b.id)
         self.assertEqual(self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)["penalty_amount"], 20.0)
 
     def test_rider_no_penalty_over_2h_before_pickup(self):

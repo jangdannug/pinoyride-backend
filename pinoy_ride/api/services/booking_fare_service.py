@@ -104,8 +104,8 @@ class BookingFareService:
         default_booking_fee = 0.0
         default_commission_percentage = 0.15
 
-        pesos_per_km = default_pesos_per_km
-        pesos_per_km2 = default_pesos_per_km2
+        # Old (main) computation: minimum fare, km basis, booking fee and commission
+        # per vehicle type from price_config; per-km rates from the shared price table.
         try:
             pricing_config = self.price_config_service.get_pricing_for_booking(
                 str(booking_type)
@@ -114,18 +114,22 @@ class BookingFareService:
             minimum_fare = pricing_config["minimum_fare"]
             booking_fee = pricing_config["booking_fee"]
             commission_prcentage = pricing_config["commission_percentage"]
-            pesos_per_km = float(pricing_config.get("pesos_per_km") or default_pesos_per_km)
-            pesos_per_km2 = float(pricing_config.get("pesos_per_km2") or default_pesos_per_km2)
         except NotFoundError:
-            fb = BOOKING_TYPE_FALLBACKS.get(
-                str(booking_type), BOOKING_TYPE_FALLBACKS["1"]
+            km_basis = default_km_basis
+            minimum_fare = default_minimum_fare
+            booking_fee = default_booking_fee
+            commission_prcentage = default_commission_percentage
+
+        latest_price = self.price_service.get_latest_price()
+        if latest_price:
+            pesos_per_km = clean_numeric_value(latest_price.price) or default_pesos_per_km
+            pesos_per_km2 = (
+                clean_numeric_value(latest_price.exceed_time_travel_price)
+                or default_pesos_per_km2
             )
-            km_basis = fb["km_basis"]
-            minimum_fare = fb["minimum_fare"]
-            booking_fee = fb["booking_fee"]
-            commission_prcentage = fb["commission_percentage"]
-            pesos_per_km = fb["pesos_per_km"]
-            pesos_per_km2 = fb["pesos_per_km2"]
+        else:
+            pesos_per_km = default_pesos_per_km
+            pesos_per_km2 = default_pesos_per_km2
 
         base_amount = distance_km_round * pesos_per_km
         exceeding_kms_total = 0

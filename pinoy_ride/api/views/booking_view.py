@@ -805,7 +805,6 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
                     push_service.defer(passenger_push.trip_started, booking_details)
                 elif status == "3":
                     push_service.defer(passenger_push.trip_completed, booking_details)
-                    push_service.defer(push_service.notify_rider_trip_completed, booking_details)
 
                 serializer = BookingSerializer(booking_details)
            

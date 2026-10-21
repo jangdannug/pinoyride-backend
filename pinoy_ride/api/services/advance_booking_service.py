@@ -176,8 +176,21 @@ class AdvanceBookingService:
                 return float(estimated)
         return float(payment.total_amount or 0)
 
+    def is_rider_no_show(self, booking, now=None):
+        """Rider accepted (status 5 with a rider) but never tapped Go To Pickup, and pickup passed by RIDER_NO_SHOW_MINUTES."""
+        now = now or _now()
+        minutes = cfg("RIDER_NO_SHOW_MINUTES")
+        return bool(minutes and booking.rider_id and booking.status == STATUS_SCHEDULED
+                    and booking.scheduled_pickup_at
+                    and now - booking.scheduled_pickup_at >= timedelta(minutes=minutes))
+
     def customer_penalty(self, booking):
         now = _now()
+        # Pending advance booking (no rider has accepted): always free, no violation.
+        if not booking.rider_id:
+            return 0.0, 0
+        if self.is_rider_no_show(booking, now):
+            return 0.0, 0
         grace = cfg("CANCEL_FREE_GRACE_MINUTES")
         if grace and booking.created_at and now - booking.created_at <= timedelta(minutes=grace):
             return 0.0, 0
@@ -250,17 +263,20 @@ class AdvanceBookingService:
             raise ValidationError("Not an advance booking")
         if booking.status not in (STATUS_SCHEDULED, STATUS_ACCEPTED):
             raise ValidationError("This booking can no longer be cancelled")
+        rider_no_show = self.is_rider_no_show(booking)
         amount, violations = self.customer_penalty(booking)
         result = {
             "booking_id": booking.id, "penalty_applies": amount > 0, "penalty_amount": amount,
-            "violation_added": violations, "status": booking.status,
+            "violation_added": violations, "status": booking.status, "rider_no_show": rider_no_show,
         }
         if preview:
             return result
         booking.status = STATUS_CANCELLED
         booking.cancelled_at = _now()
         booking.cancelled_by = "customer"
-        booking.cancel_reason = reason
+        booking.cancel_reason = f"Rider no-show|{reason}" if (rider_no_show and reason) else ("Rider no-show" if rider_no_show else reason)
+        if rider_no_show:
+            logger.info("RIDER NO-SHOW: booking %s rider %s, passenger cancelled free", booking.id, booking.rider_id)
         booking.updated_by = customer_id
         booking.updated_by_user = "customer"
         booking.save()

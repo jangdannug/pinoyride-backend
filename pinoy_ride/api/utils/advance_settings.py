@@ -7,6 +7,8 @@ _DEFAULTS = {
     "ADVANCE_MIN_LEAD_MINUTES": 120,
     "ADVANCE_MAX_DAYS": 30,
     "CANCEL_PENALTY_WINDOW_MINUTES": 120,
+    # Rider no-show: accepted, never tapped Go To Pickup, this many minutes past pickup -> passenger cancels free.
+    "RIDER_NO_SHOW_MINUTES": 30,
     "CANCEL_PENALTY_PERCENT": 10,
     "CANCEL_VIOLATION_COUNT": 1,
     "CANCEL_FREE_GRACE_MINUTES": 0,

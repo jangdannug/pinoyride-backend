@@ -4,7 +4,7 @@ import os
 from django.conf import settings
 
 _DEFAULTS = {
-    "TRAFFIC_SURCHARGE_ENABLED": True,
+    "TRAFFIC_SURCHARGE_ENABLED": False,
     "TRAFFIC_SURCHARGE_MAX_PERCENT": 25,
     "TRAFFIC_SURCHARGE_MIN_RATIO": 1.0,
 }
