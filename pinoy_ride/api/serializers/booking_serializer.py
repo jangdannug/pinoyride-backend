@@ -193,9 +193,8 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_penalty_amount(self, obj):
         history_rider_id = self.context.get("history_rider_id")
         if history_rider_id:
-            amount = self._rider_cancel_penalty_amount(history_rider_id, obj.id)
-            if amount > 0:
-                return amount
+            # Rider history/detail: only debits on this rider's wallet (not passenger penalties).
+            return self._rider_cancel_penalty_amount(history_rider_id, obj.id)
         if obj.status != 4 or not obj.cancelled_by:
             return 0.0
         from api.models.wallet_history_model import WalletHistory
