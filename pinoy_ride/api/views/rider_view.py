@@ -685,6 +685,34 @@ class RiderViewSet(viewsets.ViewSet):
             return AppResponse.send_error(message=str(e), code=500)
 
 
+    @action(detail=False, methods=['post'], url_path='get_earnings')
+    def get_earnings(self, request):
+        """Rider's own earnings for a day (date) or a month (month + year).
+
+        Same auth as the other rider endpoints (API key + signed rider_id).
+        """
+        try:
+            from api.services.rider_earnings_service import RiderEarningsService
+
+            rider_id = request.data.get("rider_id", "")
+            if not rider_id:
+                return AppResponse.send_error(message="Rider id is required", code=400)
+            self.service.get_rider_by_id(rider_id=rider_id)
+            data = RiderEarningsService().get_earnings(
+                rider_id=rider_id,
+                date_str=request.data.get("date") or None,
+                month=request.data.get("month") or None,
+                year=request.data.get("year") or None,
+            )
+            return AppResponse.send_success(data=data, message="Rider earnings")
+        except NotFoundError as e:
+            return AppResponse.send_error(message=str(e), code=404)
+        except ValidationError as e:
+            return AppResponse.send_error(message=str(e), code=400)
+        except Exception as e:
+            return AppResponse.send_error(message=str(e), code=500)
+
+
     @action(detail=False, methods=['post'], url_path='get_service_details')
     def get_service_details(self, request):
         """Get rider service details including acceptance rate, ratings, and cancellation rate"""
