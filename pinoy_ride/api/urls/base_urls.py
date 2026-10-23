@@ -26,4 +26,5 @@ urlpatterns = [
     path('admin/price-config/', include('api.urls.admin_price_config_urls')),
     path('admin/task/', include('api.urls.admin_task_urls')),
     path('admin/dashboard/', include('api.urls.admin_dashboard_urls')),
+    path('admin/emergency_cancellations/', include('api.urls.admin_emergency_cancel_urls')),
 ]

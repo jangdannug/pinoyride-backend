@@ -232,10 +232,12 @@ class CancelTests(Base):
             self.svc.accept(self.rider, b.id)
             r = self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
             b.refresh_from_db()
-            self.assertEqual(b.status, 5)
-            self.assertIsNone(b.rider_id)
-            self.assertIsNone(b.vehicle_plate_number)
-            self.assertIsNotNone(b.returned_to_pool_at)
+            self.assertEqual((b.status, b.cancelled_by), (4, "rider"))
+            new = Booking.objects.get(id=r["new_booking_id"])
+            self.assertEqual(new.status, 5)
+            self.assertIsNone(new.rider_id)
+            self.assertIsNone(new.vehicle_plate_number)
+            self.assertIsNotNone(new.returned_to_pool_at)
             flagged = r["flagged_for_review"]
         self.assertTrue(flagged)
         self.assertEqual(Rider.objects.get(id=self.rider.id).status, 1)  # no auto-suspend
@@ -268,8 +270,9 @@ class CancelTests(Base):
         self.assertEqual(row["pretty_status"], "Cancelled")
         self.assertGreater(row["penalty_amount"], 0)
         b.refresh_from_db()
-        customer_row = BookingSerializer(b).data
+        customer_row = BookingSerializer(b.replaced_by).data
         self.assertEqual(customer_row["pretty_status"], "Returned to pool")
+        self.assertEqual(BookingSerializer(b).data["penalty_amount"], 0.0)  # passenger view of old row
 
     def test_rider_cancel_shows_cancelled_in_history_without_penalty(self):
         b = self._booking(hours=3)
@@ -385,9 +388,8 @@ class ReminderTests(Base):
     def test_rider_cancel_resets_early_reminder(self):
         b = self._accepted(59)
         self.assertEqual(self.svc.send_due_reminders(), 1)
-        self.svc.cancel_by_rider(self.rider, b.id, reason="Emergency")
-        b.refresh_from_db()
-        self.assertIsNone(b.early_reminder_sent_at)
+        r = self.svc.cancel_by_rider(self.rider, b.id, reason="Emergency")
+        self.assertIsNone(Booking.objects.get(id=r["new_booking_id"]).early_reminder_sent_at)
 
     @override_settings(ADVANCE_EARLY_REMINDER_MINUTES=120)
     def test_early_minutes_setting_override(self):

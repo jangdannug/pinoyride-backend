@@ -39,6 +39,18 @@ class BookingSerializer(serializers.ModelSerializer):
     pooled_at = serializers.SerializerMethodField()
     # True once a rider holds the booking (status 1/2, or an accepted advance booking still at 5)
     rider_assigned = serializers.SerializerMethodField()
+    # US-7.3 rider emergency cancel (rider history/details only; null/False elsewhere)
+    is_emergency = serializers.SerializerMethodField()
+    emergency_status = serializers.SerializerMethodField()
+    emergency_penalty_amount = serializers.SerializerMethodField()
+    emergency_admin_reason = serializers.SerializerMethodField()
+    emergency_reviewed_at = serializers.SerializerMethodField()
+    # Rider cancel re-pooled this booking under a new one (0110). Ids / ref codes or null.
+    replaced_by = serializers.IntegerField(source="replaced_by_id", read_only=True)
+    replaced_by_ref_code = serializers.SerializerMethodField()
+    is_replaced = serializers.SerializerMethodField()
+    replaces = serializers.SerializerMethodField()
+    replaces_ref_code = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
     customer_id = serializers.PrimaryKeyRelatedField(
@@ -85,7 +97,59 @@ class BookingSerializer(serializers.ModelSerializer):
             "returned_to_pool_at",
             "pooled_at",
             "rider_assigned",
+            "is_emergency",
+            "emergency_status",
+            "emergency_penalty_amount",
+            "emergency_admin_reason",
+            "emergency_reviewed_at",
+            "replaced_by",
+            "replaced_by_ref_code",
+            "is_replaced",
+            "replaces",
+            "replaces_ref_code",
         ]
+
+    def _emergency(self, obj):
+        cache = self.context.setdefault("_emergency_cache", {})
+        if obj.id not in cache:
+            from api.models.emergency_cancel_request_model import emergency_info
+            cache[obj.id] = emergency_info(self.context.get("history_rider_id"), obj.id)
+        return cache[obj.id]
+
+    def get_is_emergency(self, obj):
+        return self._emergency(obj)["is_emergency"]
+
+    def get_emergency_status(self, obj):
+        return self._emergency(obj)["emergency_status"]
+
+    def get_emergency_penalty_amount(self, obj):
+        return self._emergency(obj)["emergency_penalty_amount"]
+
+    def get_emergency_admin_reason(self, obj):
+        return self._emergency(obj)["emergency_admin_reason"]
+
+    def get_emergency_reviewed_at(self, obj):
+        return self._emergency(obj)["emergency_reviewed_at"]
+
+    def get_replaced_by_ref_code(self, obj):
+        return obj.replaced_by.ref_code if obj.replaced_by_id else None
+
+    def get_is_replaced(self, obj):
+        return obj.replaced_by_id is not None
+
+    def _replaces(self, obj):
+        try:
+            return obj.replaces
+        except Booking.DoesNotExist:
+            return None
+
+    def get_replaces(self, obj):
+        b = self._replaces(obj)
+        return b.id if b else None
+
+    def get_replaces_ref_code(self, obj):
+        b = self._replaces(obj)
+        return b.ref_code if b else None
 
     def get_payment_details(self, obj):
         # get the related table booking_payment
@@ -197,6 +261,8 @@ class BookingSerializer(serializers.ModelSerializer):
             return self._rider_cancel_penalty_amount(history_rider_id, obj.id)
         if obj.status != 4 or not obj.cancelled_by:
             return 0.0
+        if obj.cancelled_by == "rider":
+            return 0.0  # passenger side never shows a rider's cancel penalty
         from api.models.wallet_history_model import WalletHistory
         rows = WalletHistory.objects.filter(
             booking_id__in=(str(obj.id), obj.id),

@@ -61,6 +61,9 @@ class Booking(SoftDeleteModel):
     est_duration_minutes = models.IntegerField(null=True, blank=True)
     # Driver at-risk flag (0108): rider on another ride is expected to be late for this advance pickup
     at_risk_at = models.DateTimeField(null=True, blank=True)
+    # Rider cancel re-pools under a NEW booking (0110): old row stays cancelled-by-rider and points here.
+    replaced_by = models.OneToOneField('self', related_name='replaces', on_delete=models.SET_NULL,
+                                       null=True, blank=True)
     time_created = models.CharField(max_length=255, null=True)
     date_created = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

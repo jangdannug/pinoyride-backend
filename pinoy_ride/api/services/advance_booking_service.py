@@ -13,6 +13,7 @@ from geopy.distance import geodesic
 
 from api.models.advance_booking_rider_release_model import AdvanceBookingRiderRelease
 from api.models.booking_model import Booking
+from api.models.emergency_cancel_request_model import EmergencyCancelRequest
 from api.models.booking_payment_model import BookingPayment
 from api.models.wallet_history_model import WalletHistory
 from api.repositories import (
@@ -437,6 +438,8 @@ class AdvanceBookingService:
             "assigned": assigned,
             "can_start": self._can_start(booking) if assigned else False,
         }
+        from api.models.emergency_cancel_request_model import emergency_info
+        data.update(emergency_info(rider.id, booking.id, since=booking.accepted_at if assigned else None))
         if p:
             distance_fare = round(float(p.pesos_per_km or 0) * float(p.distance_km_round or 0), 2)
             data.update({
@@ -521,19 +524,52 @@ class AdvanceBookingService:
             raise ValidationError("Reason is required")
         amount, violations = self.rider_penalty(booking)
         result = {"booking_id": booking.id, "penalty_applies": amount > 0, "penalty_amount": amount,
-                  "violation_added": violations, "status": booking.status}
+                  "violation_added": violations, "status": booking.status,
+                  "emergency_available": amount > 0}
         if preview:
             return result
+        new = self._release_to_pool(rider, booking, reason)
+        if amount > 0:
+            self._apply_penalty("rider", rider.id, booking, amount)  # charged on the OLD booking
+        self._notify_released(rider, new)
+        count, flagged = self._review_flag("rider", rider.id)
+        result.update({"status": booking.status, "violation_total": count, "flagged_for_review": flagged,
+                       "new_booking_id": new.id, "new_ref_code": new.ref_code})
+        return result
+
+    # Copied onto the re-pooled booking; rider / vehicle / accept / reminder / cancel fields are not.
+    CLONE_FIELDS = ("customer_id", "booking_type", "pickup_location", "dropoff_location", "pickup_lat",
+                    "pickup_long", "dropoff_lat", "dropoff_long", "distance_km", "payment_type", "note_to_rider",
+                    "is_advance", "scheduled_pickup_at", "window_start", "window_end", "est_duration_minutes",
+                    "time_created", "date_created")
+    PAYMENT_CLONE_FIELDS = ("type", "minimum_fare", "pesos_per_km", "booking_fee", "base_amount",
+                            "distance_km_round", "tip", "promo_discount", "total_amount_wo_promo", "total_amount",
+                            "commission", "rider_net_amount", "all_payment_details", "status")
+
+    def _release_to_pool(self, rider, booking, reason):
+        """Shared by free / penalty / emergency rider cancel (Mark, Oct 23 2026): the old booking becomes
+        cancelled-by-rider (kept for rider history, penalty and emergency request) and a NEW pending
+        advance booking with a new ref_code goes back to the pool. Returns the new booking.
+        Caller must be inside transaction.atomic."""
         was_active = booking.status == STATUS_ACCEPTED
-        # Release back to the pool (stays an advance booking at status 5, no rider)
-        booking.status = STATUS_SCHEDULED
-        booking.rider = None
-        booking.rider_vehicle = None
-        for f in ("vehicle_plate_number", "vehicle_brand", "vehicle_model", "vehicle_color", "vehicle_type",
-                  "accepted_at", "rider_arrived_at", "reminder_sent_at", "early_reminder_sent_at"):
-            setattr(booking, f, None)
+        now = _now()
+        new = Booking(**{f: getattr(booking, f) for f in self.CLONE_FIELDS})
+        new.status = STATUS_SCHEDULED
+        new.returned_to_pool_at = now
+        new.updated_by = rider.id
+        new.updated_by_user = "rider"
+        new.save()
+        payment = BookingPayment.objects.filter(booking_id=booking.id).first()
+        if payment:
+            BookingPayment.objects.create(booking=new, **{f: getattr(payment, f) for f in self.PAYMENT_CLONE_FIELDS})
+        # The passenger's promo follows the ride (moved, not copied, so usage isn't counted twice).
+        from api.models.promo_availed_model import PromoAvailed
+        PromoAvailed.objects.filter(booking_id=booking.id).update(booking=new)
+        booking.status = STATUS_CANCELLED
+        booking.cancelled_at = now
+        booking.cancelled_by = "rider"
         booking.cancel_reason = reason
-        booking.returned_to_pool_at = _now()
+        booking.replaced_by = new
         booking.updated_by = rider.id
         booking.updated_by_user = "rider"
         booking.save()
@@ -541,15 +577,86 @@ class AdvanceBookingService:
         if was_active:
             from api.models.rider_model import Rider
             Rider.objects.filter(id=rider.id).update(is_available=1)
-        if amount > 0:
-            self._apply_penalty("rider", rider.id, booking, amount)
+        return new
+
+    def _notify_released(self, rider, booking):
         notify("Rider cancelled - finding you another rider", booking)
         # Passenger Dev owns the passenger copy/type.
         push_service.defer(passenger_push.rider_cancelled_reassigning, booking)
         # Back in the pool: offer it to other eligible riders (not the one who released it).
         push_service.defer(push_service.notify_advance_available, booking, exclude_rider_ids=[rider.id])
-        count, flagged = self._review_flag("rider", rider.id)
-        result.update({"status": booking.status, "violation_total": count, "flagged_for_review": flagged})
+
+    # ---------------------------------------------------------------- US-7.3 emergency cancel
+    @transaction.atomic
+    def cancel_emergency_by_rider(self, rider, booking_id, reason=None):
+        booking = self._assigned(rider.id, booking_id)
+        if not booking.is_advance:
+            raise ValidationError("Not an advance booking")
+        if booking.status != STATUS_SCHEDULED:
+            raise ValidationError("This booking can no longer be cancelled")
+        reason = (reason or "").strip()
+        if not reason:
+            raise ValidationError("Reason is required")
+        amount, violations = self.rider_penalty(booking)
+        if amount <= 0:
+            raise ValidationError("No penalty applies. Use regular cancel")
+        scheduled = booking.scheduled_pickup_at
+        new = self._release_to_pool(rider, booking, reason)
+        req = EmergencyCancelRequest.objects.create(
+            booking=booking, rider_id=rider.id, reason=reason, penalty_amount=amount,
+            violation_count=violations, scheduled_pickup_at=scheduled)
+        self._notify_released(rider, new)
+        return {"booking_id": booking.id, "request_id": req.id, "emergency_status": req.status,
+                "penalty_amount": amount, "status": booking.status,
+                "new_booking_id": new.id, "new_ref_code": new.ref_code}
+
+    @staticmethod
+    def emergency_row(req):
+        r = req.rider
+        name = " ".join(x for x in (r.first_name, r.middle_name, r.last_name) if x) if r else None
+        loc = lambda dt: timezone.localtime(dt).isoformat() if dt else None
+        return {"id": req.id, "booking_id": req.booking_id, "ref_code": req.booking.ref_code,
+                "rider_id": req.rider_id, "rider_name": name, "rider_mobile": getattr(r, "mobile_no", None),
+                "reason": req.reason, "scheduled_pickup_at": loc(req.scheduled_pickup_at),
+                "cancelled_at": loc(req.created_at), "penalty_amount": req.penalty_amount,
+                "status": req.status, "admin_reason": req.admin_reason, "reviewed_at": loc(req.reviewed_at)}
+
+    def list_emergency_requests(self, status="pending", page=1, perpage=10):
+        qs = EmergencyCancelRequest.objects.select_related("booking", "rider").order_by("-created_at")
+        status = (status or "pending").lower()
+        if status != "all":
+            if status not in ("pending", "approved", "rejected"):
+                raise ValidationError("Invalid status")
+            qs = qs.filter(status=status)
+        p = Paginator(qs, max(1, int(perpage or 10))).get_page(int(page or 1))
+        return {"items": [self.emergency_row(x) for x in p.object_list], "page": p.number,
+                "perpage": p.paginator.per_page, "total": p.paginator.count, "total_pages": p.paginator.num_pages}
+
+    @transaction.atomic
+    def decide_emergency(self, request_id, decision, reason=None, admin_user=None):
+        req = (EmergencyCancelRequest.objects.select_for_update().select_related("booking", "rider")
+               .filter(id=request_id).first())
+        if req is None:
+            raise NotFoundError("Emergency cancellation request not found")
+        if req.status != EmergencyCancelRequest.STATUS_PENDING:
+            raise ValidationError(f"This request was already {req.status}")
+        decision = (decision or "").strip().lower()
+        if decision not in ("approve", "reject"):
+            raise ValidationError("Decision must be approve or reject")
+        reason = (reason or "").strip() or None
+        if decision == "reject" and not reason:
+            raise ValidationError("Reason is required when rejecting")
+        req.status = EmergencyCancelRequest.STATUS_APPROVED if decision == "approve" else EmergencyCancelRequest.STATUS_REJECTED
+        req.admin_reason = reason
+        req.reviewed_by = admin_user if getattr(admin_user, "pk", None) else None
+        req.reviewed_at = _now()
+        req.save()
+        result = self.emergency_row(req)
+        if decision == "reject":
+            self._apply_penalty("rider", req.rider_id, req.booking, req.penalty_amount)
+            count, flagged = self._review_flag("rider", req.rider_id)
+            result.update({"violation_total": count, "flagged_for_review": flagged})
+        push_service.defer(push_service.notify_rider_emergency_decision, req)
         return result
 
     # ---------------------------------------------------------------- reminder

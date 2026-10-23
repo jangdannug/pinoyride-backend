@@ -127,3 +127,10 @@ class AdvanceBookingMixin:
             _rider(request), _req(request, "booking_id"),
             reason=request.data.get("reason"), preview=_truthy(request.data.get("preview")))
         return AppResponse.send_success(data=data, message="Booking released")
+
+    @action(detail=False, methods=["post"], url_path="cancel_emergency_rider")
+    @_handle
+    def cancel_emergency_rider(self, request):
+        data = self.advance_service.cancel_emergency_by_rider(
+            _rider(request), _req(request, "booking_id"), reason=request.data.get("reason"))
+        return AppResponse.send_success(data=data, message="Emergency cancellation sent for admin review")

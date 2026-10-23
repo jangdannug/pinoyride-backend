@@ -27,3 +27,5 @@ from .cash_out_transaction_model import CashOutTransaction
 from .booking_issues_model import BookingIssues
 from .ignored_booking_model import IgnoredBooking
 from .price_config_model import PriceConfig
+from .advance_booking_rider_release_model import AdvanceBookingRiderRelease
+from .emergency_cancel_request_model import EmergencyCancelRequest

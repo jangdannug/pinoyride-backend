@@ -22,3 +22,4 @@ from .admin_task_view import AdminTaskViewSet
 from .admin_dashboard_view import AdminDashboardViewSet
 from .promo_view import PromoViewSet
 from .message_view import MessageViewSet
+from .admin_emergency_cancel_view import AdminEmergencyCancelViewSet

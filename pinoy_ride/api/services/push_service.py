@@ -537,3 +537,20 @@ def notify_booking_expired(booking):
         return PushResult(status=SKIPPED, reason="no_rider")
     title, body = _rider_text("booking_expired", booking)
     return send_to_rider(rider_id, "booking_expired", booking, title=title, body=body, cancelled_by="system")
+
+
+def notify_rider_emergency_decision(req):
+    """US-7.3: admin approved/rejected a rider's emergency cancellation -> that rider."""
+    booking = req.booking
+    ref = getattr(booking, "ref_code", "") or f"#{getattr(booking, 'id', '')}"
+    if req.status == "approved":
+        title = "Emergency cancellation approved"
+        body = f"Your emergency cancellation for booking {ref} was approved. No penalty was charged."
+    else:
+        title = "Emergency cancellation rejected"
+        body = (f"Your emergency cancellation for booking {ref} was rejected. "
+                f"A ₱{float(req.penalty_amount or 0):,.2f} penalty was charged.")
+        if req.admin_reason:
+            body = f"{body} Reason: {req.admin_reason}"
+    return send_to_rider(req.rider_id, "emergency_cancel_decision", booking, title=title, body=body,
+                         emergency_status=req.status, emergency_request_id=req.id)
