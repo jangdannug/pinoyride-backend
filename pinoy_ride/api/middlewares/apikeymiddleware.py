@@ -2,6 +2,7 @@
 
 from django.http import JsonResponse
 from django.conf import settings
+import json
 import os
 from django.utils import timezone
 
@@ -44,18 +45,18 @@ class ApiKeyAuthenticationMiddleware:
     def get_min_app_version(self, user_type):
         """Get minimum app version from environment based on user type"""
         if user_type == 'customer':
-            return self.customer_min_version
+            return os.getenv('MIN_CUSTOMER_APP_VERSION', self.customer_min_version)
         elif user_type == 'rider':
-            return self.rider_min_version
-        return self.customer_min_version
+            return os.getenv('MIN_RIDER_APP_VERSION', self.rider_min_version)
+        return os.getenv('MIN_CUSTOMER_APP_VERSION', self.customer_min_version)
 
     def get_download_link(self, user_type):
         """Get download link based on user type"""
         if user_type == 'customer':
-            return self.customer_download_link
+            return os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', self.customer_download_link)
         elif user_type == 'rider':
-            return self.rider_download_link
-        return self.customer_download_link
+            return os.getenv('RIDER_APP_DOWNLOAD_LINK', self.rider_download_link)
+        return os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', self.customer_download_link)
 
     def compare_versions(self, current_version, min_version):
         """Compare two version strings (e.g., '1.0.0' < '1.2.3' returns True)"""
@@ -82,7 +83,7 @@ class ApiKeyAuthenticationMiddleware:
 
     def __call__(self, request):
 
-        if request.path.startswith('/api/') and settings.ENV != 'development':
+        if request.path.startswith('/api/'):
             api_key_app = request.headers.get('X-API-KEY')
             api_key_callback = request.headers.get('api-key')
 
@@ -115,21 +116,24 @@ class ApiKeyAuthenticationMiddleware:
                 '/api/booking/get_contact/',
                 '/api/booking/report_issue/',
                 '/api/booking/add_tip/',
+                '/api/riders/logout/',
+                '/api/customers/logout/',
             )
 
             # Check callback routes (api-key)
             if request.path.startswith(callback_routes):
-               if api_key_callback != settings.CALLBACK_API_KEY:
+                if settings.ENV != 'development' and api_key_callback != settings.CALLBACK_API_KEY:
                     response = self.get_response(request)
                     return response
 
-            # Check normal API routes (X-API-KEY)
+            # Check normal API routes (X-API-KEY in non-dev, app_version in all environments)
             elif request.path.startswith(api_routes):
-                if api_key_app != settings.CUSTOM_API_KEY:
+                if settings.ENV != 'development' and api_key_app != settings.CUSTOM_API_KEY:
                     return JsonResponse({'message': 'Invalid API key, Unauthorized Access'}, status=403)
 
                 # Check app version from request data
                 app_version = None
+                user_type = None
                 request_data = None
                 try:
                     if request.method == 'POST':
@@ -140,10 +144,9 @@ class ApiKeyAuthenticationMiddleware:
                             request_data = dict(request.POST)
                         elif request.content_type and 'json' in request.content_type:
                             # Parse JSON for application/json
-                            import json
                             body_data = json.loads(request.body)
                             app_version = body_data.get('app_version')
-                            user_type = request.POST.get('user_type')
+                            user_type = body_data.get('user_type')
                             request_data = body_data
                         elif request.content_type and 'application/x-www-form-urlencoded' in request.content_type:
                             # Use Django's request.POST for URL encoded
@@ -160,7 +163,7 @@ class ApiKeyAuthenticationMiddleware:
 
                 # Determine user type from path and get corresponding version
                 user_type = self.get_user_type_from_path(request.path, user_type)
-              
+
                 # Skip version check if user_type is None or app version is None
                 if user_type is None or app_version is None:
                     response = self.get_response(request)
@@ -189,7 +192,6 @@ class ApiKeyAuthenticationMiddleware:
                         }
                     }
                     return JsonResponse(response_data, status=426)
-
 
         response = self.get_response(request)
         return response
