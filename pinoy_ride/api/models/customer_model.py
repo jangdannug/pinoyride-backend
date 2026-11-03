@@ -21,6 +21,7 @@ class Customer(SoftDeleteModel):
     email = models.CharField(max_length=255,null=True)
     is_verified = models.IntegerField(default=0)
     is_login = models.IntegerField(default=0, null=True, blank=True)
+    last_app_version = models.CharField(max_length=32, null=True, blank=True)
     login_type = models.CharField(max_length=255, null=True)
     current_location = models.TextField(null=True)
     current_lat = models.CharField(max_length=255, null=True, blank=True)

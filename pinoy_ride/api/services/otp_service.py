@@ -151,6 +151,7 @@ class OtpService:
                     rider_instance=rider,
                     status=1
                 )
+                self._save_app_version(rider, app_version)
 
         elif user_type == 'customer':
             # Return FALSE if current version greater or equal than minimum
@@ -160,9 +161,16 @@ class OtpService:
                     customer_instance=customer,
                     status=1
                 )
+                self._save_app_version(customer, app_version)
 
         return otp_record
 
+
+    @staticmethod
+    def _save_app_version(user, app_version):
+        """Remember the app version of the last successful login."""
+        if user is not None and app_version:
+            type(user).objects.filter(pk=user.pk).update(last_app_version=str(app_version)[:32])
 
     # @transaction.atomic
     def call_otp_api(self, mobile_no, otp_code):
