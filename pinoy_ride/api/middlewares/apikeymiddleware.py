@@ -50,13 +50,27 @@ class ApiKeyAuthenticationMiddleware:
             return os.getenv('MIN_RIDER_APP_VERSION', self.rider_min_version)
         return os.getenv('MIN_CUSTOMER_APP_VERSION', self.customer_min_version)
 
-    def get_download_link(self, user_type):
-        """Get download link based on user type"""
-        if user_type == 'customer':
-            return os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', self.customer_download_link)
-        elif user_type == 'rider':
-            return os.getenv('RIDER_APP_DOWNLOAD_LINK', self.rider_download_link)
-        return os.getenv('CUSTOMER_APP_DOWNLOAD_LINK', self.customer_download_link)
+    @staticmethod
+    def get_platform(request):
+        """'ios' / 'android' from the RN networking User-Agent, else None."""
+        if request is None:
+            return None
+        ua = request.META.get('HTTP_USER_AGENT', '') or ''
+        if 'CFNetwork' in ua or 'Darwin' in ua:
+            return 'ios'
+        if 'okhttp' in ua.lower() or 'Android' in ua:
+            return 'android'
+        return None
+
+    def get_download_link(self, user_type, request=None):
+        """Store link for the caller's platform, falling back to the generic link."""
+        prefix = 'RIDER' if user_type == 'rider' else 'CUSTOMER'
+        fallback = self.rider_download_link if user_type == 'rider' else self.customer_download_link
+        generic = os.getenv(f'{prefix}_APP_DOWNLOAD_LINK', fallback)
+        platform = self.get_platform(request)
+        if platform:
+            return os.getenv(f'{prefix}_APP_{platform.upper()}_DOWNLOAD_LINK') or generic
+        return generic
 
     def compare_versions(self, current_version, min_version):
         """Compare two version strings (e.g., '1.0.0' < '1.2.3' returns True)"""
@@ -170,7 +184,7 @@ class ApiKeyAuthenticationMiddleware:
                     return response
 
                 min_version = self.get_min_app_version(user_type)
-                download_link = self.get_download_link(user_type)
+                download_link = self.get_download_link(user_type, request)
 
                 # Skip version check for excluded routes
                 if request.path.startswith(excluded_version_check_routes):
