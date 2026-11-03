@@ -1,3 +1,4 @@
+from api.utils.login_session import is_stale_session
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -126,7 +127,9 @@ class RiderViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 rider = self.service.login_mobile_no(rider_data)
 
-                if rider.is_login == 1:
+                if rider.is_login == 1 and not is_stale_session(
+                    rider.is_login, rider.last_app_version, app_version
+                ):
                     return AppResponse.send_error(
                         message="This account is currently logged in. Please log out before logging in again.",
                         code=400,

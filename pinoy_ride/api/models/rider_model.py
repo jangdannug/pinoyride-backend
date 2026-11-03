@@ -40,6 +40,7 @@ class Rider(SoftDeleteModel):
     is_available = models.IntegerField(default=1)
     is_online = models.IntegerField(default=0)
     is_login = models.IntegerField(default=0, null=True, blank=True)
+    last_app_version = models.CharField(max_length=32, null=True, blank=True)
     last_online_datetime = models.DateTimeField(null=True)
     last_offline_datetime = models.DateTimeField(null=True)
     is_verified = models.IntegerField(default=0)

@@ -1,3 +1,4 @@
+from api.utils.login_session import is_stale_session
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
@@ -112,7 +113,9 @@ class CustomerViewSet(viewsets.ViewSet):
             with transaction.atomic():
                 customer = self.service.login_mobile_no(request.data)
                 # Check if rider is already logged in
-                if customer.is_login == 1:
+                if customer.is_login == 1 and not is_stale_session(
+                    customer.is_login, customer.last_app_version, app_version
+                ):
                     return AppResponse.send_error(message="This account is currently logged in. Please log out before logging in again.", code=400)
 
                 ekyc_request_user_id = customer.ekyc_request_user_id
