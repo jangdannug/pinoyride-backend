@@ -169,7 +169,9 @@ class CustomerViewSet(viewsets.ViewSet):
             customer_id = request.data.get("customer_id", "")
 
             if not customer_id:
-                return AppResponse.send_error(message="Customer Id is required", code=400)
+                # Already logged out on the phone (no id): nothing to do. A 400 here
+                # left logged-out 1.1.2 apps stuck on the Update screen.
+                return AppResponse.send_success(message="Already logged out")
 
             with transaction.atomic():
                 customer = self.service.get_customer_by_id(customer_id=customer_id)

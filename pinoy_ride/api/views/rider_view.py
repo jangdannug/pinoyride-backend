@@ -188,7 +188,9 @@ class RiderViewSet(viewsets.ViewSet):
             rider_id = request.data.get("rider_id", "")
 
             if not rider_id:
-                return AppResponse.send_error(message="Rider Id is required", code=400)
+                # Already logged out on the phone (no id): nothing to do. A 400 here
+                # left logged-out 1.1.2 apps stuck on the Update screen.
+                return AppResponse.send_success(message="Already logged out")
 
             with transaction.atomic():
                 rider = self.service.get_rider_by_id(rider_id=rider_id)
