@@ -4,20 +4,13 @@ Temporary seeder for local rider + customer login testing.
 Usage:
     python manage.py seed_test_accounts
     python manage.py seed_test_accounts --rider-mobile 9170000001 --customer-mobile 9170000002
-    python manage.py seed_test_accounts --rider-mobile 9170000101 \
-        --customer-mobile 9170000102 --plate-prefix WEB
+    python manage.py seed_test_accounts --rider-mobile 9170000101 --customer-mobile 9170000102
 
-Seeds everything the rider app's Vehicles screens read:
-  - rider.drivers_license_no / rider.drivers_license_no_expiration_date
-    (shown in the Vehicles header)
-  - one vehicle per service type (1 Motorcycle, 2 Car 4 Seaters,
-    3 Car 6 Seaters) with brand, model, color and a normalized unique plate;
-    one vehicle per type with brand, model, color and a normalized unique plate.
+Seeds the rider (with driver's license number and expiration, shown in the
+Vehicles header), the customer, and their wallets. No vehicles are seeded:
+test riders start with an empty Vehicles list and add their own in the app.
 
-Idempotent: re-running updates the same rider/customer/vehicles in place
-(vehicles are matched by plate, ignoring spaces/dashes/case) and resets them
-to the seeded values. Vehicle images are not seeded (media storage is S3);
-the app falls back to the vehicle-type icon.
+Idempotent: re-running updates the same rider/customer in place.
 """
 
 import datetime
@@ -29,27 +22,11 @@ from django.db import transaction
 from api.models.customer_model import Customer
 from api.models.pinoy_ride_wallet_model import PinoyRideWallet
 from api.models.rider_model import Rider
-from api.models.rider_vehicle_details_model import RiderVehicleDetails
 from api.services.wallet_service import WalletService
 from api.utils.customer_utils import CustomUtils
-from api.utils.vehicle_plate_utils import (
-    ALLOWED_VEHICLE_TYPES,
-    normalize_plate_number,
-    plate_compare_key,
-)
 
 # Fixed (not relative to today) so re-runs don't change the value.
 SEED_LICENSE_EXPIRATION = datetime.date(2030, 12, 31)
-
-# Plate suffixes are appended to --plate-prefix, e.g. "WEB 1001".
-SEED_VEHICLES = [
-    {"type": "1", "brand": "Honda", "model": "Click 125i", "color": "Red",
-     "plate_suffix": "1001", "status": 1},
-    {"type": "2", "brand": "Toyota", "model": "Vios", "color": "White",
-     "plate_suffix": "2002", "status": 1},
-    {"type": "3", "brand": "Toyota", "model": "Innova", "color": "Gray",
-     "plate_suffix": "3003", "status": 1},
-]
 
 
 class Command(BaseCommand):
@@ -65,11 +42,6 @@ class Command(BaseCommand):
             "--customer-mobile",
             default="9170000002",
             help="10-digit PH mobile for customer (default: 9170000002)",
-        )
-        parser.add_argument(
-            "--plate-prefix",
-            default="TST",
-            help="Prefix for seeded plate numbers, e.g. TST -> 'TST 1001' (default: TST)",
         )
 
     def handle(self, *args, **options):
@@ -94,7 +66,6 @@ class Command(BaseCommand):
         with transaction.atomic():
             rider = self._seed_rider(rider_mobile)
             customer = self._seed_customer(customer_mobile)
-            self._seed_vehicles(rider, options["plate_prefix"])
 
             wallet_service = WalletService()
             wallet_service.create_rider_wallet(rider_id=rider.id)
@@ -166,54 +137,6 @@ class Command(BaseCommand):
         """LTO-style license number (Nxx-yy-zzzzzz), unique per seeded mobile."""
         digits = self._digits(mobile_no)
         return f"N01-{digits[-8:-6]}-{digits[-6:]}"
-
-    def _seed_vehicles(self, rider: Rider, plate_prefix: str) -> None:
-        prefix = normalize_plate_number(plate_prefix)
-        # Active (non-soft-deleted) vehicles, keyed the same way the
-        # serializer's duplicate-plate check compares them.
-        existing = {}
-        for vehicle in RiderVehicleDetails.objects.all():
-            existing.setdefault(plate_compare_key(vehicle.v_plate_number), vehicle)
-
-        for spec in SEED_VEHICLES:
-            assert spec["type"] in ALLOWED_VEHICLE_TYPES
-            plate = normalize_plate_number(f"{prefix} {spec['plate_suffix']}")
-            values = {
-                "v_type": spec["type"],
-                "v_brand": spec["brand"],
-                "v_model": spec["model"],
-                "v_color": spec["color"],
-                "v_plate_number": plate,
-                "status": spec["status"],
-            }
-
-            vehicle = existing.get(plate_compare_key(plate))
-            if vehicle and vehicle.rider_id != rider.id:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"  Skipped vehicle {plate}: plate already registered to "
-                        f"rider id={vehicle.rider_id}. Use a different --plate-prefix."
-                    )
-                )
-                continue
-
-            if vehicle:
-                for field, value in values.items():
-                    setattr(vehicle, field, value)
-                vehicle.save()
-                action = "Updated"
-            else:
-                vehicle = RiderVehicleDetails.objects.create(rider=rider, **values)
-                existing[plate_compare_key(plate)] = vehicle
-                action = "Created"
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"  {action} vehicle id={vehicle.id} type={vehicle.v_type} "
-                    f"{vehicle.v_brand} {vehicle.v_model} {vehicle.v_color} "
-                    f"plate={vehicle.v_plate_number}"
-                )
-            )
 
     def _seed_customer(self, mobile: str) -> Customer:
         # Upgrade a legacy row saved without the 63 prefix instead of creating a duplicate.
