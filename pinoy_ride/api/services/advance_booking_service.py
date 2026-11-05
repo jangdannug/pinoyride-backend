@@ -718,14 +718,17 @@ class AdvanceBookingService:
             raise NotFoundError("Booking not found")
         base = {"booking_id": booking.id, "eta_state": None, "eta_minutes": None, "pretty_eta": None,
                 "distance_km": None, "using_fallback": False, "rider_location_updated_at": None,
-                "refresh_after_seconds": cfg("ETA_REFRESH_SECONDS")}
+                "refresh_after_seconds": cfg("ETA_REFRESH_SECONDS"), "leg": None}
         if booking.status in (STATUS_PENDING, STATUS_SCHEDULED):
             return {**base, "eta_state": "not_started", "pretty_eta": None}
-        if booking.status != STATUS_ACCEPTED:
+        # Status 1: rider -> pickup. Status 2 (ride started): rider -> drop-off.
+        if booking.status not in (STATUS_ACCEPTED, STATUS_STARTED):
             return {**base, "eta_state": None, "refresh_after_seconds": None}
-        if booking.rider_arrived_at:
+        leg = "dropoff" if booking.status == STATUS_STARTED else "pickup"
+        base["leg"] = leg
+        if leg == "pickup" and booking.rider_arrived_at:
             return {**base, "eta_state": "arrived", "pretty_eta": "Arrived", "refresh_after_seconds": None}
-        key = f"booking_eta:{booking.id}"
+        key = f"booking_eta:{booking.id}:{leg}"
         cached = cache.get(key)
         if cached:
             return cached
@@ -736,7 +739,10 @@ class AdvanceBookingService:
                 or _now() - rider.current_location_updated_at > stale):
             return {**base, "eta_state": "unavailable", "pretty_eta": "Rider location unavailable"}
         r = (float(rider.current_lat), float(rider.current_long))
-        p = (float(booking.pickup_lat), float(booking.pickup_long))
+        if leg == "dropoff":
+            p = (float(booking.dropoff_lat), float(booking.dropoff_long))
+        else:
+            p = (float(booking.pickup_lat), float(booking.pickup_long))
         straight_km = geodesic(r, p).kilometers
         minutes, fallback, dist_km = None, False, straight_km
         try:
