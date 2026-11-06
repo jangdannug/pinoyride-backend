@@ -2,6 +2,7 @@
 import logging
 import math
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -64,6 +65,13 @@ class AdvanceBookingService:
         self.wallet_history = WalletHistoryRepository()
         self.pr_wallet = PinoyRideWalletRepository()
         self.pr_wallet_history = PinoyRideWalletHistoryRepository()
+
+    @staticmethod
+    def _is_acceptance_grace(booking, now):
+        """Both roles cancel free through the configured minutes from acceptance."""
+        minutes = cfg("CANCEL_FREE_GRACE_MINUTES")
+        return bool(minutes and booking.accepted_at
+                    and now - booking.accepted_at <= timedelta(minutes=minutes))
 
     # ------------------------------------------------------------------ create
     @staticmethod
@@ -166,16 +174,19 @@ class AdvanceBookingService:
 
     @staticmethod
     def _penalty_fare_base(booking):
-        """Advance cancel penalties use the fare quoted at booking, not post start_advance actual."""
+        """Quoted fare for advances; current total otherwise. Keep money out of binary floats."""
         payment = BookingPayment.objects.filter(booking_id=booking.id).first()
         if not payment:
-            return 0.0
+            return Decimal("0")
         details = payment.all_payment_details or {}
-        if booking.is_advance and isinstance(details, dict):
-            estimated = details.get("estimated_total_amount")
-            if estimated is not None:
-                return float(estimated)
-        return float(payment.total_amount or 0)
+        estimated = details.get("estimated_total_amount") if booking.is_advance and isinstance(details, dict) else None
+        return Decimal(str(payment.total_amount if estimated is None else estimated))
+
+    @staticmethod
+    def _penalty_amount(booking, percent):
+        """One money rule for rider and passenger: quote × configured %, rounded half up."""
+        amount = AdvanceBookingService._penalty_fare_base(booking) * Decimal(str(percent)) / Decimal("100")
+        return float(amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
     def is_rider_no_show(self, booking, now=None):
         """Rider accepted (status 5 with a rider) but never tapped Go To Pickup, and pickup passed by RIDER_NO_SHOW_MINUTES."""
@@ -192,21 +203,25 @@ class AdvanceBookingService:
             return 0.0, 0
         if self.is_rider_no_show(booking, now):
             return 0.0, 0
-        grace = cfg("CANCEL_FREE_GRACE_MINUTES")
-        if grace and booking.created_at and now - booking.created_at <= timedelta(minutes=grace):
+        if self._is_acceptance_grace(booking, now):
             return 0.0, 0
         if not booking.scheduled_pickup_at:
             return 0.0, 0
         if booking.scheduled_pickup_at - now < timedelta(minutes=cfg("CANCEL_PENALTY_WINDOW_MINUTES")):
-            amount = round(self._penalty_fare_base(booking) * cfg("CANCEL_PENALTY_PERCENT") / 100.0, 2)
+            amount = self._penalty_amount(booking, cfg("CANCEL_PENALTY_PERCENT"))
             return amount, cfg("CANCEL_VIOLATION_COUNT")
         return 0.0, 0
 
     def rider_penalty(self, booking):
-        window = cfg("RIDER_CANCEL_PENALTY_WINDOW_MINUTES")
-        if window and booking.scheduled_pickup_at and booking.scheduled_pickup_at - _now() >= timedelta(minutes=window):
+        if not booking.rider_id:
             return 0.0, 0
-        amount = round(self._total_amount(booking) * cfg("RIDER_CANCEL_PENALTY_PERCENT") / 100.0, 2)
+        now = _now()
+        if self.is_rider_no_show(booking, now) or self._is_acceptance_grace(booking, now):
+            return 0.0, 0
+        window = cfg("RIDER_CANCEL_PENALTY_WINDOW_MINUTES")
+        if window and booking.scheduled_pickup_at and booking.scheduled_pickup_at - now >= timedelta(minutes=window):
+            return 0.0, 0
+        amount = self._penalty_amount(booking, cfg("RIDER_CANCEL_PENALTY_PERCENT"))
         return amount, cfg("RIDER_CANCEL_VIOLATION_COUNT")
 
     def _apply_penalty(self, user_type, user_id, booking, amount):

@@ -173,6 +173,12 @@ class StartArrivedTests(Base):
 
 
 class CancelTests(Base):
+    @staticmethod
+    def _accepted_earlier(booking):
+        # Old penalty tests deliberately exercise established (>5 min) acceptances.
+        accepted_at = timezone.now() - timedelta(minutes=10)
+        Booking.objects.filter(id=booking.id).update(accepted_at=accepted_at)
+
     def test_customer_no_penalty_over_2h(self):
         b = self._booking(hours=3)
         r = self.svc.cancel_by_customer(self.customer.id, b.id)
@@ -183,6 +189,7 @@ class CancelTests(Base):
         b = self._booking(hours=3)
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=20))
         self.svc.accept(self.rider, b.id)  # penalty only applies once a rider has accepted
+        self._accepted_earlier(b)
         p = self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)
         self.assertEqual(p["penalty_amount"], 10.0)
         b.refresh_from_db()
@@ -202,6 +209,7 @@ class CancelTests(Base):
             scheduled_pickup_at=timezone.now() + timedelta(minutes=20),
         )
         self.svc.accept(self.rider, b.id)
+        self._accepted_earlier(b)
         self.svc.cancel_by_customer(self.customer.id, b.id, reason="changed plans")
         history = BookingRepository.get_rider_booking_history(self.rider.id, page_size=20)
         row = next(x for x in history["bookings"] if x["id"] == b.id)
@@ -213,6 +221,7 @@ class CancelTests(Base):
         b = self._booking(hours=3)
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=90))
         self.svc.accept(self.rider, b.id)
+        self._accepted_earlier(b)
         self.assertEqual(self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)["penalty_amount"], 20.0)
 
     def test_rider_no_penalty_over_2h_before_pickup(self):
@@ -230,6 +239,7 @@ class CancelTests(Base):
                 scheduled_pickup_at=timezone.now() + timedelta(minutes=90),
             )
             self.svc.accept(self.rider, b.id)
+            self._accepted_earlier(b)
             r = self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
             b.refresh_from_db()
             self.assertEqual((b.status, b.cancelled_by), (4, "rider"))
@@ -262,6 +272,7 @@ class CancelTests(Base):
             scheduled_pickup_at=timezone.now() + timedelta(minutes=90),
         )
         self.svc.accept(self.rider, b.id)
+        self._accepted_earlier(b)
         self.svc.cancel_by_rider(self.rider, b.id, reason="flat tire")
         history = BookingRepository.get_rider_booking_history(self.rider.id, page_size=20)
         ids = [row["id"] for row in history["bookings"]]

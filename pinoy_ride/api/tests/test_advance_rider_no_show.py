@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -13,11 +14,12 @@ NOW = timezone.now()
 
 def _b(minutes_from_now, rider_id=7, status=STATUS_SCHEDULED):
     return SimpleNamespace(rider_id=rider_id, status=status, created_at=NOW - timedelta(days=2),
+                           accepted_at=NOW - timedelta(hours=1) if rider_id else None,
                            scheduled_pickup_at=NOW + timedelta(minutes=minutes_from_now))
 
 
 @patch.object(svc_mod, "_now", lambda: NOW)
-@patch.object(AdvanceBookingService, "_penalty_fare_base", lambda self, b: 200.0)
+@patch.object(AdvanceBookingService, "_penalty_fare_base", lambda b: Decimal('200'))
 class RiderNoShowTests(SimpleTestCase):
     def setUp(self):
         self.s = AdvanceBookingService.__new__(AdvanceBookingService)
@@ -51,3 +53,8 @@ class RiderNoShowTests(SimpleTestCase):
 
     def test_accepted_inside_2h_still_penalised(self):
         self.assertGreater(self.s.customer_penalty(_b(117))[0], 0)
+
+    def test_rider_no_show_cancellation_is_free_too(self):
+        b = _b(-30)
+        self.assertTrue(self.s.is_rider_no_show(b))
+        self.assertEqual(self.s.rider_penalty(b), (0.0, 0))

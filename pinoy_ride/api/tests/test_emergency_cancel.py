@@ -12,16 +12,23 @@ from api.repositories.booking_repository import BookingRepository
 from api.services import push_service
 from api.utils.custom_error import ValidationError
 
-from .test_advance_booking_eta import Base
+from .test_advance_booking_eta import Base, _eta
 
 DEFER = "api.services.push_service.defer"
 
 
+@patch("api.services.google_maps_service.GoogleMapsService.get_eta", _eta)
 class EmergencyCancelTests(Base):
     def _accepted(self, minutes_to_pickup=90):
         b = self._booking(hours=3)
         self.svc.accept(self.rider, b.id)
-        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=minutes_to_pickup))
+        accepted_at = timezone.now() - timedelta(minutes=10)
+        # This established acceptance has passed the newly scoped five-minute grace.
+        Booking.objects.filter(id=b.id).update(accepted_at=accepted_at)
+        b.accepted_at = accepted_at
+        # Explicitly moved pickup for this test's two-hour cancellation scenario.
+        b.scheduled_pickup_at = accepted_at + timedelta(minutes=minutes_to_pickup)
+        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=b.scheduled_pickup_at)
         return b
 
     def _debits(self):
@@ -163,13 +170,20 @@ class EmergencyCancelTests(Base):
         self.assertIsNone(row["emergency_status"])
 
 
+@patch("api.services.google_maps_service.GoogleMapsService.get_eta", _eta)
 class RepoolNewBookingTests(Base):
     """Mark, Oct 23 2026: every rider cancel re-pools under a NEW booking / ref_code."""
 
     def _accepted(self, minutes_to_pickup=90):
         b = self._booking(hours=3)
         self.svc.accept(self.rider, b.id)
-        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=minutes_to_pickup))
+        accepted_at = timezone.now() - timedelta(minutes=10)
+        # This established acceptance has passed the newly scoped five-minute grace.
+        Booking.objects.filter(id=b.id).update(accepted_at=accepted_at)
+        b.accepted_at = accepted_at
+        # Explicitly moved pickup for this test's two-hour cancellation scenario.
+        b.scheduled_pickup_at = accepted_at + timedelta(minutes=minutes_to_pickup)
+        Booking.objects.filter(id=b.id).update(scheduled_pickup_at=b.scheduled_pickup_at)
         return b
 
     def _check_split(self, b, r):
@@ -209,7 +223,10 @@ class RepoolNewBookingTests(Base):
         new = self._check_split(b, r)
         self.assertEqual(EmergencyCancelRequest.objects.get(id=r["request_id"]).booking_id, b.id)
         # Same rider re-accepts the new booking, then Cancel Anyway: no double penalty on one booking.
-        self.svc.accept(self.rider, new.id)
+        second_acceptance = self.svc.accept(self.rider, new.id)
+        # Cancel Anyway on the later acceptance, after its own (grace-free) interval.
+        second_acceptance.accepted_at = timezone.now() - timedelta(minutes=10)
+        Booking.objects.filter(id=new.id).update(accepted_at=second_acceptance.accepted_at)
         self.assertFalse(self.svc.details(self.rider, new.id)["is_emergency"])
         r2 = self.svc.cancel_by_rider(self.rider, new.id, reason="again")
         self.svc.decide_emergency(r["request_id"], "reject", reason="No proof")
