@@ -26,7 +26,7 @@ from api.repositories import (
 from api.repositories.rider_vehicle_details_repository import RiderVehicleDetailsRepository
 from api.services import push_service
 from api.services import passenger_push
-from api.utils.advance_settings import cfg
+from api.utils.advance_settings import cancellation_policy, cfg
 from api.utils.custom_error import NotFoundError, ValidationError
 from api.utils.vehicle_plate_utils import pretty_vehicle_type
 
@@ -284,6 +284,7 @@ class AdvanceBookingService:
         result = {
             "booking_id": booking.id, "penalty_applies": amount > 0, "penalty_amount": amount,
             "violation_added": violations, "status": booking.status, "rider_no_show": rider_no_show,
+            "cancellation_policy": cancellation_policy(),
         }
         if preview:
             return result
@@ -452,6 +453,7 @@ class AdvanceBookingService:
             "rider_arrived_at": _iso(booking.rider_arrived_at), "arrived": booking.rider_arrived_at is not None,
             "assigned": assigned,
             "can_start": self._can_start(booking) if assigned else False,
+            "cancellation_policy": cancellation_policy(),
         }
         from api.models.emergency_cancel_request_model import emergency_info
         data.update(emergency_info(rider.id, booking.id, since=booking.accepted_at if assigned else None))
@@ -540,7 +542,7 @@ class AdvanceBookingService:
         amount, violations = self.rider_penalty(booking)
         result = {"booking_id": booking.id, "penalty_applies": amount > 0, "penalty_amount": amount,
                   "violation_added": violations, "status": booking.status,
-                  "emergency_available": amount > 0}
+                  "emergency_available": amount > 0, "cancellation_policy": cancellation_policy()}
         if preview:
             return result
         new = self._release_to_pool(rider, booking, reason)

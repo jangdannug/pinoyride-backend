@@ -48,3 +48,11 @@ def cfg(name):
         return type(default)(float(value)) if isinstance(default, int) else type(default)(value)
     except (TypeError, ValueError):
         return default
+
+
+def cancellation_policy():
+    """Role cancel-penalty percents for app copy; same settings the penalty math reads."""
+    return {
+        "passenger_cancel_penalty_percent": cfg("PASSENGER_CANCEL_PENALTY_PERCENT"),
+        "rider_cancel_penalty_percent": cfg("RIDER_CANCEL_PENALTY_PERCENT"),
+    }

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from api.models import Booking, Customer
+from api.utils.advance_settings import cancellation_policy
 from api.utils.vehicle_plate_utils import pretty_vehicle_type
 from .partial_customer_serializer import PartialCustomerSerializer
 from .booking_payment_serializer import BookingPaymentSerializer
@@ -51,6 +52,8 @@ class BookingSerializer(serializers.ModelSerializer):
     is_replaced = serializers.SerializerMethodField()
     replaces = serializers.SerializerMethodField()
     replaces_ref_code = serializers.SerializerMethodField()
+    # Role cancel-penalty percents so both apps' cancel copy follows the backend settings.
+    cancellation_policy = serializers.SerializerMethodField()
 
     # Map customer_id → customer (for writes)
     customer_id = serializers.PrimaryKeyRelatedField(
@@ -107,7 +110,11 @@ class BookingSerializer(serializers.ModelSerializer):
             "is_replaced",
             "replaces",
             "replaces_ref_code",
+            "cancellation_policy",
         ]
+
+    def get_cancellation_policy(self, obj):
+        return cancellation_policy()
 
     def _emergency(self, obj):
         cache = self.context.setdefault("_emergency_cache", {})
