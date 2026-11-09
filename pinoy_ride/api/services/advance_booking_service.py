@@ -41,6 +41,14 @@ class ConflictError(Exception):
     """Booking already taken (HTTP 409)."""
 
 
+class PenaltyPreviewRequired(Exception):
+    """A fee applies, so the passenger must cancel via cancel_advance after seeing the preview."""
+
+    def __init__(self, preview):
+        super().__init__("A cancellation fee applies. Use booking/cancel_advance with preview first.")
+        self.preview = preview
+
+
 def _now():
     return timezone.now()
 
@@ -271,7 +279,7 @@ class AdvanceBookingService:
         return count, flagged
 
     @transaction.atomic
-    def cancel_by_customer(self, customer_id, booking_id, reason=None, preview=False):
+    def cancel_by_customer(self, customer_id, booking_id, reason=None, preview=False, require_free=False):
         booking = Booking.objects.select_for_update().filter(id=booking_id, customer_id=customer_id).first()
         if booking is None:
             raise NotFoundError("Booking not found")
@@ -288,6 +296,8 @@ class AdvanceBookingService:
         }
         if preview:
             return result
+        if require_free and amount > 0:
+            raise PenaltyPreviewRequired(result)
         booking.status = STATUS_CANCELLED
         booking.cancelled_at = _now()
         booking.cancelled_by = "customer"

@@ -71,7 +71,7 @@ from api.utils.app_logger import app_logger
 logger = logging.getLogger('myapp')
 
 from api.views.advance_booking_view import AdvanceBookingMixin
-from api.services.advance_booking_service import AdvanceBookingService
+from api.services.advance_booking_service import AdvanceBookingService, PenaltyPreviewRequired
 from api.services.booking_fare_service import BookingFareService
 from api.services import booking_window_service
 
@@ -823,6 +823,21 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
 
 
     
+    @staticmethod
+    def _cancel_advance_free_only(customer_id, booking_id, booking_details):
+        """Advance cancel through the legacy status endpoint: same rules as cancel_advance, free cases only.
+
+        A fee is never charged without the cancel_advance preview, and never bypassed here.
+        """
+        try:
+            AdvanceBookingService().cancel_by_customer(customer_id, booking_id, require_free=True)
+        except PenaltyPreviewRequired as e:
+            data = {"error_code": "use_cancel_advance", "endpoint": "booking/cancel_advance/", **e.preview}
+            return AppResponse.send_error(data=data, message=str(e), code=409)
+        booking_details.refresh_from_db()
+        return AppResponse.send_success(data=BookingSerializer(booking_details).data,
+                                        message="Booking updated successfully")
+
     @action(detail=False, methods=['post'], url_path='update_status_for_customer')
     def update_status_for_customer(self, request):
         """Update status for customer"""
@@ -847,6 +862,9 @@ class BookingViewSet(AdvanceBookingMixin, viewsets.ViewSet):
                 
                 ## validate booking record if it is linked to customer_id
                 self.service.get_booking_by_customer_and_id(customer_id=customer_id, booking_id=booking_id)
+
+                if status == "4" and booking_details.is_advance and booking_details.status in (1, 5):
+                    return self._cancel_advance_free_only(customer_id, booking_id, booking_details)
 
                 self.service.update_booking_status_for_customer(booking=booking_details, booking_status = status, customer=customer_details)
 
