@@ -191,17 +191,17 @@ class CancelTests(Base):
         self.svc.accept(self.rider, b.id)  # penalty only applies once a rider has accepted
         self._accepted_earlier(b)
         p = self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)
-        self.assertEqual(p["penalty_amount"], 10.0)
+        self.assertEqual(p["penalty_amount"], 20.0)  # passenger 20% of 100
         b.refresh_from_db()
         self.assertEqual(b.status, 5)
         r = self.svc.cancel_by_customer(self.customer.id, b.id, reason="x")
         self.assertEqual(r["violation_added"], 1)
         self.assertEqual(WalletHistory.objects.filter(tran_type="cancel_penalty").count(), 1)
         w = Wallet.objects.get(user_id=self.customer.id, user_type="customer")
-        self.assertEqual(w.avail_balance, -10.0)
-        self.assertEqual(PinoyRideWallet.objects.get(user_id=1).avail_balance, 10.0)
+        self.assertEqual(w.avail_balance, -20.0)
+        self.assertEqual(PinoyRideWallet.objects.get(user_id=1).avail_balance, 20.0)
         b.refresh_from_db()
-        self.assertEqual(BookingSerializer(b).data["penalty_amount"], 10.0)
+        self.assertEqual(BookingSerializer(b).data["penalty_amount"], 20.0)
 
     def test_customer_cancel_penalty_not_on_rider_history(self):
         b = self._booking(hours=3)
@@ -216,13 +216,13 @@ class CancelTests(Base):
         self.assertEqual(row["pretty_status"], "Cancelled")
         self.assertEqual(row["penalty_amount"], 0)
 
-    @override_settings(CANCEL_PENALTY_PERCENT=20)
+    @override_settings(PASSENGER_CANCEL_PENALTY_PERCENT=30)
     def test_settings_override(self):
         b = self._booking(hours=3)
         Booking.objects.filter(id=b.id).update(scheduled_pickup_at=timezone.now() + timedelta(minutes=90))
         self.svc.accept(self.rider, b.id)
         self._accepted_earlier(b)
-        self.assertEqual(self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)["penalty_amount"], 20.0)
+        self.assertEqual(self.svc.cancel_by_customer(self.customer.id, b.id, preview=True)["penalty_amount"], 30.0)
 
     def test_rider_no_penalty_over_2h_before_pickup(self):
         b = self._booking(hours=3)

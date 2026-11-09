@@ -184,7 +184,7 @@ class AdvanceBookingService:
 
     @staticmethod
     def _penalty_amount(booking, percent):
-        """One money rule for rider and passenger: quote × configured %, rounded half up."""
+        """One money rule for rider and passenger: quote × that role's configured %, rounded half up."""
         amount = AdvanceBookingService._penalty_fare_base(booking) * Decimal(str(percent)) / Decimal("100")
         return float(amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
@@ -208,7 +208,7 @@ class AdvanceBookingService:
         if not booking.scheduled_pickup_at:
             return 0.0, 0
         if booking.scheduled_pickup_at - now < timedelta(minutes=cfg("CANCEL_PENALTY_WINDOW_MINUTES")):
-            amount = self._penalty_amount(booking, cfg("CANCEL_PENALTY_PERCENT"))
+            amount = self._penalty_amount(booking, cfg("PASSENGER_CANCEL_PENALTY_PERCENT"))
             return amount, cfg("CANCEL_VIOLATION_COUNT")
         return 0.0, 0
 

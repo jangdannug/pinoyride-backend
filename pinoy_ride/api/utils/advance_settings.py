@@ -9,7 +9,8 @@ _DEFAULTS = {
     "CANCEL_PENALTY_WINDOW_MINUTES": 120,
     # Rider no-show: accepted, never tapped Go To Pickup, this many minutes past pickup -> passenger cancels free.
     "RIDER_NO_SHOW_MINUTES": 30,
-    "CANCEL_PENALTY_PERCENT": 10,
+    # Percent of the quoted estimated fare charged to whoever cancels outside the free cases.
+    "PASSENGER_CANCEL_PENALTY_PERCENT": 20,
     "CANCEL_VIOLATION_COUNT": 1,
     # Both rider and passenger: free for this long after accepted_at.
     "CANCEL_FREE_GRACE_MINUTES": 5,

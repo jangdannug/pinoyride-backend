@@ -28,12 +28,13 @@ def booking(*, seconds=301, pickup=30):
 class AcceptanceGraceTests(Base):
     @patch.object(svc_mod.AdvanceBookingService, '_penalty_fare_base', lambda b: Decimal('100'))
     def test_five_minute_boundary_free_before_and_at_501_charged(self):
-        for seconds, expected in ((299, (0.0, 0)), (300, (0.0, 0)), (301, (10.0, 1))):
+        for seconds, passenger, rider in ((299, (0.0, 0), (0.0, 0)), (300, (0.0, 0), (0.0, 0)),
+                                          (301, (20.0, 1), (10.0, 1))):
             with self.subTest(seconds=seconds):
                 b, now = booking(seconds=seconds)
                 with patch.object(svc_mod, '_now', return_value=now):
-                    self.assertEqual(self.svc.customer_penalty(b), expected)
-                    self.assertEqual(self.svc.rider_penalty(b), expected)
+                    self.assertEqual(self.svc.customer_penalty(b), passenger)
+                    self.assertEqual(self.svc.rider_penalty(b), rider)
 
     @patch('api.services.google_maps_service.GoogleMapsService.get_eta', _eta)
     def test_inside_two_hours_preview_and_cancel_free_during_grace(self):
@@ -56,12 +57,12 @@ class AcceptanceGraceTests(Base):
 
     @patch.object(svc_mod.AdvanceBookingService, '_penalty_fare_base', lambda b: Decimal('100'))
     def test_after_grace_rider_two_hour_window_still_inclusive(self):
-        for minutes, expected in ((125, (0.0, 0)), (119, (10.0, 1))):
+        for minutes, passenger, rider in ((125, (0.0, 0), (0.0, 0)), (119, (20.0, 1), (10.0, 1))):
             with self.subTest(minutes=minutes):
                 b, now = booking(pickup=minutes)
                 with patch.object(svc_mod, '_now', return_value=now):
-                    self.assertEqual(self.svc.customer_penalty(b), expected)
-                    self.assertEqual(self.svc.rider_penalty(b), expected)
+                    self.assertEqual(self.svc.customer_penalty(b), passenger)
+                    self.assertEqual(self.svc.rider_penalty(b), rider)
 
     def test_unassigned_cancellation_remains_free_even_with_stale_timestamp(self):
         b, _ = booking()
@@ -73,10 +74,10 @@ class AcceptanceGraceTests(Base):
     def test_no_acceptance_does_not_fall_back_to_booking_creation(self):
         # Once a rider is assigned, a missing or stale imported acceptance must not grant a grace.
         b, _ = booking()
-        self.assertEqual(self.svc.customer_penalty(b), (10.0, 1))
+        self.assertEqual(self.svc.customer_penalty(b), (20.0, 1))
         self.assertEqual(self.svc.rider_penalty(b), (10.0, 1))
         b.accepted_at = None
-        self.assertEqual(self.svc.customer_penalty(b), (10.0, 1))
+        self.assertEqual(self.svc.customer_penalty(b), (20.0, 1))
         self.assertEqual(self.svc.rider_penalty(b), (10.0, 1))
 
     def test_no_show_remains_free_after_grace(self):
@@ -86,7 +87,7 @@ class AcceptanceGraceTests(Base):
         self.assertEqual(self.svc.rider_penalty(b), (0.0, 0))
 
     @patch('api.services.google_maps_service.GoogleMapsService.get_eta', _eta)
-    def test_quoted_99_10_other_total_889_20_both_charge_9_91(self):
+    def test_quoted_99_10_other_total_889_20_passenger_19_82_rider_9_91(self):
         b = self.svc.accept(self.rider, self._booking(hours=3, total=889.20).id)
         payment = BookingPayment.objects.get(booking=b)
         payment.all_payment_details = {'estimated_total_amount': 99.10}
@@ -94,16 +95,16 @@ class AcceptanceGraceTests(Base):
         now = b.accepted_at + timedelta(minutes=10)
         b.scheduled_pickup_at = now + timedelta(minutes=30)
         with patch.object(svc_mod, '_now', return_value=now):
-            self.assertEqual(self.svc.customer_penalty(b), (9.91, 1))
+            self.assertEqual(self.svc.customer_penalty(b), (19.82, 1))
             self.assertEqual(self.svc.rider_penalty(b), (9.91, 1))
 
     @patch('api.services.google_maps_service.GoogleMapsService.get_eta', _eta)
-    def test_quoted_149_15_ordinary_half_up_is_14_92(self):
+    def test_quoted_149_15_passenger_29_83_rider_half_up_14_92(self):
         b = self.svc.accept(self.rider, self._booking(hours=3, total=149.15).id)
         now = b.accepted_at + timedelta(minutes=10)
         b.scheduled_pickup_at = now + timedelta(minutes=30)
         with patch.object(svc_mod, '_now', return_value=now):
-            self.assertEqual(self.svc.customer_penalty(b), (14.92, 1))
+            self.assertEqual(self.svc.customer_penalty(b), (29.83, 1))
             self.assertEqual(self.svc.rider_penalty(b), (14.92, 1))
 
     @patch('api.services.google_maps_service.GoogleMapsService.get_eta', _eta)
@@ -125,5 +126,5 @@ class AcceptanceGraceTests(Base):
             self.assertEqual(self.svc.rider_penalty(again), (0.0, 0))
         again.scheduled_pickup_at = again.accepted_at + timedelta(minutes=35, seconds=1, microseconds=1)
         with patch.object(svc_mod, '_now', return_value=again.accepted_at + timedelta(minutes=5, seconds=1)):
-            self.assertEqual(self.svc.customer_penalty(again), (10.0, 1))
+            self.assertEqual(self.svc.customer_penalty(again), (20.0, 1))
             self.assertEqual(self.svc.rider_penalty(again), (10.0, 1))
