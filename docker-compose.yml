@@ -40,5 +40,42 @@ services:
       redis:
         condition: service_healthy
 
+  # Celery worker: runs the advance-booking jobs (reminder push, at-risk re-pool).
+  # Needs the Firebase service-account JSON for push. Put it on the host (never in git)
+  # and set FIREBASE_JSON_HOST_PATH, or edit the volume line below.
+  worker:
+    build: .
+    command: sh -c "cd /app/pinoy_ride && celery -A pinoy_ride worker -l info"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/pinoyride_db
+      REDIS_URL: redis://redis:6379/0
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase.json
+    volumes:
+      - ${FIREBASE_JSON_HOST_PATH:-./firebase.json}:/run/secrets/firebase.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Celery beat: schedules the two 60-second jobs. Run exactly ONE beat.
+  beat:
+    build: .
+    command: sh -c "cd /app/pinoy_ride && celery -A pinoy_ride beat -l info"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/pinoyride_db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
